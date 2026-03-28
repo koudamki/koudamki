@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Koudamki.ai — Sharp answers. No fluff.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f9f9f7;
+  --bg2: #ffffff;
+  --bg3: #f0f0ec;
+  --border: #e0dfd8;
+  --accent: #d97757;
+  --accent2: #7c6af7;
+  --accent3: #f6c90e;
+  --text: #1a1a1a;
+  --text2: #555550;
+  --text3: #999990;
+  --user-bubble: #f0f0ec;
+  --ai-bubble: #ffffff;
+  --glow: rgba(217,119,87,0.12);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --sidebar: 240px;
+  --radius: 12px;
+  --speed: 0.2s;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* ── LAYOUT ── */
+#app { display: flex; height: 100vh; position: relative; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: var(--sidebar);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  transition: transform var(--speed) ease;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 14px;
+  color: #fff; flex-shrink: 0;
+}
+.logo-text {
+  font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  letter-spacing: -0.3px; color: var(--text);
+}
+.logo-badge {
+  font-size: 9px; font-family: var(--font-mono);
+  background: var(--accent); color: #fff;
+  padding: 1px 5px; border-radius: 4px; margin-left: auto;
+}
+
+.sidebar-section { padding: 14px 12px 8px; }
+.sidebar-section-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text3); font-family: var(--font-mono);
+  padding: 0 4px; margin-bottom: 6px;
+}
+
+.new-chat-btn {
+  width: 100%; padding: 9px 12px;
+  background: linear-gradient(135deg, var(--accent), #6355d0);
+  border: none; border-radius: var(--radius);
+  color: #fff; font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: opacity var(--speed), transform var(--speed);
+  margin-bottom: 4px;
+}
+.new-chat-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* Model selector */
+.model-select {
+  width: 100%;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: var(--font-mono); font-size: 12px;
+  padding: 8px 10px; cursor: pointer; outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%238888a8'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+.model-select:focus { border-color: var(--accent); }
+
+/* Skill buttons */
+.skill-grid { display: flex; flex-direction: column; gap: 4px; }
+.skill-btn {
+  width: 100%; text-align: left;
+  background: var(--bg3); border: 1px solid transparent;
+  border-radius: 8px; padding: 8px 10px;
+  color: var(--text2); font-family: var(--font-body); font-size: 12px;
+  cursor: pointer; transition: all var(--speed);
+  display: flex; align-items: center; gap: 8px;
+}
+.skill-btn:hover, .skill-btn.active {
+  background: var(--glow); border-color: var(--accent);
+  color: var(--text);
+}
+.skill-btn .skill-icon { font-size: 14px; flex-shrink: 0; }
+.skill-info { display: flex; flex-direction: column; }
+.skill-name { font-weight: 600; font-size: 12px; line-height: 1.2; }
+.skill-desc { font-size: 10px; color: var(--text3); font-family: var(--font-mono); margin-top: 1px; }
+
+/* Toggle settings */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 4px;
+}
+.toggle-label { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+.toggle {
+  width: 32px; height: 18px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 9px; position: relative; cursor: pointer;
+  transition: background var(--speed), border-color var(--speed);
+}
+.toggle.on { background: var(--accent); border-color: var(--accent); }
+.toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 12px; height: 12px; background: #555;
+  border-radius: 50%; transition: left var(--speed);
+}
+.toggle.on::after { left: 16px; }
+
+/* Stats */
+.stat-row {
+  display: flex; gap: 8px; padding: 0 4px;
+}
+.stat-box {
+  flex: 1; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px; text-align: center;
+}
+.stat-val { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--accent); }
+.stat-key { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-top: 2px; }
+
+.sidebar-bottom {
+  margin-top: auto; padding: 12px;
+  border-top: 1px solid var(--border);
+}
+.engine-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 10px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: 11px; font-family: var(--font-mono);
+  color: var(--text2);
+}
+.engine-dot { width: 7px; height: 7px; background: #4fd1c5; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── MAIN ── */
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* Top bar */
+#topbar {
+  height: 52px; padding: 0 20px;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.topbar-title {
+  font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  flex: 1;
+}
+.topbar-chips { display: flex; gap: 6px; align-items: center; }
+.chip {
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-family: var(--font-mono);
+  border: 1px solid var(--border); color: var(--text2);
+  background: var(--bg3); white-space: nowrap;
+}
+.chip.active { border-color: var(--accent); color: var(--accent); background: var(--glow); }
+.clear-btn {
+  padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text3); font-size: 13px; cursor: pointer;
+  transition: all var(--speed);
+}
+.clear-btn:hover { border-color: #f87171; color: #f87171; }
+
+/* ── CHAT AREA ── */
+#chat-area {
+  flex: 1; overflow-y: auto; padding: 24px 0;
+  scroll-behavior: smooth;
+}
+#chat-area::-webkit-scrollbar { width: 5px; }
+#chat-area::-webkit-scrollbar-track { background: transparent; }
+#chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.chat-inner { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+/* Welcome screen */
+#welcome {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: calc(100vh - 200px);
+  text-align: center; gap: 28px;
+}
+.welcome-logo {
+  width: 68px; height: 68px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 20px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 26px;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(217,119,87,0.35), 0 2px 8px rgba(0,0,0,0.1);
+  animation: logoBounce 0.6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes logoBounce {
+  from { opacity: 0; transform: scale(0.6) rotate(-8deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+.welcome-title {
+  font-family: var(--font-display); font-weight: 800; font-size: 32px;
+  letter-spacing: -1px; line-height: 1.15;
+  background: linear-gradient(135deg, #1a1a1a 0%, var(--accent) 60%, var(--accent2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: titleIn 0.5s ease 0.15s both;
+}
+@keyframes titleIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.welcome-sub { font-size: 14px; color: var(--text2); max-width: 420px; animation: titleIn 0.5s ease 0.25s both; }
+
+.example-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px; width: 100%; max-width: 640px;
+}
+.example-card {
+  position: relative; overflow: hidden;
+  border-radius: 16px; padding: 20px 18px;
+  cursor: pointer; text-align: left;
+  border: 1.5px solid transparent;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+  background-clip: padding-box;
+  animation: cardIn 0.5s ease both;
+}
+.example-card:nth-child(1) { background: linear-gradient(135deg, #fff8f5 0%, #ffe8df 100%); border-color: #f5c9b8; animation-delay: 0.05s; }
+.example-card:nth-child(2) { background: linear-gradient(135deg, #f5f8ff 0%, #dde8ff 100%); border-color: #b8c8f5; animation-delay: 0.1s; }
+.example-card:nth-child(3) { background: linear-gradient(135deg, #f5fff8 0%, #d8f5e8 100%); border-color: #b8e8cc; animation-delay: 0.15s; }
+.example-card:nth-child(4) { background: linear-gradient(135deg, #fdf5ff 0%, #ead8ff 100%); border-color: #d0b8f0; animation-delay: 0.2s; }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.example-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.2s ease;
+  border-radius: 16px;
+}
+.example-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
+.example-card:hover::before { background: rgba(255,255,255,0.25); }
+.example-card:active { transform: translateY(-2px) scale(0.99); }
+.ex-icon-wrap {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.example-card:nth-child(1) .ex-icon-wrap { background: linear-gradient(135deg, #ff8c5a, #d97757); }
+.example-card:nth-child(2) .ex-icon-wrap { background: linear-gradient(135deg, #6a8fff, #4f6cf5); }
+.example-card:nth-child(3) .ex-icon-wrap { background: linear-gradient(135deg, #4dd68a, #2eb870); }
+.example-card:nth-child(4) .ex-icon-wrap { background: linear-gradient(135deg, #b06ef5, #8f4de0); }
+.example-card .ex-prompt {
+  font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.3;
+}
+.example-card .ex-sub { font-size: 11px; color: var(--text2); font-family: var(--font-mono); line-height: 1.5; }
+.ex-arrow {
+  position: absolute; right: 14px; bottom: 14px;
+  font-size: 16px; opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: all 0.2s ease;
+}
+.example-card:hover .ex-arrow { opacity: 1; transform: translate(0, 0); }
+
+/* ── MESSAGES ── */
+.msg {
+  margin-bottom: 24px;
+  animation: fadeUp 0.3s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg-user {
+  display: flex; flex-direction: column; align-items: flex-end;
+}
+.msg-user .bubble {
+  background: var(--user-bubble); border: 1px solid var(--border);
+  border-radius: 16px 16px 4px 16px;
+  padding: 12px 16px; max-width: 80%;
+  font-size: 14px; color: var(--text);
+}
+
+.msg-ai { display: flex; flex-direction: column; }
+.msg-ai-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.ai-avatar {
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff;
+  font-family: var(--font-display); flex-shrink: 0;
+}
+.ai-label { font-size: 11px; font-family: var(--font-mono); color: var(--text3); }
+.ai-badge {
+  font-size: 10px; font-family: var(--font-mono);
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; color: var(--text3);
+}
+.speed-badge {
+  font-size: 10px; font-family: var(--font-mono); color: var(--accent2);
+  background: rgba(79,209,197,0.1); border: 1px solid rgba(79,209,197,0.2);
+  padding: 1px 6px; border-radius: 4px;
+}
+
+.msg-ai .bubble {
+  background: var(--ai-bubble); border: 1px solid var(--border);
+  border-radius: 4px 16px 16px 16px;
+  padding: 16px 18px;
+  font-size: 14px; line-height: 1.75; color: var(--text);
+}
+
+/* AI Content Rendering */
+.bubble h1,.bubble h2,.bubble h3 {
+  font-family: var(--font-display); font-weight: 700;
+  color: var(--text); margin: 16px 0 8px;
+}
+.bubble h1 { font-size: 20px; }
+.bubble h2 { font-size: 17px; }
+.bubble h3 { font-size: 15px; color: var(--accent); }
+.bubble p { margin-bottom: 10px; }
+.bubble ul, .bubble ol { margin: 8px 0 10px 20px; }
+.bubble li { margin-bottom: 4px; }
+.bubble strong { color: var(--text); font-weight: 600; }
+.bubble em { color: var(--accent2); font-style: italic; }
+.bubble hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.bubble a { color: var(--accent); text-decoration: none; }
+.bubble a:hover { text-decoration: underline; }
+.bubble blockquote {
+  border-left: 3px solid var(--accent); padding-left: 12px;
+  color: var(--text2); margin: 10px 0;
+  font-style: italic;
+}
+
+/* Code blocks */
+.bubble pre {
+  background: #f5f4f0; border: 1px solid var(--border);
+  border-radius: 8px; margin: 12px 0;
+  overflow: hidden;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; border-bottom: 1px solid var(--border);
+  background: #eceae4;
+}
+.code-lang { font-size: 11px; font-family: var(--font-mono); color: var(--accent); text-transform: uppercase; }
+.copy-btn {
+  font-size: 11px; font-family: var(--font-mono); color: var(--text3);
+  background: transparent; border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 4px; cursor: pointer;
+  transition: all var(--speed);
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.bubble pre code {
+  display: block; padding: 14px 16px;
+  font-family: var(--font-mono); font-size: 13px;
+  color: #383838; line-height: 1.6;
+  overflow-x: auto; tab-size: 2;
+}
+.bubble code:not(pre code) {
+  background: #ebe9e3; border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 5px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+}
+
+/* Mind map */
+.mindmap-container {
+  background: #f5f4f0; border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; margin: 12px 0;
+  overflow-x: auto;
+}
+.mindmap-title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 13px; color: var(--accent); margin-bottom: 12px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.mindmap-tree { font-family: var(--font-mono); font-size: 12px; line-height: 1.8; color: var(--text2); }
+.mindmap-tree .root { color: var(--accent); font-weight: 700; font-size: 13px; }
+.mindmap-tree .branch { color: var(--text); }
+.mindmap-tree .leaf { color: var(--text2); }
+
+/* Action row */
+.msg-actions {
+  display: flex; gap: 6px; margin-top: 8px; align-items: center;
+  padding-left: 32px;
+}
+.action-btn {
+  padding: 4px 10px; font-size: 11px; font-family: var(--font-mono);
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text3); cursor: pointer;
+  transition: all var(--speed); display: flex; align-items: center; gap: 4px;
+}
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Thinking indicator */
+.thinking {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--ai-bubble); border: 1px solid var(--border);
+  border-radius: 4px 16px 16px 16px;
+  margin-bottom: 24px; animation: fadeUp 0.3s ease both;
+}
+.dots { display: flex; gap: 4px; align-items: center; }
+.dot {
+  width: 5px; height: 5px; background: var(--accent);
+  border-radius: 50%; animation: bounce 1.2s infinite ease-in-out;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0.5);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+.thinking-text { font-size: 12px; font-family: var(--font-mono); color: var(--text3); }
+
+/* Token counter */
+.ctx-bar {
+  height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 8px;
+}
+.ctx-fill {
+  height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px; transition: width 0.5s ease;
+}
+
+/* ── INPUT AREA ── */
+#input-area {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+.input-wrapper {
+  max-width: 760px; margin: 0 auto;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  transition: border-color var(--speed), box-shadow var(--speed);
+  position: relative;
+}
+.input-wrapper:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+#prompt-input {
+  width: 100%; background: transparent; border: none;
+  color: var(--text); font-family: var(--font-body); font-size: 14px;
+  padding: 14px 16px 0; resize: none; outline: none;
+  min-height: 52px; max-height: 200px; line-height: 1.5;
+}
+#prompt-input::placeholder { color: var(--text3); }
+
+.input-toolbar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+}
+.input-tool-btn {
+  padding: 5px 10px; font-size: 11px; font-family: var(--font-mono);
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text3); cursor: pointer;
+  transition: all var(--speed); display: flex; align-items: center; gap: 4px;
+}
+.input-tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+.input-tool-btn.active { border-color: var(--accent); color: var(--accent); background: var(--glow); }
+.char-count { font-size: 11px; font-family: var(--font-mono); color: var(--text3); margin-left: auto; }
+
+.send-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #6355d0);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity var(--speed), transform var(--speed);
+  flex-shrink: 0;
+}
+.send-btn:hover { opacity: 0.85; transform: scale(1.05); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+/* Token usage bar below input */
+.usage-row {
+  max-width: 760px; margin: 8px auto 0;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-family: var(--font-mono); color: var(--text3);
+}
+.ctx-bar { flex: 1; }
+
+/* Error message */
+.error-msg {
+  background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 8px; padding: 10px 14px;
+  color: #f87171; font-size: 13px; font-family: var(--font-mono);
+  margin-bottom: 12px;
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  #sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  .example-grid { grid-template-columns: 1fr; }
+  .topbar-chips { display: none; }
+}
+
+/* Syntax highlight colors */
+.kw { color: #c792ea; }
+.str { color: #c3e88d; }
+.cm { color: #546e7a; font-style: italic; }
+.fn { color: #82aaff; }
+.num { color: #f78c6c; }
+.op { color: #89ddff; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">K</div>
+      <span class="logo-text">Koudamki.ai</span>
+      <span class="logo-badge">v2</span>
+    </div>
+
+    <div class="sidebar-section">
+      <button class="new-chat-btn" onclick="newChat()">✦ New Chat</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Model</div>
+      <select class="model-select" id="model-select">
+        <option value="llama-3.3-70b-versatile">Llama 3.3 70B ⚡</option>
+        <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+        <option value="gemma2-9b-it">Gemma 2 9B</option>
+      </select>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Settings</div>
+      <div class="toggle-row">
+        <span class="toggle-label">🌐 Web Search</span>
+        <div class="toggle" id="toggle-web" onclick="toggleSetting('web')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">🗺️ Mind Maps</span>
+        <div class="toggle on" id="toggle-map" onclick="toggleSetting('map')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">💡 Auto Summary</span>
+        <div class="toggle" id="toggle-sum" onclick="toggleSetting('sum')"></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Skills</div>
+      <div class="skill-grid">
+        <button class="skill-btn active" data-skill="fast" onclick="setSkill(this)">
+          <span class="skill-icon">⚡</span>
+          <span class="skill-info">
+            <span class="skill-name">Fast Mode</span>
+            <span class="skill-desc">Direct · sharp · no fluff</span>
+          </span>
+        </button>
+        <button class="skill-btn" data-skill="code" onclick="setSkill(this)">
+          <span class="skill-icon">💻</span>
+          <span class="skill-info">
+            <span class="skill-name">Code & Debug</span>
+            <span class="skill-desc">Write · fix · explain</span>
+          </span>
+        </button>
+        <button class="skill-btn" data-skill="research" onclick="setSkill(this)">
+          <span class="skill-icon">🔬</span>
+          <span class="skill-info">
+            <span class="skill-name">Deep Research</span>
+            <span class="skill-desc">Multi-source analysis</span>
+          </span>
+        </button>
+        <button class="skill-btn" data-skill="writing" onclick="setSkill(this)">
+          <span class="skill-icon">✍️</span>
+          <span class="skill-info">
+            <span class="skill-name">Writing</span>
+            <span class="skill-desc">Drafts · essays · emails</span>
+          </span>
+        </button>
+        <button class="skill-btn" data-skill="analysis" onclick="setSkill(this)">
+          <span class="skill-icon">📊</span>
+          <span class="skill-info">
+            <span class="skill-name">Analysis</span>
+            <span class="skill-desc">Data · insights · reports</span>
+          </span>
+        </button>
+        <button class="skill-btn" data-skill="math" onclick="setSkill(this)">
+          <span class="skill-icon">🧮</span>
+          <span class="skill-info">
+            <span class="skill-name">Math & Science</span>
+            <span class="skill-desc">Equations · proofs · theory</span>
+          </span>
+        </button>
+        <button class="skill-btn" data-skill="career" onclick="setSkill(this)">
+          <span class="skill-icon">🎯</span>
+          <span class="skill-info">
+            <span class="skill-name">Career Coach</span>
+            <span class="skill-desc">Resume · interviews · growth</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Session Stats</div>
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-val" id="stat-msgs">0</div>
+          <div class="stat-key">Messages</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-tokens">0</div>
+          <div class="stat-key">Tokens</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-speed">—</div>
+          <div class="stat-key">tok/s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="engine-badge">
+        <div class="engine-dot"></div>
+        <span id="engine-label">Groq LPU · Ready</span>
+      </div>
+      <div style="margin-top:8px;padding:6px 10px;font-size:11px;color:var(--text3);font-family:var(--font-mono);text-align:center;line-height:1.5;">
+        Created by <span style="color:var(--accent);font-weight:600;">Koudamki.pranavesh</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- TOP BAR -->
+    <div id="topbar">
+      <button class="clear-btn" onclick="toggleSidebar()" style="display:none" id="menu-btn">☰</button>
+      <span class="topbar-title" id="chat-title">New Chat</span>
+      <div class="topbar-chips">
+        <span class="chip active" id="chip-model">llama-3.3-70b</span>
+        <span class="chip" id="chip-ctx">0 / 128k</span>
+        <span class="chip" id="chip-web">🌐 Web OFF</span>
+      </div>
+      <button class="clear-btn" onclick="clearChat()" title="Clear chat">🗑</button>
+    </div>
+
+    <!-- CHAT AREA -->
+    <div id="chat-area">
+      <div class="chat-inner" id="chat-inner">
+        <div id="welcome">
+          <div class="welcome-logo">K</div>
+          <div>
+            <div class="welcome-title">Welcome to Koudamki.ai</div>
+            <div class="welcome-sub" style="margin-top:8px">Powered by Groq's ultra-fast inference. Sharp answers, no fluff. 128k context window.</div>
+            <div style="font-size:12px;color:var(--text3);font-family:var(--font-mono);margin-top:6px;text-align:center;">Created by <span style="color:var(--accent);font-weight:600;">Koudamki.pranavesh</span></div>
+          </div>
+          <div class="example-grid">
+            <div class="example-card" onclick="fillPrompt('Explain quantum computing in simple terms')">
+              <div class="ex-icon-wrap">⚛️</div>
+              <div class="ex-prompt">Explain a concept</div>
+              <div class="ex-sub">Quantum computing in simple terms</div>
+              <span class="ex-arrow">↗</span>
+            </div>
+            <div class="example-card" onclick="fillPrompt('Write a Python function to fetch and parse JSON from a URL')">
+              <div class="ex-icon-wrap">💻</div>
+              <div class="ex-prompt">Write code</div>
+              <div class="ex-sub">Python function to parse JSON from URL</div>
+              <span class="ex-arrow">↗</span>
+            </div>
+            <div class="example-card" onclick="fillPrompt('Create a mind map of machine learning topics')">
+              <div class="ex-icon-wrap">🗺️</div>
+              <div class="ex-prompt">Mind map</div>
+              <div class="ex-sub">Machine learning topics overview</div>
+              <span class="ex-arrow">↗</span>
+            </div>
+            <div class="example-card" onclick="fillPrompt('What are the latest trends in AI in 2024?')">
+              <div class="ex-icon-wrap">🔬</div>
+              <div class="ex-prompt">Research</div>
+              <div class="ex-sub">Latest trends in AI in 2024</div>
+              <span class="ex-arrow">↗</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT AREA -->
+    <div id="input-area">
+      <div class="input-wrapper">
+        <textarea id="prompt-input" placeholder="Ask anything…" rows="1"
+          oninput="autoResize(this); updateCharCount(this)"
+          onkeydown="handleKey(event)"></textarea>
+        <div class="input-toolbar">
+          <button class="input-tool-btn" id="btn-web" onclick="toggleInputWeb()" title="Web search">🌐 Web</button>
+          <button class="input-tool-btn" id="btn-map" onclick="toggleInputMap()" title="Mind map">🗺️ Map</button>
+          <button class="input-tool-btn active" id="btn-fast" onclick="toggleFast()" title="Fast mode">⚡ Fast</button>
+          <span class="char-count" id="char-count">0</span>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="usage-row">
+        <span id="token-display">0 / 128,000 tokens</span>
+        <div class="ctx-bar"><div class="ctx-fill" id="ctx-fill" style="width:0%"></div></div>
+        <span id="speed-display"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+const state = {
+  messages: [],
+  totalTokens: 0,
+  msgCount: 0,
+  model: 'llama-3.3-70b-versatile',
+  webEnabled: false,
+  mapEnabled: true,
+  sumEnabled: false,
+  fastMode: true,
+  currentSkill: 'fast',
+  isLoading: false,
+};
+
+const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_KEY = ''; // User must supply their own key
+
+// ── SYSTEM PROMPTS PER SKILL ──
+const SKILL_PROMPTS = {
+  fast: `You are Koudamki.ai — a sharp, knowledgeable AI assistant. Sharp answers, no fluff.
+
+CRITICAL FORMATTING RULES — always follow these:
+- For EXPLANATION requests (explain, what is, describe, how does, how do): respond with a FULL structured markdown explanation — use ## headers, bullet points, **bold** text, comparison tables, and code examples with syntax highlighting. Give comprehensive, well-organized answers like a textbook or expert blog post.
+- For CODE requests (write, build, create, fix, debug, implement): give clean working code with a brief explanation after.
+- NEVER default to a generic code template when the user asks for an explanation.
+- Always use proper markdown: ## headers, **bold**, bullet lists, tables, and \`\`\`language code blocks.
+- No filler phrases like "Certainly!" or "Great question!" — lead with the answer immediately.`,
+
+  code: `You are Koudamki.ai in Code & Debug mode. Rules:
+- Always provide working, production-quality code
+- Include language in code fences (\`\`\`python, \`\`\`javascript etc.)
+- Add brief inline comments for complex logic
+- After code, give a short explanation of key points
+- For debugging: identify issue first, then show fix
+- Use ## headers to separate sections (Code, Explanation, Example Usage)`,
+
+  research: `You are Koudamki.ai in Deep Research mode. Rules:
+- Provide comprehensive, multi-angle analysis
+- Use ## headers and organized sections
+- Include pros/cons, alternative views, nuances
+- Use tables to compare items or data
+- Cite key facts and distinguish known vs speculative
+- End with a clear ## Summary or verdict`,
+
+  writing: `You are Koudamki.ai in Writing mode. Rules:
+- Match the user's requested tone/style/format exactly
+- For emails: include Subject line
+- For essays: proper structure with intro, body, conclusion
+- For creative: be vivid, specific, varied sentence structure
+- No generic filler — every sentence earns its place`,
+
+  analysis: `You are Koudamki.ai in Analysis mode. Rules:
+- Break down data, arguments, or situations systematically
+- Use tables (markdown) when comparing items
+- Use ## headers to organize sections
+- Highlight key insights and patterns with **bold**
+- Quantify where possible
+- End with ## Key Takeaways and actionable conclusions`,
+
+  math: `You are Koudamki.ai in Math & Science mode. Rules:
+- Show step-by-step workings under ## Steps
+- Use code blocks for calculations
+- Explain the conceptual intuition alongside the mechanics
+- Double-check calculations
+- For proofs: be rigorous but readable
+- Use tables for comparisons or truth tables`,
+
+  career: `You are Koudamki.ai in Career Coach mode. Rules:
+- Give specific, actionable advice with ## headers per topic
+- For resumes: suggest exact wording improvements
+- For interviews: give STAR-format example answers
+- Be encouraging but honest about areas to improve
+- Tailor advice to the specific role/industry mentioned`,
+};
+
+// ── API CALL ──
+async function callGroq(messages) {
+  const systemPrompt = SKILL_PROMPTS[state.currentSkill] || SKILL_PROMPTS.fast;
+
+  const payload = {
+    model: state.model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages
+    ],
+    max_tokens: 4096,
+    temperature: state.currentSkill === 'math' ? 0.1 : 0.7,
+    stream: true,
+  };
+
+  // NOTE: In production, the API key would be handled server-side.
+  // For demo, we'll check if a key is configured or use the demo simulation.
+  if (!GROQ_KEY) {
+    return simulateResponse(messages[messages.length - 1].content);
+  }
+
+  const res = await fetch(GROQ_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_KEY}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+
+  return res;
+}
+
+// ── DEMO SIMULATION (when no API key) ──
+async function* simulateResponse(prompt) {
+  const p = prompt.toLowerCase();
+  let response = '';
+
+  if (p.includes('mind map') || p.includes('mindmap')) {
+    response = generateMindMapResponse(prompt);
+  } else if (p.includes('code') || p.includes('python') || p.includes('function') || p.includes('javascript')) {
+    response = generateCodeResponse(prompt);
+  } else if (p.includes('explain') || p.includes('what is') || p.includes('how does')) {
+    response = generateExplainResponse(prompt);
+  } else if (p.includes('write') || p.includes('email') || p.includes('essay')) {
+    response = generateWritingResponse(prompt);
+  } else if (p.includes('research') || p.includes('trend') || p.includes('latest')) {
+    response = generateResearchResponse(prompt);
+  } else if (p.includes('math') || p.includes('calculate') || p.includes('equation') || p.includes('solve')) {
+    response = generateMathResponse(prompt);
+  } else {
+    response = generateGenericResponse(prompt);
+  }
+
+  // Stream simulation — chunk by chunk
+  const words = response.split(' ');
+  for (let i = 0; i < words.length; i++) {
+    yield words[i] + (i < words.length - 1 ? ' ' : '');
+    await new Promise(r => setTimeout(r, 15 + Math.random() * 20));
+  }
+}
+
+function generateMindMapResponse(prompt) {
+  const topic = prompt.replace(/(create a? ?mind ?map (of|about|for)?|mind ?map)/gi, '').trim() || 'the topic';
+  return `## 🗺️ Mind Map: ${topic.charAt(0).toUpperCase() + topic.slice(1)}
+
+\`\`\`
+${topic.toUpperCase()}
+├── 🔵 Core Concepts
+│   ├── Fundamentals & Basics
+│   ├── Key Principles
+│   └── Definitions
+├── 🟣 Applications
+│   ├── Real-World Use Cases
+│   ├── Industry Examples
+│   └── Practical Tools
+├── 🟡 Methods & Approaches
+│   ├── Primary Techniques
+│   ├── Best Practices
+│   └── Common Patterns
+├── 🔴 Challenges
+│   ├── Common Problems
+│   ├── Limitations
+│   └── Trade-offs
+└── 🟢 Future Directions
+    ├── Emerging Trends
+    ├── Research Areas
+    └── Next Steps
+\`\`\`
+
+**Key takeaway:** This map gives you a 360° view of **${topic}** — start from the center and explore each branch based on your priorities.`;
+}
+
+function generateCodeResponse(prompt) {
+  if (prompt.toLowerCase().includes('json') || prompt.toLowerCase().includes('url') || prompt.toLowerCase().includes('fetch')) {
+    return `## Python Function: Fetch & Parse JSON from URL
+
+\`\`\`python
+import requests
+from typing import Any, Optional
+
+def fetch_json(url: str, timeout: int = 10) -> Optional[Any]:
+    """
+    Fetch and parse JSON data from a URL.
+    
+    Args:
+        url: The endpoint URL
+        timeout: Request timeout in seconds
+    
+    Returns:
+        Parsed JSON data, or None on failure
+    """
+    try:
+        response = requests.get(url, timeout=timeout)
+        response.raise_for_status()  # Raises on 4xx/5xx
+        return response.json()
+    except requests.exceptions.Timeout:
+        print(f"Timeout after {timeout}s: {url}")
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP error {e.response.status_code}: {url}")
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+    except ValueError:
+        print("Response is not valid JSON")
+    return None
+
+
+# Example usage
+if __name__ == "__main__":
+    data = fetch_json("https://api.github.com/users/octocat")
+    if data:
+        print(f"User: {data.get('name')}")
+        print(f"Repos: {data.get('public_repos')}")
+\`\`\`
+
+**Key points:**
+- Uses \`requests\` library (install: \`pip install requests\`)
+- Returns \`None\` on any failure — caller can check safely
+- \`raise_for_status()\` handles 4xx/5xx HTTP errors
+- Specific exception types for better error diagnosis
+- Type hints for IDE support`;
+  }
+
+  return `## Code Solution
+
+\`\`\`python
+def solution(input_data):
+    """
+    Clean, readable implementation.
+    """
+    # Process the input
+    result = []
+    
+    for item in input_data:
+        # Apply transformation
+        processed = transform(item)
+        result.append(processed)
+    
+    return result
+
+def transform(item):
+    """Helper function."""
+    return item  # customize as needed
+\`\`\`
+
+Adjust the \`transform\` function to your specific logic. Let me know what the function should actually do and I'll tailor it precisely.`;
+}
+
+function generateExplainResponse(prompt) {
+  if (prompt.toLowerCase().includes('quantum')) {
+    return `## Quantum Computing — Simple Explanation
+
+**Classical computers** use bits: 0 or 1. Everything is binary.
+
+**Quantum computers** use *qubits*, which exploit quantum mechanics:
+
+### The 3 Key Ideas
+
+**1. Superposition**
+A qubit can be 0, 1, *or both simultaneously* until you measure it. Think of it like a coin spinning in the air — it's "both" heads and tails until it lands.
+
+**2. Entanglement**
+Two qubits can be "linked" so that measuring one instantly tells you the state of the other — regardless of distance. Einstein called this "spooky action at a distance."
+
+**3. Interference**
+Quantum algorithms amplify correct answers and cancel wrong ones — like noise-cancelling headphones, but for computations.
+
+### What It's Good For
+
+| Task | Classical | Quantum |
+|------|-----------|---------|
+| Breaking encryption | Thousands of years | Hours (theoretically) |
+| Drug molecule simulation | Impossible | Feasible |
+| Optimization (logistics) | Approximate | Near-optimal |
+| Most everyday tasks | ✅ Fast | ❌ Overkill |
+
+**Bottom line:** Quantum computers aren't faster at *everything* — they're exponentially faster at specific problems involving vast search spaces or simulating physics.`;
+  }
+
+  return `## Explanation
+
+Here's a clear breakdown of the concept you asked about:
+
+**Core idea:** The fundamental principle at the heart of this topic involves understanding how components interact and build on each other.
+
+**How it works:**
+1. Start with the foundational layer
+2. Each subsequent step builds on the previous
+3. The output emerges from the combined system
+
+**Why it matters:** This concept is widely applied in modern technology and science, enabling solutions that wouldn't otherwise be possible.
+
+**Simple analogy:** Think of it like a well-organized kitchen — individual tools are simple, but combined correctly, they produce complex results efficiently.
+
+Want me to go deeper on any specific aspect?`;
+}
+
+function generateWritingResponse(prompt) {
+  return `## ✍️ Draft
+
+Here's a polished draft based on your request:
+
+---
+
+**Subject:** [Relevant to your context]
+
+I hope this message finds you well. I'm writing to [main purpose — direct and specific].
+
+[Core paragraph: state the key information, request, or point clearly. Be specific. Avoid padding.]
+
+[Supporting detail: provide context, timeline, or any critical information the reader needs to act.]
+
+I'd appreciate [specific ask] by [timeframe if relevant]. Please don't hesitate to reach out if you have questions.
+
+Best regards,
+[Your name]
+
+---
+
+**Adjustments I can make:**
+- Tone: More formal / casual / urgent
+- Length: Shorter punchy version or longer detailed version
+- Format: Change to essay, report, or other format
+
+Tell me what to tweak.`;
+}
+
+function generateResearchResponse(prompt) {
+  return `## 🔬 Research: AI Trends 2024
+
+### 1. Multimodal Models Dominate
+GPT-4o, Gemini Ultra, and Claude 3 Opus all handle text, images, audio, and video natively. The trend: **one model, many modalities** replacing specialized pipelines.
+
+### 2. Small Models Punch Up
+Models like Phi-3 (3.8B params) match GPT-3.5 on many benchmarks. **Efficiency over scale** is the new arms race — inference cost matters more than raw parameter count.
+
+### 3. Reasoning & "Thinking" Models
+Chain-of-thought prompting evolved into explicit *reasoning tokens*. Models now "think before answering" — OpenAI o1, DeepSeek R1 show dramatic gains on math/logic.
+
+### 4. AI Agents Go Mainstream
+- Browser agents (Operator, Claude's computer use)
+- Code agents (Devin, GitHub Copilot Workspace)
+- Multi-agent orchestration frameworks (CrewAI, AutoGen)
+
+### 5. Open Source Catches Up
+Llama 3.1 405B competes with proprietary models. Meta's open release strategy is forcing the entire industry to accelerate.
+
+### 6. RAG → Agentic RAG
+Simple retrieval-augmented generation is being replaced by agents that iteratively search, reason, and synthesize — not just one-shot retrieval.
+
+---
+
+**Key takeaway:** 2024 was the year AI moved from "impressive demos" to **production deployment** — agents, multimodal, and efficient local models are the defining themes.`;
+}
+
+function generateMathResponse(prompt) {
+  return `## 🧮 Mathematical Solution
+
+**Problem:** ${prompt}
+
+**Step-by-step solution:**
+
+**Step 1:** Identify what we're solving for and the given information.
+
+**Step 2:** Set up the equation or framework.
+
+$$f(x) = \\text{[equation based on your problem]}$$
+
+**Step 3:** Apply the relevant theorem/method.
+
+Working:
+\`\`\`
+Given: [values]
+Formula: [formula]
+Substituting: [calculation]
+Result: [answer]
+\`\`\`
+
+**Step 4:** Verify the solution makes sense dimensionally and numerically.
+
+**Answer:** [solution]
+
+*Please provide the specific numbers or equation you want solved for a precise calculation.*`;
+}
+
+function generateGenericResponse(prompt) {
+  return `## Response
+
+${prompt.length > 50 ? 'Based on your question' : 'Here\'s what you need to know'}:
+
+**Direct answer:** This is a well-posed question that touches on several important areas.
+
+Here are the key points:
+
+- **Point 1:** The primary consideration is understanding the core mechanism at play
+- **Point 2:** Context matters significantly — the answer varies based on specific conditions  
+- **Point 3:** Practical application requires weighing trade-offs
+
+**Bottom line:** The most effective approach depends on your specific constraints and goals. The pattern that works best in most cases is [starting simple, validating, then optimizing].
+
+Want me to go deeper on any specific aspect of this?`;
+}
+
+// ── RENDER MARKDOWN ──
+function renderMarkdown(text) {
+  let html = text
+    // Escape HTML
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    // Code blocks with header
+    .replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, lang, code) => {
+      const l = lang || 'code';
+      return `<pre><div class="code-header"><span class="code-lang">${l}</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>${code.trim()}</code></pre>`;
+    })
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // Bold italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    // Bold
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Tables
+    .replace(/(\|.+\|\n)+/g, (table) => {
+      const rows = table.trim().split('\n');
+      let html = '<table style="border-collapse:collapse;width:100%;margin:12px 0">';
+      rows.forEach((row, i) => {
+        if (row.match(/^\|[-|\s]+\|$/)) return;
+        const cells = row.split('|').filter((_, i, a) => i > 0 && i < a.length - 1);
+        const tag = i === 0 ? 'th' : 'td';
+        const style = i === 0
+          ? 'background:#eceae4;color:var(--accent);padding:8px 12px;border:1px solid var(--border);font-family:var(--font-mono);font-size:12px'
+          : 'padding:7px 12px;border:1px solid var(--border);font-size:13px;color:var(--text2)';
+        html += `<tr>${cells.map(c => `<${tag} style="${style}">${c.trim()}</${tag}>`).join('')}</tr>`;
+      });
+      html += '</table>';
+      return html;
+    })
+    // Blockquotes
+    .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
+    // Unordered lists
+    .replace(/^[\-\*\+] (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+    // Ordered lists
+    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+    // HR
+    .replace(/^---$/gm, '<hr>')
+    // Paragraphs
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+
+  return `<p>${html}</p>`;
+}
+
+// ── SEND MESSAGE ──
+async function sendMessage() {
+  if (state.isLoading) return;
+  const input = document.getElementById('prompt-input');
+  const prompt = input.value.trim();
+  if (!prompt) return;
+
+  // Hide welcome
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.style.display = 'none';
+
+  // Add user message
+  state.messages.push({ role: 'user', content: prompt });
+  appendUserMsg(prompt);
+
+  // Clear input
+  input.value = '';
+  autoResize(input);
+  updateCharCount(input);
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('char-count').textContent = '0';
+
+  // Set title
+  if (state.msgCount === 0) {
+    const title = prompt.length > 40 ? prompt.slice(0, 40) + '…' : prompt;
+    document.getElementById('chat-title').textContent = title;
+  }
+
+  // Show thinking
+  const thinkEl = appendThinking();
+  state.isLoading = true;
+  state.msgCount++;
+  updateStats();
+
+  const startTime = Date.now();
+  let fullResponse = '';
+  let tokenCount = 0;
+
+  try {
+    const msgBubble = createAiBubble();
+    thinkEl.remove();
+
+    const systemPrompt = SKILL_PROMPTS[state.currentSkill] || SKILL_PROMPTS.fast;
+    const apiMessages = [
+      { role: 'system', content: systemPrompt },
+      ...state.messages
+    ];
+
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: apiMessages, model: state.model })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const json = JSON.parse(data);
+          const token = json.choices?.[0]?.delta?.content || '';
+          if (token) {
+            fullResponse += token;
+            tokenCount++;
+            msgBubble.innerHTML = renderMarkdown(fullResponse);
+            scrollToBottom();
+          }
+        } catch {}
+      }
+    }
+
+    const elapsed = (Date.now() - startTime) / 1000;
+    const tps = Math.round(tokenCount / elapsed);
+
+    state.messages.push({ role: 'assistant', content: fullResponse });
+    state.totalTokens += tokenCount;
+    document.getElementById('stat-speed').textContent = tps;
+    document.getElementById('speed-display').textContent = `${tps} tok/s`;
+
+    // Add action buttons
+    addActionButtons(msgBubble.parentElement.parentElement);
+
+    updateStats();
+    updateCtxBar();
+
+  } catch (err) {
+    thinkEl.remove();
+    appendError(err.message || 'Something went wrong. Check your API key.');
+  } finally {
+    state.isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+  }
+}
+
+// ── DOM HELPERS ──
+function appendUserMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-user';
+  div.innerHTML = `<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  document.getElementById('chat-inner').appendChild(div);
+  scrollToBottom();
+}
+
+function appendThinking() {
+  const div = document.createElement('div');
+  div.className = 'thinking';
+  div.innerHTML = `
+    <div class="ai-avatar">K</div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <span class="thinking-text">Generating response…</span>`;
+  document.getElementById('chat-inner').appendChild(div);
+  scrollToBottom();
+  return div;
+}
+
+function createAiBubble() {
+  const model = document.getElementById('model-select').value;
+  const short = model.split('-').slice(0,3).join('-');
+  const div = document.createElement('div');
+  div.className = 'msg msg-ai';
+  div.innerHTML = `
+    <div class="msg-ai-header">
+      <div class="ai-avatar">K</div>
+      <span class="ai-label">Koudamki.ai</span>
+      <span class="ai-badge">${short}</span>
+      <span class="speed-badge" id="spd-${Date.now()}">⚡ streaming</span>
+    </div>
+    <div class="bubble" id="ai-bubble-${Date.now()}"></div>`;
+  document.getElementById('chat-inner').appendChild(div);
+  scrollToBottom();
+  return div.querySelector('.bubble');
+}
+
+function addActionButtons(container) {
+  const row = document.createElement('div');
+  row.className = 'msg-actions';
+  row.innerHTML = `
+    <button class="action-btn" onclick="copyResponse(this)">📋 Copy</button>
+    <button class="action-btn" onclick="regenerate()">🔄 Retry</button>
+    <button class="action-btn" onclick="continueResponse(this)">➕ Continue</button>`;
+  container.appendChild(row);
+}
+
+function appendError(msg) {
+  const div = document.createElement('div');
+  div.className = 'error-msg';
+  div.textContent = `⚠️ ${msg}`;
+  document.getElementById('chat-inner').appendChild(div);
+  scrollToBottom();
+}
+
+// ── ACTIONS ──
+function copyCode(btn) {
+  const code = btn.closest('pre').querySelector('code').textContent;
+  navigator.clipboard.writeText(code);
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+function copyResponse(btn) {
+  const bubble = btn.closest('.msg-ai').querySelector('.bubble');
+  navigator.clipboard.writeText(bubble.innerText);
+  btn.textContent = '✅ Copied';
+  setTimeout(() => btn.textContent = '📋 Copy', 2000);
+}
+
+function regenerate() {
+  if (state.messages.length >= 2) {
+    state.messages.pop();
+    const lastUser = state.messages[state.messages.length - 1];
+    state.messages.pop();
+    document.getElementById('prompt-input').value = lastUser.content;
+    // Remove last 2 message elements
+    const inner = document.getElementById('chat-inner');
+    const msgs = inner.querySelectorAll('.msg');
+    if (msgs.length >= 2) { msgs[msgs.length-1].remove(); msgs[msgs.length-2].remove(); }
+    sendMessage();
+  }
+}
+
+function continueResponse(btn) {
+  document.getElementById('prompt-input').value = 'Please continue from where you left off.';
+  sendMessage();
+}
+
+function fillPrompt(text) {
+  const input = document.getElementById('prompt-input');
+  input.value = text;
+  autoResize(input);
+  updateCharCount(input);
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+function newChat() {
+  state.messages = [];
+  state.msgCount = 0;
+  state.totalTokens = 0;
+  document.getElementById('chat-inner').innerHTML = `
+    <div id="welcome">
+      <div class="welcome-logo">K</div>
+      <div>
+        <div class="welcome-title">Welcome to Koudamki.ai</div>
+        <div class="welcome-sub" style="margin-top:8px">Powered by Groq's ultra-fast inference. Sharp answers, no fluff. 128k context window.</div>
+        <div style="font-size:12px;color:var(--text3);font-family:var(--font-mono);margin-top:6px;text-align:center;">Created by <span style="color:var(--accent);font-weight:600;">Koudamki.pranavesh</span></div>
+      </div>
+      <div class="example-grid">
+        <div class="example-card" onclick="fillPrompt('Explain quantum computing in simple terms')">
+          <div class="ex-icon-wrap">⚛️</div>
+          <div class="ex-prompt">Explain a concept</div>
+          <div class="ex-sub">Quantum computing in simple terms</div>
+          <span class="ex-arrow">↗</span>
+        </div>
+        <div class="example-card" onclick="fillPrompt('Write a Python function to fetch and parse JSON from a URL')">
+          <div class="ex-icon-wrap">💻</div>
+          <div class="ex-prompt">Write code</div>
+          <div class="ex-sub">Python function to parse JSON from URL</div>
+          <span class="ex-arrow">↗</span>
+        </div>
+        <div class="example-card" onclick="fillPrompt('Create a mind map of machine learning topics')">
+          <div class="ex-icon-wrap">🗺️</div>
+          <div class="ex-prompt">Mind map</div>
+          <div class="ex-sub">Machine learning topics overview</div>
+          <span class="ex-arrow">↗</span>
+        </div>
+        <div class="example-card" onclick="fillPrompt('What are the latest trends in AI in 2024?')">
+          <div class="ex-icon-wrap">🔬</div>
+          <div class="ex-prompt">Research</div>
+          <div class="ex-sub">Latest trends in AI in 2024</div>
+          <span class="ex-arrow">↗</span>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('chat-title').textContent = 'New Chat';
+  updateStats();
+  updateCtxBar();
+}
+
+function clearChat() { newChat(); }
+
+// ── SETTINGS ──
+function toggleSetting(key) {
+  const el = document.getElementById(`toggle-${key}`);
+  if (key === 'web') {
+    state.webEnabled = !state.webEnabled;
+    el.classList.toggle('on', state.webEnabled);
+    document.getElementById('chip-web').textContent = state.webEnabled ? '🌐 Web ON' : '🌐 Web OFF';
+    document.getElementById('chip-web').classList.toggle('active', state.webEnabled);
+    document.getElementById('btn-web').classList.toggle('active', state.webEnabled);
+  } else if (key === 'map') {
+    state.mapEnabled = !state.mapEnabled;
+    el.classList.toggle('on', state.mapEnabled);
+  } else if (key === 'sum') {
+    state.sumEnabled = !state.sumEnabled;
+    el.classList.toggle('on', state.sumEnabled);
+  }
+}
+
+function toggleInputWeb() {
+  toggleSetting('web');
+}
+function toggleInputMap() {
+  state.mapEnabled = !state.mapEnabled;
+  document.getElementById('toggle-map').classList.toggle('on', state.mapEnabled);
+  document.getElementById('btn-map').classList.toggle('active', state.mapEnabled);
+}
+function toggleFast() {
+  state.fastMode = !state.fastMode;
+  document.getElementById('btn-fast').classList.toggle('active', state.fastMode);
+}
+
+function setSkill(btn) {
+  document.querySelectorAll('.skill-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.currentSkill = btn.dataset.skill;
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Model change
+document.getElementById('model-select').addEventListener('change', function() {
+  state.model = this.value;
+  const short = this.value.split('-').slice(0,3).join('-');
+  document.getElementById('chip-model').textContent = short;
+  document.getElementById('engine-label').textContent = `Groq LPU · ${short}`;
+});
+
+// ── INPUT ──
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+}
+
+function updateCharCount(el) {
+  const len = el.value.length;
+  document.getElementById('char-count').textContent = len;
+  document.getElementById('send-btn').disabled = len === 0 || state.isLoading;
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!document.getElementById('send-btn').disabled) sendMessage();
+  }
+}
+
+// ── STATS ──
+function updateStats() {
+  document.getElementById('stat-msgs').textContent = state.msgCount;
+  document.getElementById('stat-tokens').textContent = state.totalTokens > 999
+    ? (state.totalTokens / 1000).toFixed(1) + 'k' : state.totalTokens;
+  document.getElementById('token-display').textContent =
+    `${state.totalTokens.toLocaleString()} / 128,000 tokens`;
+}
+
+function updateCtxBar() {
+  const pct = Math.min((state.totalTokens / 128000) * 100, 100);
+  document.getElementById('ctx-fill').style.width = pct + '%';
+  document.getElementById('chip-ctx').textContent = `${Math.round(state.totalTokens / 1000)}k / 128k`;
+}
+
+function scrollToBottom() {
+  const area = document.getElementById('chat-area');
+  area.scrollTop = area.scrollHeight;
+}
+
+// ── RESPONSIVE ──
+if (window.innerWidth < 680) {
+  document.getElementById('menu-btn').style.display = 'flex';
+}
+
+// Init
+updateStats();
+updateCtxBar();
+</script>
+</body>
+</html>
