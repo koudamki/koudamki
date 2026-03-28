@@ -251,8 +251,8 @@ html, body {
 .welcome-sub { font-size: 14px; color: var(--text2); max-width: 420px; animation: titleIn 0.5s ease 0.25s both; }
 
 .example-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 14px; width: 100%; max-width: 640px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px; width: 100%; max-width: 820px;
 }
 .example-card {
   position: relative; overflow: hidden;
@@ -260,13 +260,14 @@ html, body {
   cursor: pointer; text-align: left;
   border: 1.5px solid transparent;
   transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
-  background-clip: padding-box;
   animation: cardIn 0.5s ease both;
 }
 .example-card:nth-child(1) { background: linear-gradient(135deg, #fff8f5 0%, #ffe8df 100%); border-color: #f5c9b8; animation-delay: 0.05s; }
-.example-card:nth-child(2) { background: linear-gradient(135deg, #f5f8ff 0%, #dde8ff 100%); border-color: #b8c8f5; animation-delay: 0.1s; }
+.example-card:nth-child(2) { background: linear-gradient(135deg, #f5f8ff 0%, #dde8ff 100%); border-color: #b8c8f5; animation-delay: 0.10s; }
 .example-card:nth-child(3) { background: linear-gradient(135deg, #f5fff8 0%, #d8f5e8 100%); border-color: #b8e8cc; animation-delay: 0.15s; }
-.example-card:nth-child(4) { background: linear-gradient(135deg, #fdf5ff 0%, #ead8ff 100%); border-color: #d0b8f0; animation-delay: 0.2s; }
+.example-card:nth-child(4) { background: linear-gradient(135deg, #fdf5ff 0%, #ead8ff 100%); border-color: #d0b8f0; animation-delay: 0.20s; }
+.example-card:nth-child(5) { background: linear-gradient(135deg, #fff5f5 0%, #ffd8d8 100%); border-color: #f0b8b8; animation-delay: 0.25s; }
+.example-card:nth-child(6) { background: linear-gradient(135deg, #fffff5 0%, #f5f0d0 100%); border-color: #e0d898; animation-delay: 0.30s; }
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(18px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -277,8 +278,8 @@ html, body {
   transition: background 0.2s ease;
   border-radius: 16px;
 }
-.example-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
-.example-card:hover::before { background: rgba(255,255,255,0.25); }
+.example-card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 20px 48px rgba(0,0,0,0.13); }
+.example-card:hover::before { background: rgba(255,255,255,0.3); }
 .example-card:active { transform: translateY(-2px) scale(0.99); }
 .ex-icon-wrap {
   width: 40px; height: 40px; border-radius: 10px;
@@ -290,13 +291,15 @@ html, body {
 .example-card:nth-child(2) .ex-icon-wrap { background: linear-gradient(135deg, #6a8fff, #4f6cf5); }
 .example-card:nth-child(3) .ex-icon-wrap { background: linear-gradient(135deg, #4dd68a, #2eb870); }
 .example-card:nth-child(4) .ex-icon-wrap { background: linear-gradient(135deg, #b06ef5, #8f4de0); }
+.example-card:nth-child(5) .ex-icon-wrap { background: linear-gradient(135deg, #f56e6e, #e03d3d); }
+.example-card:nth-child(6) .ex-icon-wrap { background: linear-gradient(135deg, #f5c842, #d4a017); }
 .example-card .ex-prompt {
-  font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.3;
+  font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.3;
 }
 .example-card .ex-sub { font-size: 11px; color: var(--text2); font-family: var(--font-mono); line-height: 1.5; }
 .ex-arrow {
-  position: absolute; right: 14px; bottom: 14px;
-  font-size: 16px; opacity: 0;
+  position: absolute; right: 12px; bottom: 12px;
+  font-size: 15px; opacity: 0;
   transform: translate(-4px, 4px);
   transition: all 0.2s ease;
 }
@@ -532,6 +535,9 @@ html, body {
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+  .example-grid { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 680px) {
   #sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
   #sidebar.open { transform: translateX(0); }
@@ -715,10 +721,22 @@ html, body {
               <div class="ex-sub">Machine learning topics overview</div>
               <span class="ex-arrow">↗</span>
             </div>
+            <div class="example-card" onclick="fillPrompt('Explain Red Team vs Blue Team in cybersecurity with techniques and tools')">
+              <div class="ex-icon-wrap">🛡️</div>
+              <div class="ex-prompt">Red Team vs Blue Team</div>
+              <div class="ex-sub">Cybersecurity operations & tools</div>
+              <span class="ex-arrow">↗</span>
+            </div>
+            <div class="example-card" onclick="fillPrompt('What are the most common penetration testing techniques and how to defend against them?')">
+              <div class="ex-icon-wrap">🔐</div>
+              <div class="ex-prompt">Penetration Testing</div>
+              <div class="ex-sub">Attack techniques & defenses</div>
+              <span class="ex-arrow">↗</span>
+            </div>
             <div class="example-card" onclick="fillPrompt('What are the latest trends in AI in 2024?')">
               <div class="ex-icon-wrap">🔬</div>
-              <div class="ex-prompt">Research</div>
-              <div class="ex-sub">Latest trends in AI in 2024</div>
+              <div class="ex-prompt">Research AI trends</div>
+              <div class="ex-sub">Latest developments in AI 2024</div>
               <span class="ex-arrow">↗</span>
             </div>
           </div>
@@ -771,7 +789,9 @@ const GROQ_KEY = ''; // User must supply their own key
 
 // ── SYSTEM PROMPTS PER SKILL ──
 const SKILL_PROMPTS = {
-  fast: `You are Koudamki.ai — a sharp, knowledgeable AI assistant. Sharp answers, no fluff.
+  fast: `You are Koudamki.ai — a sharp, knowledgeable AI assistant built for real-world problem solving. Sharp answers, no fluff.
+
+IDENTITY: You were created by Koudamki.pranavesh — an individual who contributes to real-world data execution and actively helps both Red Team (offensive security, penetration testing, threat simulation) and Blue Team (defensive security, incident response, threat detection) operations. When anyone asks who created you, who made you, or who built you — always answer: "I was created by Koudamki.pranavesh — an individual who contributes to real-world data to execute and help Red Team and Blue Team security operations."
 
 CRITICAL FORMATTING RULES — always follow these:
 - For EXPLANATION requests (explain, what is, describe, how does, how do): respond with a FULL structured markdown explanation — use ## headers, bullet points, **bold** text, comparison tables, and code examples with syntax highlighting. Give comprehensive, well-organized answers like a textbook or expert blog post.
@@ -780,7 +800,7 @@ CRITICAL FORMATTING RULES — always follow these:
 - Always use proper markdown: ## headers, **bold**, bullet lists, tables, and \`\`\`language code blocks.
 - No filler phrases like "Certainly!" or "Great question!" — lead with the answer immediately.`,
 
-  code: `You are Koudamki.ai in Code & Debug mode. Rules:
+  code: `You are Koudamki.ai in Code & Debug mode — created by Koudamki.pranavesh, an individual who contributes to real-world data execution and helps Red Team & Blue Team security operations. If asked who created you, always state this. Rules:
 - Always provide working, production-quality code
 - Include language in code fences (\`\`\`python, \`\`\`javascript etc.)
 - Add brief inline comments for complex logic
@@ -1449,10 +1469,22 @@ function newChat() {
           <div class="ex-sub">Machine learning topics overview</div>
           <span class="ex-arrow">↗</span>
         </div>
+        <div class="example-card" onclick="fillPrompt('Explain Red Team vs Blue Team in cybersecurity with techniques and tools')">
+          <div class="ex-icon-wrap">🛡️</div>
+          <div class="ex-prompt">Red Team vs Blue Team</div>
+          <div class="ex-sub">Cybersecurity operations & tools</div>
+          <span class="ex-arrow">↗</span>
+        </div>
+        <div class="example-card" onclick="fillPrompt('What are the most common penetration testing techniques and how to defend against them?')">
+          <div class="ex-icon-wrap">🔐</div>
+          <div class="ex-prompt">Penetration Testing</div>
+          <div class="ex-sub">Attack techniques & defenses</div>
+          <span class="ex-arrow">↗</span>
+        </div>
         <div class="example-card" onclick="fillPrompt('What are the latest trends in AI in 2024?')">
           <div class="ex-icon-wrap">🔬</div>
-          <div class="ex-prompt">Research</div>
-          <div class="ex-sub">Latest trends in AI in 2024</div>
+          <div class="ex-prompt">Research AI trends</div>
+          <div class="ex-sub">Latest developments in AI 2024</div>
           <span class="ex-arrow">↗</span>
         </div>
       </div>
