@@ -1,476 +1,1047 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Koudamki.ai — Self Destruct</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Solver — AI & ML Problem Solver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #f0ede8;
-  --sidebar: #e8e4dd;
-  --orange: #d95f1e;
-  --orange-lt: #fdf0e8;
-  --border: #ddd9d2;
-  --text: #1a1a1a;
-  --muted: #8a8580;
-  --white: #ffffff;
-  --red: #ff2a2a;
-  --red-dim: #991a1a;
-  --red-glow: rgba(255,42,42,0.4);
-  --mono: 'Share Tech Mono', monospace;
-  --sans: 'Inter', sans-serif;
+  --bg: #080c10;
+  --surface: #0e1520;
+  --surface2: #141d2e;
+  --surface3: #1a2540;
+  --border: rgba(56,189,248,0.12);
+  --border2: rgba(56,189,248,0.25);
+  --accent: #38bdf8;
+  --accent2: #7dd3fc;
+  --accent-dim: rgba(56,189,248,0.08);
+  --green: #4ade80;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+  --radius: 8px;
+  --radius-lg: 14px;
 }
-html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: var(--sans); }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-.app { display: flex; height: 100vh; }
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 234px; min-width: 234px;
-  background: var(--sidebar);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  padding: 14px 10px 12px;
-  z-index: 20; position: relative;
-}
-.logo-row { display: flex; align-items: center; gap: 10px; padding: 4px 4px 14px; }
-.logo-k {
-  width: 30px; height: 30px; border-radius: 7px;
-  background: var(--orange);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px; color: #fff;
-}
-.logo-info .n { font-size: 13px; font-weight: 700; color: var(--text); }
-.logo-info .s { font-size: 9px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
-.new-btn {
-  width: 100%; background: var(--orange); color: #fff;
-  border: none; border-radius: 8px; padding: 9px 14px;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; gap: 7px;
-  margin-bottom: 18px;
-}
-.sec-lbl {
-  font-size: 9.5px; font-weight: 600; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted);
-  padding: 0 5px 7px; margin-top: 2px;
-}
-.model-box {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: 8px; padding: 7px 11px;
-  font-size: 12px; font-weight: 500; color: var(--text);
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-}
-.model-box .bolt { color: var(--orange); }
-.model-box .arr  { color: var(--muted); font-size: 10px; }
-.skills { display: flex; flex-direction: column; gap: 1px; flex: 1; }
-.sk {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 9px; border-radius: 8px;
-  font-size: 12.5px; color: var(--text); cursor: pointer;
-}
-.sk.active { background: var(--orange-lt); font-weight: 500; }
-.sk-ic { font-size: 14px; width: 17px; text-align: center; }
-.stats { display: flex; gap: 6px; padding: 10px 0; }
-.st {
-  flex: 1; background: var(--white);
-  border: 1px solid var(--border); border-radius: 8px;
-  padding: 7px 5px; text-align: center;
-}
-.st .v { font-size: 15px; font-weight: 600; color: var(--orange); }
-.st .l { font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 1px; }
-.st.neu .v { color: var(--text); }
-.btns { display: flex; gap: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
-.bb {
-  flex: 1; background: var(--white);
-  border: 1px solid var(--border); border-radius: 8px;
-  padding: 7px 0; font-size: 11.5px; color: var(--muted);
-  cursor: pointer; display: flex; align-items: center;
-  justify-content: center; gap: 4px;
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ── MAIN ── */
-.main { flex: 1; position: relative; overflow: hidden; }
-
-.ghost {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center;
-  filter: blur(4px) brightness(0.5) saturate(0.4);
-  pointer-events: none; user-select: none;
-}
-.topbar {
-  width: 100%; height: 42px; flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  padding: 0 20px; gap: 8px;
-  font-size: 11.5px; color: var(--muted);
-}
-.tg { background: #f5a623; color: #fff; border-radius: 3px; padding: 1px 6px; font-size: 9px; font-weight: 700; }
-.hero { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 50px; }
-.hero-k {
-  width: 58px; height: 58px; border-radius: 14px;
-  background: var(--orange);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 25px; font-weight: 700; color: #fff;
-}
-.hero h1 { font-size: 1.9rem; font-weight: 700; color: var(--text); }
-.hero p  { font-size: 13px; color: var(--muted); text-align: center; max-width: 360px; line-height: 1.6; }
-.gcards {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 10px; padding: 0 36px;
-  width: 100%; max-width: 680px; margin-top: 18px;
-}
-.gc { background: var(--white); border: 1px solid var(--border); border-radius: 11px; padding: 14px; }
-.gc .gi { font-size: 17px; margin-bottom: 7px; }
-.gc .gt { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-.gc .gs { font-size: 10.5px; color: var(--muted); line-height: 1.4; }
-.ginput { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 36px 34px; }
-.ginput-box {
-  background: var(--white); border: 2px solid var(--orange);
-  border-radius: 11px; padding: 13px 16px;
-  font-size: 13.5px; color: var(--muted); width: 100%;
-}
-.gtags { display: flex; gap: 12px; margin-top: 7px; padding: 0 3px; }
-.gtag { font-size: 10.5px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
-.gtag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
-
-/* ── OVERLAY ── */
-.overlay {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 30;
-}
-.overlay::before {
+body::before {
   content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
   pointer-events: none;
+  z-index: 0;
 }
 
-.dc {
-  background: #0c0101;
-  border: 1px solid #3a0808;
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(56,189,248,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+.glow2 {
+  position: fixed;
+  bottom: -200px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+header {
+  position: relative; z-index: 10;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,12,16,0.85);
+  backdrop-filter: blur(12px);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono);
+  font-size: 15px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.3px;
+}
+
+.logo-icon {
+  width: 30px; height: 30px;
+  border: 1.5px solid var(--accent);
   border-radius: 6px;
-  padding: 2.5rem 2.4rem 2rem;
-  width: min(530px, 92%);
-  position: relative;
-  box-shadow: 0 0 100px rgba(180,0,0,0.28), 0 32px 80px rgba(0,0,0,0.85);
-  animation: popIn .7s cubic-bezier(.16,1,.3,1) both;
-}
-@keyframes popIn {
-  from { opacity:0; transform: scale(.88) translateY(20px); }
-  to   { opacity:1; transform: scale(1)  translateY(0); }
-}
-.dc::before {
-  content: '';
-  position: absolute; top: 0; left: 10%; right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--red), transparent);
-}
-.dc::after {
-  content: '';
-  position: absolute; bottom: 0; left: 25%; right: 25%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #660000, transparent);
-}
-
-.ring {
-  width: 46px; height: 46px;
-  border: 1px solid #661111; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 1.3rem;
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100% { box-shadow: 0 0 0 0 var(--red-glow); }
-  50%      { box-shadow: 0 0 0 10px transparent; }
-}
-.ring svg { width: 20px; height: 20px; fill: var(--red); }
-
-.dtitle {
-  font-size: clamp(1.5rem,4vw,2rem);
-  font-weight: 700; letter-spacing: .3em;
-  text-transform: uppercase; text-align: center;
-  color: var(--red);
-  text-shadow: 0 0 24px var(--red-glow);
-  margin-bottom: .6rem;
+  font-size: 14px; color: var(--accent);
 }
 
-.creator-line {
-  font-size: .76rem; letter-spacing: .08em;
-  text-align: center; color: #774444;
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.header-badge {
   font-family: var(--mono);
-  margin-bottom: .5rem; line-height: 1.7;
+  font-size: 11px;
+  color: var(--accent);
+  border: 1px solid var(--border2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--accent-dim);
 }
-.creator-line .name { color: #e05555; }
 
-.bytescare-box {
-  background: #160202;
-  border: 1px solid #3d0909;
-  border-radius: 4px;
-  padding: .6rem 1rem;
-  margin: .7rem 0 1.5rem;
+/* API Key bar */
+.api-bar {
+  position: relative; z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 2rem;
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+
+.api-bar label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.api-bar input {
+  flex: 1; min-width: 200px;
+  font-family: var(--mono); font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 7px 12px;
+  outline: none;
+}
+.api-bar input:focus { border-color: var(--border2); }
+
+.api-bar select {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 7px 12px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.api-status {
+  font-family: var(--mono); font-size: 11px;
+  display: flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.api-dot { width: 6px; height: 6px; border-radius: 50%; }
+.api-dot.ok { background: var(--green); }
+.api-dot.off { background: var(--text3); }
+
+.hero {
+  position: relative; z-index: 2;
   text-align: center;
-  font-size: .83rem;
-  color: #cc4444;
-  letter-spacing: .06em;
-  line-height: 1.7;
+  padding: 3.5rem 2rem 2.5rem;
 }
-.bytescare-box strong { color: var(--red); font-weight: 600; letter-spacing: .1em; }
 
-.badges {
-  display: flex; align-items: center; justify-content: center;
-  gap: .7rem; flex-wrap: wrap; margin-bottom: 1.7rem;
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--accent); border: 1px solid var(--border2);
+  padding: 5px 12px; border-radius: 20px;
+  background: var(--accent-dim);
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.6s ease both;
 }
-.bdg {
-  font-family: var(--mono); font-size: .64rem; letter-spacing: .1em;
-  color: #883333; border: 1px solid #2a0808; border-radius: 3px;
-  padding: 4px 10px; display: flex; align-items: center; gap: 5px;
-}
-.bdg svg { width: 9px; height: 9px; fill: #883333; }
 
-/* countdown */
-.cdown {
-  display: flex; align-items: center; justify-content: center;
-  gap: .4rem; margin-bottom: 1.2rem;
-}
-.unit { display: flex; flex-direction: column; align-items: center; gap: .35rem; }
-.dbox {
-  background: #0d0202; border: 1px solid #2a0606;
-  border-radius: 4px;
-  width: clamp(66px,15vw,90px); height: clamp(66px,15vw,90px);
-  display: flex; align-items: center; justify-content: center;
-  position: relative; overflow: hidden;
-}
-.dbox::after {
+.hero-tag::before {
   content: '';
-  position: absolute; top: 50%; left: 8%; right: 8%;
-  height: 1px; background: rgba(255,42,42,0.1);
+  width: 6px; height: 6px;
+  border-radius: 50%; background: var(--green);
+  animation: pulse 2s infinite;
 }
-.dig {
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+  font-family: var(--sans);
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin-bottom: 1rem;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+
+.hero h1 span { color: var(--accent); }
+
+.hero p {
+  font-size: 1rem;
+  color: var(--text2);
+  max-width: 520px;
+  margin: 0 auto 2rem;
+  line-height: 1.7;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(16px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.tool-nav {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 960px;
+  margin: 0 auto 3rem;
+  padding: 0 2rem;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+
+.tool-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.2rem;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color .2s, background .2s, transform .15s;
+  text-align: left;
+}
+
+.tool-card:hover { border-color: var(--border2); background: var(--surface2); }
+.tool-card.active {
+  border-color: var(--accent);
+  background: var(--surface2);
+  box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 4px 24px rgba(56,189,248,0.08);
+}
+
+.tool-card-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.tool-card-icon.blue  { background: rgba(56,189,248,0.12); }
+.tool-card-icon.green { background: rgba(74,222,128,0.12); }
+.tool-card-icon.amber { background: rgba(251,191,36,0.12); }
+.tool-card-icon.red   { background: rgba(248,113,113,0.12); }
+
+.tool-card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; letter-spacing: -0.2px; }
+.tool-card p  { font-size: 11px; color: var(--text3); line-height: 1.5; }
+
+.main {
+  position: relative; z-index: 2;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+.page { display: none; animation: fadeUp 0.4s ease both; }
+.page.active { display: block; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.panel-header-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+
+.panel-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.panel-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+.panel-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.field-label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+textarea, input[type=text], input[type=number], select {
+  width: 100%;
   font-family: var(--mono);
-  font-size: clamp(1.6rem,5vw,2.5rem);
-  color: var(--red);
-  text-shadow: 0 0 10px var(--red-glow), 0 0 28px rgba(255,0,0,0.15);
-  line-height: 1;
+  font-size: 12.5px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color .15s;
+  resize: vertical;
 }
-.ulbl { font-size: .57rem; letter-spacing: .28em; text-transform: uppercase; color: #663333; font-weight: 500; }
-.colon {
+
+textarea:focus, input:focus, select:focus { border-color: var(--border2); background: var(--surface3); }
+select { appearance: none; cursor: pointer; }
+textarea::placeholder, input::placeholder { color: var(--text3); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 11px; font-family: var(--mono);
+  cursor: pointer;
+  background: transparent;
+  color: var(--text3);
+  transition: all .15s;
+}
+
+.chip:hover { border-color: var(--border2); color: var(--text2); }
+.chip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  border-radius: var(--radius);
+  border: none; cursor: pointer;
+  transition: all .15s;
+}
+
+.btn-primary { background: var(--accent); color: #080c10; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.result-panel {
+  margin-top: 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.result-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.result-label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+}
+
+.result-dots { display: flex; gap: 5px; }
+.result-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.result-body {
+  padding: 1.25rem 1.5rem;
   font-family: var(--mono);
-  font-size: clamp(1.5rem,4.5vw,2.3rem);
-  color: #661111; margin-bottom: 1.2rem;
-  animation: blink 1s step-start infinite;
-  text-shadow: 0 0 8px var(--red-glow);
-}
-@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:.15} }
-
-.pbar-wrap { height: 3px; background: #1a0404; border-radius: 2px; overflow: hidden; margin-bottom: 1rem; }
-.pbar {
-  height: 100%;
-  background: linear-gradient(90deg, #660000, var(--red));
-  box-shadow: 0 0 8px var(--red-glow);
-  border-radius: 2px;
-  transition: width 1s linear;
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: var(--text2);
+  min-height: 120px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.det-line {
-  font-family: var(--mono); font-size: .61rem;
-  letter-spacing: .14em; text-align: center; color: #4d1a1a;
-}
-.det-line span { color: #883333; }
+.result-body .placeholder { color: var(--text3); font-style: italic; }
 
-.exploded { display:none; text-align:center; padding: 1rem 0; }
-.ex-t {
-  font-size: clamp(1.8rem,6vw,3rem); font-weight: 700;
-  letter-spacing: .28em; text-transform: uppercase; color: var(--red);
-  text-shadow: 0 0 28px var(--red-glow);
-  animation: glitch .35s steps(2) infinite;
+.debug-options { display: flex; flex-direction: column; gap: 8px; }
+
+.dbg-opt {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: var(--surface2);
+  transition: all .15s;
+  text-align: left;
 }
-@keyframes glitch {
-  0%  { text-shadow: 2px 0 var(--red), -2px 0 #ff0; }
-  50% { text-shadow: -2px 0 var(--red), 2px 0 #ff0; }
+
+.dbg-opt:hover { border-color: var(--border2); }
+.dbg-opt.active { border-color: var(--accent); background: var(--surface3); }
+
+.dbg-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  flex-shrink: 0;
 }
-.ex-sub { font-family: var(--mono); font-size: .72rem; color: #663333; letter-spacing:.14em; margin-top:.8rem; }
+
+.dbg-opt.active .dbg-num { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.dbg-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.dbg-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+.spin {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(8,12,16,0.3);
+  border-top-color: #080c10;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.cursor::after {
+  content: '▋';
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.status-bar {
+  position: relative; z-index: 2;
+  border-top: 1px solid var(--border);
+  background: rgba(8,12,16,0.9);
+  padding: 8px 2rem;
+  display: flex; align-items: center; gap: 16px;
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  flex-wrap: wrap;
+}
+
+.status-item { display: flex; align-items: center; gap: 5px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+@media (max-width: 700px) {
+  .tool-nav { grid-template-columns: 1fr 1fr; }
+  .row2, .row3 { grid-template-columns: 1fr; }
+  header { padding: 0 1rem; }
+  .main, .tool-nav { padding: 0 1rem; }
+  .hero { padding: 2rem 1rem 2rem; }
+  .hero h1 { font-size: 2rem; }
+  .api-bar { padding: 10px 1rem; }
+}
+
+@media (max-width: 480px) {
+  .tool-nav { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="glow2"></div>
 
-  <!-- ════════════ SIDEBAR ════════════ -->
-  <aside class="sidebar">
-    <div class="logo-row">
-      <div class="logo-k">K</div>
-      <div class="logo-info">
-        <div class="n">Koudamki.ai</div>
-        <div class="s">V3 · Sharp Answers.</div>
-      </div>
-    </div>
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚙</div>
+    ML<span style="color:var(--accent)">Solver</span>
+  </div>
+  <div class="header-right">
+    <div class="header-badge">Powered by Groq</div>
+  </div>
+</header>
 
-    <button class="new-btn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
-      New Chat
-    </button>
-
-    <div class="sec-lbl">Model</div>
-    <div class="model-box">
-      <span>Llama 3.3 70B <span class="bolt">⚡</span></span>
-      <span class="arr">▾</span>
-    </div>
-
-    <div class="sec-lbl">Skills</div>
-    <div class="skills">
-      <div class="sk active"><span class="sk-ic">⚡</span> Fast Mode</div>
-      <div class="sk"><span class="sk-ic">💻</span> Code &amp; Debug</div>
-      <div class="sk"><span class="sk-ic">🔍</span> Deep Research</div>
-      <div class="sk"><span class="sk-ic">✍️</span> Writing</div>
-      <div class="sk"><span class="sk-ic">🔬</span> Math &amp; Science</div>
-      <div class="sk"><span class="sk-ic">🎯</span> Career Coach</div>
-    </div>
-
-    <div class="stats">
-      <div class="st"><div class="v">0</div><div class="l">msgs</div></div>
-      <div class="st"><div class="v">0</div><div class="l">tokens</div></div>
-      <div class="st neu"><div class="v">—</div><div class="l">tok/s</div></div>
-    </div>
-
-    <div class="btns">
-      <button class="bb">⚙ Settings</button>
-      <button class="bb">◑ Theme</button>
-    </div>
-  </aside>
-
-  <!-- ════════════ MAIN ════════════ -->
-  <div class="main">
-
-    <!-- blurred ghost UI -->
-    <div class="ghost">
-      <div class="topbar">
-        Llama 3.3 70B <span class="tg">⚡</span> · Groq LPU
-      </div>
-      <div class="hero">
-        <div class="hero-k">K</div>
-        <h1>Sharp answers. No fluff.</h1>
-        <p>Powered by Groq's ultra-fast LPU inference. Ask anything — code, research, writing, math.</p>
-      </div>
-      <div class="gcards">
-        <div class="gc"><div class="gi">🧩</div><div class="gt">Explain a concept</div><div class="gs">Quantum computing in simple terms</div></div>
-        <div class="gc"><div class="gi">💻</div><div class="gt">Write code</div><div class="gs">Python function to parse JSON from URL</div></div>
-        <div class="gc"><div class="gi">🔭</div><div class="gt">Research AI trends</div><div class="gs">Latest developments in AI 2025</div></div>
-        <div class="gc"><div class="gi">🛡</div><div class="gt">Red Team vs Blue Team</div><div class="gs">Cybersecurity operations &amp; tools</div></div>
-        <div class="gc"><div class="gi">📐</div><div class="gt">Math problem</div><div class="gs">Integration by parts example</div></div>
-        <div class="gc"><div class="gi">✍️</div><div class="gt">Write something</div><div class="gs">Cover letter for software engineer</div></div>
-      </div>
-      <div class="ginput">
-        <div class="ginput-box">Ask anything…</div>
-        <div class="gtags">
-          <span class="gtag"><span class="gtag-dot"></span>Web Search</span>
-          <span class="gtag"><span class="gtag-dot"></span>Mind Map</span>
-          <span class="gtag"><span class="gtag-dot"></span>Auto Summary</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── SELF-DESTRUCT OVERLAY ── -->
-    <div class="overlay">
-      <div class="dc">
-
-        <div class="ring">
-          <svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
-        </div>
-
-        <h1 class="dtitle">Self &nbsp; Destruct</h1>
-
-        <p class="creator-line">
-          Creator &nbsp;<span class="name">Koti.Pranaavesh</span>&nbsp; has got a
-          <span class="name">BytesCare</span> issue —<br>
-          this page has been set to self destruct
-        </p>
-
-        <div class="bytescare-box">
-          Due to <strong>BytesCare</strong> — this website will self destruct
-        </div>
-
-        <div class="badges">
-          <div class="bdg">
-            <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
-            koudamki.vercel.app
-          </div>
-          <div class="bdg">
-            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93-2.67-1.14-5-4.43-5-7.93V7.18L12 5z"/></svg>
-            copy-protected
-          </div>
-        </div>
-
-        <div id="live">
-          <div class="cdown">
-            <div class="unit">
-              <div class="dbox"><span class="dig" id="hh">00</span></div>
-              <span class="ulbl">Hours</span>
-            </div>
-            <div class="colon">:</div>
-            <div class="unit">
-              <div class="dbox"><span class="dig" id="mm">00</span></div>
-              <span class="ulbl">Minutes</span>
-            </div>
-            <div class="colon">:</div>
-            <div class="unit">
-              <div class="dbox"><span class="dig" id="ss">00</span></div>
-              <span class="ulbl">Seconds</span>
-            </div>
-          </div>
-
-          <div class="pbar-wrap">
-            <div class="pbar" id="pbar" style="width:0%"></div>
-          </div>
-
-          <p class="det-line">detonation — <span>05 apr 2026 · 5:00 PM IST</span></p>
-        </div>
-
-        <div class="exploded" id="dead">
-          <div class="ex-t">Detonated</div>
-          <p class="ex-sub">This website has been destroyed.</p>
-          <p class="ex-sub" style="margin-top:.35rem;color:#441111;">— Due to BytesCare —</p>
-        </div>
-
-      </div>
-    </div>
-
+<!-- API KEY BAR -->
+<div class="api-bar">
+  <label>Groq API Key</label>
+  <input type="password" id="groq-key" placeholder="gsk_..." oninput="updateStatus()">
+  <label style="margin-left:8px">Model</label>
+  <select id="groq-model">
+    <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (best)</option>
+    <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (fast)</option>
+    <option value="mixtral-8x7b-32768">mixtral-8x7b-32768 (long ctx)</option>
+    <option value="gemma2-9b-it">gemma2-9b-it</option>
+  </select>
+  <div class="api-status" id="api-status">
+    <div class="api-dot off" id="api-dot"></div>
+    <span id="api-status-text">No key entered</span>
   </div>
 </div>
 
+<div class="hero">
+  <div class="hero-tag">Groq-Powered Developer Toolkit</div>
+  <h1>Fix your AI & ML<br><span>problems instantly</span></h1>
+  <p>Four specialized tools — diagnostics, dataset analysis, experiment advice, and step-by-step debugging — all running on Groq's LPU engine.</p>
+</div>
+
+<div class="tool-nav">
+  <div class="tool-card active" onclick="showPage('diag',this)">
+    <div class="tool-card-icon blue">🩺</div>
+    <h3>ML Diagnostics</h3>
+    <p>Overfitting, loss divergence, accuracy plateaus</p>
+  </div>
+  <div class="tool-card" onclick="showPage('data',this)">
+    <div class="tool-card-icon green">📊</div>
+    <h3>Dataset Analyzer</h3>
+    <p>Quality report, imbalance, missing values, leakage</p>
+  </div>
+  <div class="tool-card" onclick="showPage('exp',this)">
+    <div class="tool-card-icon amber">🧪</div>
+    <h3>Experiment Advisor</h3>
+    <p>Hyperparameter tuning & experiment strategies</p>
+  </div>
+  <div class="tool-card" onclick="showPage('debug',this)">
+    <div class="tool-card-icon red">🐛</div>
+    <h3>ML Debugger</h3>
+    <p>Tensor errors, NaN loss, pipeline & deploy bugs</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PAGE 1: ML DIAGNOSTICS -->
+  <div id="diag" class="page active">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(56,189,248,0.12)">🩺</div>
+        <div>
+          <div class="panel-title">ML Diagnostics Assistant</div>
+          <div class="panel-sub">Describe your model behavior or paste metrics — get a root cause analysis and fix</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row2">
+          <div>
+            <label class="field-label">Framework</label>
+            <select id="d1-fw">
+              <option>PyTorch</option>
+              <option>TensorFlow / Keras</option>
+              <option>Scikit-learn</option>
+              <option>XGBoost / LightGBM</option>
+              <option>JAX / Flax</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Task type</label>
+            <select id="d1-task">
+              <option>Classification</option>
+              <option>Regression</option>
+              <option>NLP / Text</option>
+              <option>Computer Vision</option>
+              <option>Time Series</option>
+              <option>Reinforcement Learning</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Problem type (select all that apply)</label>
+          <div class="chips">
+            <button class="chip on" onclick="toggleChip(this)">Overfitting</button>
+            <button class="chip" onclick="toggleChip(this)">Underfitting</button>
+            <button class="chip" onclick="toggleChip(this)">Slow training</button>
+            <button class="chip" onclick="toggleChip(this)">Accuracy plateau</button>
+            <button class="chip" onclick="toggleChip(this)">Loss diverging</button>
+            <button class="chip" onclick="toggleChip(this)">Gradient explosion</button>
+            <button class="chip" onclick="toggleChip(this)">Poor generalization</button>
+            <button class="chip" onclick="toggleChip(this)">Other</button>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Describe the issue / paste metrics or error output</label>
+          <textarea id="d1-input" rows="5" placeholder="e.g. Training accuracy 98%, validation 62%. Loss stops improving after epoch 5. Using Adam lr=0.001, batch_size=32..."></textarea>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="d1-btn" onclick="runDiag()">
+            <span>Run diagnostics</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">diagnosis output</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d1-result"><span class="placeholder">// Awaiting input — fill the form and click "Run diagnostics"</span></div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: DATASET ANALYZER -->
+  <div id="data" class="page">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(74,222,128,0.12)">📊</div>
+        <div>
+          <div class="panel-title">Dataset Analyzer</div>
+          <div class="panel-sub">Describe your dataset — get a quality report, issue diagnosis, and preprocessing pipeline</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row3">
+          <div>
+            <label class="field-label">Number of rows</label>
+            <input type="number" id="d2-rows" placeholder="e.g. 50000">
+          </div>
+          <div>
+            <label class="field-label">Number of features</label>
+            <input type="number" id="d2-feats" placeholder="e.g. 42">
+          </div>
+          <div>
+            <label class="field-label">Missing value %</label>
+            <input type="number" id="d2-miss" placeholder="e.g. 15">
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label class="field-label">Data type</label>
+            <select id="d2-type">
+              <option>Tabular / CSV</option>
+              <option>Text / NLP</option>
+              <option>Image</option>
+              <option>Time Series</option>
+              <option>Graph / Network</option>
+              <option>Mixed / Multimodal</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Target variable</label>
+            <select id="d2-target">
+              <option>Binary classification</option>
+              <option>Multi-class classification</option>
+              <option>Regression / continuous</option>
+              <option>Multi-label</option>
+              <option>Unsupervised / clustering</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Known issues (select all that apply)</label>
+          <div class="chips">
+            <button class="chip" onclick="toggleChip(this)">Missing values</button>
+            <button class="chip" onclick="toggleChip(this)">Class imbalance</button>
+            <button class="chip" onclick="toggleChip(this)">Duplicate rows</button>
+            <button class="chip" onclick="toggleChip(this)">Outliers</button>
+            <button class="chip" onclick="toggleChip(this)">High cardinality categoricals</button>
+            <button class="chip" onclick="toggleChip(this)">Skewed distributions</button>
+            <button class="chip" onclick="toggleChip(this)">Data leakage suspected</button>
+            <button class="chip" onclick="toggleChip(this)">Inconsistent schema</button>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Additional context (domain, schema, specific concerns)</label>
+          <textarea id="d2-desc" rows="4" placeholder="e.g. Customer churn dataset. 30% missing in 'last_login'. 5% churn rate (severe imbalance). Includes timestamps and categorical features like 'country' with 180 unique values..."></textarea>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="d2-btn" onclick="runData()">
+            <span>Analyze dataset</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">analysis output</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d2-result"><span class="placeholder">// Awaiting input — describe your dataset and click "Analyze dataset"</span></div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: EXPERIMENT ADVISOR -->
+  <div id="exp" class="page">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(251,191,36,0.12)">🧪</div>
+        <div>
+          <div class="panel-title">Experiment Advisor</div>
+          <div class="panel-sub">Describe your setup — get prioritized hyperparameter tuning and experiment strategies</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row2">
+          <div>
+            <label class="field-label">Model / architecture</label>
+            <input type="text" id="d3-model" placeholder="e.g. ResNet-50, BERT, Random Forest, LSTM">
+          </div>
+          <div>
+            <label class="field-label">Current performance</label>
+            <input type="text" id="d3-metric" placeholder="e.g. F1=0.72, RMSE=0.34, AUC=0.81">
+          </div>
+        </div>
+        <div class="row3">
+          <div>
+            <label class="field-label">Compute budget</label>
+            <select id="d3-compute">
+              <option>Low (CPU / single GPU)</option>
+              <option>Medium (2–4 GPUs)</option>
+              <option>High (multi-GPU / cloud cluster)</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Optimization goal</label>
+            <select id="d3-goal">
+              <option>Improve accuracy / metric</option>
+              <option>Reduce overfitting</option>
+              <option>Speed up training</option>
+              <option>Reduce model size</option>
+              <option>Better generalization</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Search strategy</label>
+            <select id="d3-search">
+              <option>Suggest best strategy</option>
+              <option>Grid search</option>
+              <option>Random search</option>
+              <option>Bayesian optimization</option>
+              <option>Manual / intuition-based</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Current hyperparameters & config</label>
+          <textarea id="d3-config" rows="4" placeholder="e.g. lr=0.001, batch_size=32, epochs=50, dropout=0.3, optimizer=Adam, weight_decay=0, scheduler=None, augmentation=None..."></textarea>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="d3-btn" onclick="runExp()">
+            <span>Get recommendations</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">experiment recommendations</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d3-result"><span class="placeholder">// Awaiting input — fill your model config and click "Get recommendations"</span></div>
+    </div>
+  </div>
+
+  <!-- PAGE 4: ML DEBUGGER -->
+  <div id="debug" class="page">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(248,113,113,0.12)">🐛</div>
+        <div>
+          <div class="panel-title">ML Debugger</div>
+          <div class="panel-sub">Select bug category, paste your code or stack trace — get step-by-step fix with corrected code</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div>
+          <label class="field-label">Bug category</label>
+          <div class="debug-options">
+            <button class="dbg-opt active" onclick="selectDbg(this,'Shape mismatch / tensor dimension error')">
+              <div class="dbg-num">1</div>
+              <div><div class="dbg-title">Shape / tensor mismatch</div><div class="dbg-desc">Wrong dimensions, broadcasting errors, size mismatch</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'NaN or Inf appearing in loss or gradients')">
+              <div class="dbg-num">2</div>
+              <div><div class="dbg-title">NaN / Inf in loss or gradients</div><div class="dbg-desc">Exploding gradients, bad weight init, division by zero</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'Data pipeline bug — wrong dtype, slow loading, or data leakage')">
+              <div class="dbg-num">3</div>
+              <div><div class="dbg-title">Data pipeline bug</div><div class="dbg-desc">Wrong dtype, slow DataLoader, label leakage in CV</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'Model not learning — flat loss curve or near-random accuracy from the start')">
+              <div class="dbg-num">4</div>
+              <div><div class="dbg-title">Model not learning</div><div class="dbg-desc">Flat loss, random accuracy, gradient not flowing</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'Deployment or inference bug — slowness, memory leak, or wrong predictions')">
+              <div class="dbg-num">5</div>
+              <div><div class="dbg-title">Deployment / inference bug</div><div class="dbg-desc">Latency, memory leak, wrong outputs in production</div></div>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Paste code, stack trace, or describe the bug</label>
+          <textarea id="d4-input" rows="7" placeholder="Paste your error traceback, code snippet, or describe exactly what's happening and what you expected..."></textarea>
+        </div>
+        <input type="hidden" id="d4-cat" value="Shape mismatch / tensor dimension error">
+        <div>
+          <button class="btn btn-primary" id="d4-btn" onclick="runDebug()">
+            <span>Debug it</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">debug output</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d4-result"><span class="placeholder">// Awaiting input — select a bug category, paste your code, and click "Debug it"</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <div class="status-item"><div class="status-dot" id="sb-dot" style="background:var(--text3)"></div> <span id="sb-label">Groq API — no key</span></div>
+  <div class="status-item" id="sb-model">Model: —</div>
+  <div class="status-item">Streaming: enabled</div>
+</div>
+
 <script>
-  const TARGET = new Date('2026-04-05T11:30:00.000Z').getTime();
-  const ORIGIN  = TARGET - 24 * 3600 * 1000;
+function updateStatus() {
+  const key = document.getElementById('groq-key').value.trim();
+  const model = document.getElementById('groq-model').value;
+  const dot = document.getElementById('api-dot');
+  const txt = document.getElementById('api-status-text');
+  const sbDot = document.getElementById('sb-dot');
+  const sbLabel = document.getElementById('sb-label');
+  const sbModel = document.getElementById('sb-model');
+  if (key.startsWith('gsk_') && key.length > 20) {
+    dot.className = 'api-dot ok';
+    txt.textContent = 'Key looks valid';
+    sbDot.style.background = 'var(--green)';
+    sbLabel.textContent = 'Groq API ready';
+  } else if (key.length > 0) {
+    dot.className = 'api-dot off';
+    dot.style.background = 'var(--amber)';
+    txt.textContent = 'Key format unexpected';
+    sbDot.style.background = 'var(--amber)';
+    sbLabel.textContent = 'Groq API — check key';
+  } else {
+    dot.className = 'api-dot off';
+    txt.textContent = 'No key entered';
+    sbDot.style.background = 'var(--text3)';
+    sbLabel.textContent = 'Groq API — no key';
+  }
+  sbModel.textContent = 'Model: ' + model;
+}
 
-  const hEl  = document.getElementById('hh');
-  const mEl  = document.getElementById('mm');
-  const sEl  = document.getElementById('ss');
-  const pbar = document.getElementById('pbar');
-  const live = document.getElementById('live');
-  const dead = document.getElementById('dead');
+document.getElementById('groq-model').addEventListener('change', updateStatus);
 
-  function pad(n){ return String(n).padStart(2,'0'); }
+function showPage(id, card) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  card.classList.add('active');
+}
 
-  function tick(){
-    const now  = Date.now();
-    const diff = TARGET - now;
-    if(diff <= 0){
-      live.style.display = 'none';
-      dead.style.display = 'block';
-      return;
-    }
-    const t = Math.floor(diff / 1000);
-    hEl.textContent = pad(Math.floor(t / 3600));
-    mEl.textContent = pad(Math.floor((t % 3600) / 60));
-    sEl.textContent = pad(t % 60);
-    const pct = Math.min(100, Math.max(0, ((now - ORIGIN)/(TARGET - ORIGIN))*100));
-    pbar.style.width = pct.toFixed(2) + '%';
-    setTimeout(tick, 1000);
+function toggleChip(el) { el.classList.toggle('on'); }
+
+function getChips(container) {
+  return Array.from(container.querySelectorAll('.chip.on')).map(c => c.textContent.trim()).join(', ') || 'none specified';
+}
+
+function selectDbg(el, cat) {
+  document.querySelectorAll('.dbg-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('d4-cat').value = cat;
+}
+
+function setLoading(btnId, resId, on, label) {
+  const btn = document.getElementById(btnId);
+  const res = document.getElementById(resId);
+  if (on) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Analyzing...';
+    res.innerHTML = '';
+    res.classList.add('cursor');
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '<span>' + label + '</span>';
+    res.classList.remove('cursor');
+  }
+}
+
+async function callGroq(prompt, resId, systemMsg) {
+  const key = document.getElementById('groq-key').value.trim();
+  const model = document.getElementById('groq-model').value;
+  const res = document.getElementById(resId);
+
+  if (!key) {
+    res.textContent = 'Error: Please enter your Groq API key in the bar at the top of the page.';
+    return;
   }
 
-  tick();
+  res.textContent = '';
+  res.classList.add('cursor');
+
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 1024,
+        stream: true,
+        messages: [
+          { role: 'system', content: systemMsg },
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      res.textContent = 'Groq API error ' + r.status + ': ' + (err?.error?.message || r.statusText);
+      res.classList.remove('cursor');
+      return;
+    }
+
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const d = line.slice(6).trim();
+          if (d === '[DONE]') continue;
+          try {
+            const j = JSON.parse(d);
+            const delta = j.choices?.[0]?.delta?.content;
+            if (delta) res.textContent += delta;
+          } catch {}
+        }
+      }
+    }
+  } catch (e) {
+    res.textContent = 'Network error: ' + e.message + '\n\nCheck your API key and internet connection.';
+  }
+  res.classList.remove('cursor');
+}
+
+const SYS = 'You are a senior ML/AI engineer. Give precise, actionable answers. Use numbered steps for procedures. Be concise but complete. Plain text only — no markdown symbols like ** or ##. Use clear section breaks with a blank line.';
+
+async function runDiag() {
+  const page = document.getElementById('diag');
+  const chips = getChips(page);
+  const fw = document.getElementById('d1-fw').value;
+  const task = document.getElementById('d1-task').value;
+  const input = document.getElementById('d1-input').value;
+  setLoading('d1-btn','d1-result',true,'Run diagnostics');
+  const prompt = `ML DIAGNOSIS REQUEST
+Framework: ${fw}
+Task type: ${task}
+Problem types: ${chips}
+User description:
+${input || '(no additional context provided)'}
+
+Please provide:
+1. Root cause analysis — what is most likely causing this
+2. Step-by-step fix — concrete code changes or actions
+3. How to verify the fix worked
+4. Prevention tips for the future`;
+  await callGroq(prompt,'d1-result',SYS);
+  setLoading('d1-btn','d1-result',false,'Run diagnostics');
+}
+
+async function runData() {
+  const page = document.getElementById('data');
+  const issues = getChips(page);
+  const rows = document.getElementById('d2-rows').value;
+  const feats = document.getElementById('d2-feats').value;
+  const miss = document.getElementById('d2-miss').value;
+  const type = document.getElementById('d2-type').value;
+  const target = document.getElementById('d2-target').value;
+  const desc = document.getElementById('d2-desc').value;
+  setLoading('d2-btn','d2-result',true,'Analyze dataset');
+  const prompt = `DATASET ANALYSIS REQUEST
+Dataset: ${rows||'?'} rows, ${feats||'?'} features, ~${miss||'?'}% missing values
+Type: ${type} | Target: ${target}
+Known issues: ${issues}
+Details: ${desc || '(none provided)'}
+
+Provide:
+1. Data quality assessment — severity of each issue
+2. Specific fixes for each identified issue, with code examples
+3. Recommended preprocessing pipeline in order
+4. Feature engineering suggestions
+5. Warnings about potential data leakage or hidden issues`;
+  await callGroq(prompt,'d2-result',SYS);
+  setLoading('d2-btn','d2-result',false,'Analyze dataset');
+}
+
+async function runExp() {
+  const model = document.getElementById('d3-model').value;
+  const metric = document.getElementById('d3-metric').value;
+  const compute = document.getElementById('d3-compute').value;
+  const goal = document.getElementById('d3-goal').value;
+  const search = document.getElementById('d3-search').value;
+  const config = document.getElementById('d3-config').value;
+  setLoading('d3-btn','d3-result',true,'Get recommendations');
+  const prompt = `ML EXPERIMENT ADVICE REQUEST
+Model: ${model||'not specified'}
+Current metric: ${metric||'not provided'}
+Compute: ${compute}
+Goal: ${goal}
+Search strategy: ${search}
+Current config:
+${config || '(not provided)'}
+
+Provide:
+1. Top 5 hyperparameter changes to try, with specific values and expected impact
+2. Prioritized experiment order — what to try first
+3. Reasoning for each recommendation
+4. Recommended search strategy and why
+5. Diminishing returns warning — when to stop tuning`;
+  await callGroq(prompt,'d3-result',SYS);
+  setLoading('d3-btn','d3-result',false,'Get recommendations');
+}
+
+async function runDebug() {
+  const cat = document.getElementById('d4-cat').value;
+  const code = document.getElementById('d4-input').value;
+  setLoading('d4-btn','d4-result',true,'Debug it');
+  const prompt = `ML DEBUG REQUEST
+Category: ${cat}
+Code / Error:
+${code || '(no code or error provided)'}
+
+Provide:
+1. Exact root cause of the bug
+2. Fixed code or specific fix steps (include corrected code snippet)
+3. Explanation of why this error occurs
+4. How to verify the fix works
+5. How to prevent this class of bug in the future`;
+  await callGroq(prompt,'d4-result',SYS);
+  setLoading('d4-btn','d4-result',false,'Debug it');
+}
 </script>
 </body>
 </html>
