@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koudamki.ai — ML Solver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c10;
+  --surface: #0e1520;
+  --surface2: #141d2e;
+  --surface3: #1a2540;
+  --border: rgba(56,189,248,0.12);
+  --border2: rgba(56,189,248,0.25);
+  --accent: #38bdf8;
+  --accent2: #7dd3fc;
+  --accent-dim: rgba(56,189,248,0.08);
+  --green: #4ade80;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+  --radius: 8px;
+  --radius-lg: 14px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(56,189,248,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+.glow2 {
+  position: fixed;
+  bottom: -200px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,12,16,0.88);
+  backdrop-filter: blur(14px);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--sans); font-size: 15px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.3px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 30px; height: 30px;
+  border: 1.5px solid var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800;
+  color: var(--accent); font-family: var(--sans);
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.header-badge {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--accent);
+  border: 1px solid var(--border2);
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--accent-dim);
+}
+
+.header-sub {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3);
+}
+
+/* ── API BAR ── */
+.api-bar {
+  position: relative; z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 2rem;
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+
+.api-bar label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.api-bar input {
+  flex: 1; min-width: 200px; max-width: 320px;
+  font-family: var(--mono); font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 7px 12px;
+  outline: none; transition: border-color .15s;
+}
+.api-bar input:focus { border-color: var(--border2); }
+
+.api-bar select {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 7px 12px;
+  outline: none; cursor: pointer; appearance: none;
+  transition: border-color .15s;
+}
+.api-bar select:focus { border-color: var(--border2); }
+
+.api-status {
+  font-family: var(--mono); font-size: 11px;
+  display: flex; align-items: center; gap: 5px;
+  margin-left: auto; white-space: nowrap;
+}
+.api-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); transition: background .3s; }
+.api-dot.ok   { background: var(--green); }
+.api-dot.warn { background: var(--amber); }
+
+/* ── HERO ── */
+.hero {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 3.5rem 2rem 2.5rem;
+}
+
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--accent); border: 1px solid var(--border2);
+  padding: 5px 12px; border-radius: 20px;
+  background: var(--accent-dim);
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.6s ease both;
+}
+
+.hero-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%; background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+  font-family: var(--sans);
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin-bottom: 1rem;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+
+.hero h1 span { color: var(--accent); }
+
+.hero p {
+  font-size: 1rem;
+  color: var(--text2);
+  max-width: 520px;
+  margin: 0 auto 2rem;
+  line-height: 1.7;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.hero-credit {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3);
+  animation: fadeUp 0.6s 0.25s ease both;
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(16px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── TOOL NAV ── */
+.tool-nav {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 960px;
+  margin: 0 auto 3rem;
+  padding: 0 2rem;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+
+.tool-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.2rem;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color .2s, background .2s, transform .15s;
+  text-align: left;
+}
+
+.tool-card:hover { border-color: var(--border2); background: var(--surface2); transform: translateY(-1px); }
+.tool-card.active {
+  border-color: var(--accent);
+  background: var(--surface2);
+  box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 4px 24px rgba(56,189,248,0.08);
+}
+
+.tool-card-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; margin-bottom: 10px;
+}
+
+.tool-card-icon.blue  { background: rgba(56,189,248,0.12); }
+.tool-card-icon.green { background: rgba(74,222,128,0.12); }
+.tool-card-icon.amber { background: rgba(251,191,36,0.12); }
+.tool-card-icon.red   { background: rgba(248,113,113,0.12); }
+
+.tool-card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; letter-spacing: -0.2px; }
+.tool-card p  { font-size: 11px; color: var(--text3); line-height: 1.5; }
+
+/* ── MAIN ── */
+.main {
+  position: relative; z-index: 2;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+.page { display: none; animation: fadeUp 0.4s ease both; }
+.page.active { display: block; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.panel-header-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+
+.panel-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.panel-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+.panel-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.field-label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text3); margin-bottom: 6px;
+}
+
+textarea, input[type=text], input[type=number], select {
+  width: 100%;
+  font-family: var(--mono); font-size: 12.5px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color .15s;
+  resize: vertical;
+}
+
+textarea:focus, input:focus, select:focus { border-color: var(--border2); background: var(--surface3); }
+select { appearance: none; cursor: pointer; }
+textarea::placeholder, input::placeholder { color: var(--text3); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 11px; font-family: var(--mono);
+  cursor: pointer; background: transparent;
+  color: var(--text3); transition: all .15s;
+}
+.chip:hover { border-color: var(--border2); color: var(--text2); }
+.chip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  border-radius: var(--radius);
+  border: none; cursor: pointer; transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #080c10; }
+.btn-primary:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(56,189,248,0.25); }
+.btn-primary:active:not(:disabled) { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.result-panel {
+  margin-top: 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.result-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.result-label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+}
+
+.result-dots { display: flex; gap: 5px; }
+.result-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.result-body {
+  padding: 1.25rem 1.5rem;
+  font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.9; color: var(--text2);
+  min-height: 120px;
+  white-space: pre-wrap; word-break: break-word;
+}
+.result-body .placeholder { color: var(--text3); font-style: italic; }
+
+.debug-options { display: flex; flex-direction: column; gap: 8px; }
+
+.dbg-opt {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer; background: var(--surface2);
+  transition: all .15s; text-align: left; width: 100%;
+}
+.dbg-opt:hover { border-color: var(--border2); }
+.dbg-opt.active { border-color: var(--accent); background: var(--surface3); }
+
+.dbg-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--surface3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; color: var(--text3); flex-shrink: 0;
+}
+.dbg-opt.active .dbg-num { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.dbg-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.dbg-desc  { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+.spin {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(8,12,16,0.3);
+  border-top-color: #080c10;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.cursor::after {
+  content: '▋'; color: var(--accent);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  position: relative; z-index: 2;
+  border-top: 1px solid var(--border);
+  background: rgba(8,12,16,0.92);
+  padding: 8px 2rem;
+  display: flex; align-items: center; gap: 16px;
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  flex-wrap: wrap;
+}
+.status-item { display: flex; align-items: center; gap: 5px; }
+.status-dot  { width: 6px; height: 6px; border-radius: 50%; }
+
+@media (max-width: 700px) {
+  .tool-nav { grid-template-columns: 1fr 1fr; }
+  .row2, .row3 { grid-template-columns: 1fr; }
+  header { padding: 0 1rem; }
+  .main, .tool-nav { padding: 0 1rem; }
+  .hero { padding: 2rem 1rem 2rem; }
+  .hero h1 { font-size: 2rem; }
+  .api-bar { padding: 10px 1rem; }
+}
+@media (max-width: 480px) {
+  .tool-nav { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="glow2"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">K</div>
+    Koudamki<span style="color:var(--accent)">.ai</span>
+  </div>
+  <div class="header-right">
+    <span class="header-sub">v3 · ML Solver</span>
+    <div class="header-badge">Groq LPU</div>
+  </div>
+</header>
+
+<!-- API BAR -->
+<div class="api-bar">
+  <label>Groq API Key</label>
+  <input type="password" id="groq-key" placeholder="gsk_..." oninput="updateStatus()">
+  <label style="margin-left:8px">Model</label>
+  <select id="groq-model" onchange="updateStatus()">
+    <option value="llama-3.3-70b-versatile">Llama 3.3 70B ⚡ (best)</option>
+    <option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
+    <option value="mixtral-8x7b-32768">Mixtral 8×7B (long ctx)</option>
+    <option value="gemma2-9b-it">Gemma 2 9B</option>
+    <option value="llama-3.3-70b-specdec">Llama 3.3 70B SpecDec</option>
+    <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
+  </select>
+  <div class="api-status" id="api-status">
+    <div class="api-dot" id="api-dot"></div>
+    <span id="api-status-text">No key entered</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Koudamki.ai · ML Solver · Groq-Powered</div>
+  <h1>Fix your AI &amp; ML<br><span>problems instantly</span></h1>
+  <p>Four specialized tools — diagnostics, dataset analysis, experiment advice, and step-by-step debugging — all running on Groq's LPU engine.</p>
+  <div class="hero-credit">Created by Koudamki.Pranav</div>
+</div>
+
+<!-- TOOL NAV -->
+<div class="tool-nav">
+  <div class="tool-card active" onclick="showPage('diag',this)">
+    <div class="tool-card-icon blue">🩺</div>
+    <h3>ML Diagnostics</h3>
+    <p>Overfitting, loss divergence, accuracy plateaus</p>
+  </div>
+  <div class="tool-card" onclick="showPage('data',this)">
+    <div class="tool-card-icon green">📊</div>
+    <h3>Dataset Analyzer</h3>
+    <p>Quality report, imbalance, missing values, leakage</p>
+  </div>
+  <div class="tool-card" onclick="showPage('exp',this)">
+    <div class="tool-card-icon amber">🧪</div>
+    <h3>Experiment Advisor</h3>
+    <p>Hyperparameter tuning &amp; experiment strategies</p>
+  </div>
+  <div class="tool-card" onclick="showPage('debug',this)">
+    <div class="tool-card-icon red">🐛</div>
+    <h3>ML Debugger</h3>
+    <p>Tensor errors, NaN loss, pipeline &amp; deploy bugs</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PAGE 1: ML DIAGNOSTICS -->
+  <div id="diag" class="page active">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(56,189,248,0.12)">🩺</div>
+        <div>
+          <div class="panel-title">ML Diagnostics Assistant</div>
+          <div class="panel-sub">Describe your model behavior or paste metrics — get a root cause analysis and fix</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row2">
+          <div>
+            <label class="field-label">Framework</label>
+            <select id="d1-fw">
+              <option>PyTorch</option>
+              <option>TensorFlow / Keras</option>
+              <option>Scikit-learn</option>
+              <option>XGBoost / LightGBM</option>
+              <option>JAX / Flax</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Task type</label>
+            <select id="d1-task">
+              <option>Classification</option>
+              <option>Regression</option>
+              <option>NLP / Text</option>
+              <option>Computer Vision</option>
+              <option>Time Series</option>
+              <option>Reinforcement Learning</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Problem type (select all that apply)</label>
+          <div class="chips">
+            <button class="chip on" onclick="toggleChip(this)">Overfitting</button>
+            <button class="chip" onclick="toggleChip(this)">Underfitting</button>
+            <button class="chip" onclick="toggleChip(this)">Slow training</button>
+            <button class="chip" onclick="toggleChip(this)">Accuracy plateau</button>
+            <button class="chip" onclick="toggleChip(this)">Loss diverging</button>
+            <button class="chip" onclick="toggleChip(this)">Gradient explosion</button>
+            <button class="chip" onclick="toggleChip(this)">Poor generalization</button>
+            <button class="chip" onclick="toggleChip(this)">Other</button>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Describe the issue / paste metrics or error output</label>
+          <textarea id="d1-input" rows="5" placeholder="e.g. Training accuracy 98%, validation 62%. Loss stops improving after epoch 5. Using Adam lr=0.001, batch_size=32..."></textarea>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="d1-btn" onclick="runDiag()">
+            <span>Run diagnostics</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">diagnosis output</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d1-result"><span class="placeholder">// Awaiting input — fill the form and click "Run diagnostics"</span></div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: DATASET ANALYZER -->
+  <div id="data" class="page">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(74,222,128,0.12)">📊</div>
+        <div>
+          <div class="panel-title">Dataset Analyzer</div>
+          <div class="panel-sub">Describe your dataset — get a quality report, issue diagnosis, and preprocessing pipeline</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row3">
+          <div>
+            <label class="field-label">Number of rows</label>
+            <input type="number" id="d2-rows" placeholder="e.g. 50000">
+          </div>
+          <div>
+            <label class="field-label">Number of features</label>
+            <input type="number" id="d2-feats" placeholder="e.g. 42">
+          </div>
+          <div>
+            <label class="field-label">Missing value %</label>
+            <input type="number" id="d2-miss" placeholder="e.g. 15">
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label class="field-label">Data type</label>
+            <select id="d2-type">
+              <option>Tabular / CSV</option>
+              <option>Text / NLP</option>
+              <option>Image</option>
+              <option>Time Series</option>
+              <option>Graph / Network</option>
+              <option>Mixed / Multimodal</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Target variable</label>
+            <select id="d2-target">
+              <option>Binary classification</option>
+              <option>Multi-class classification</option>
+              <option>Regression / continuous</option>
+              <option>Multi-label</option>
+              <option>Unsupervised / clustering</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Known issues (select all that apply)</label>
+          <div class="chips">
+            <button class="chip" onclick="toggleChip(this)">Missing values</button>
+            <button class="chip" onclick="toggleChip(this)">Class imbalance</button>
+            <button class="chip" onclick="toggleChip(this)">Duplicate rows</button>
+            <button class="chip" onclick="toggleChip(this)">Outliers</button>
+            <button class="chip" onclick="toggleChip(this)">High cardinality categoricals</button>
+            <button class="chip" onclick="toggleChip(this)">Skewed distributions</button>
+            <button class="chip" onclick="toggleChip(this)">Data leakage suspected</button>
+            <button class="chip" onclick="toggleChip(this)">Inconsistent schema</button>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Additional context (domain, schema, specific concerns)</label>
+          <textarea id="d2-desc" rows="4" placeholder="e.g. Customer churn dataset. 30% missing in 'last_login'. 5% churn rate (severe imbalance). Includes timestamps and categorical features like 'country' with 180 unique values..."></textarea>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="d2-btn" onclick="runData()">
+            <span>Analyze dataset</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">analysis output</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d2-result"><span class="placeholder">// Awaiting input — describe your dataset and click "Analyze dataset"</span></div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: EXPERIMENT ADVISOR -->
+  <div id="exp" class="page">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(251,191,36,0.12)">🧪</div>
+        <div>
+          <div class="panel-title">Experiment Advisor</div>
+          <div class="panel-sub">Describe your setup — get prioritized hyperparameter tuning and experiment strategies</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row2">
+          <div>
+            <label class="field-label">Model / architecture</label>
+            <input type="text" id="d3-model" placeholder="e.g. ResNet-50, BERT, Random Forest, LSTM">
+          </div>
+          <div>
+            <label class="field-label">Current performance</label>
+            <input type="text" id="d3-metric" placeholder="e.g. F1=0.72, RMSE=0.34, AUC=0.81">
+          </div>
+        </div>
+        <div class="row3">
+          <div>
+            <label class="field-label">Compute budget</label>
+            <select id="d3-compute">
+              <option>Low (CPU / single GPU)</option>
+              <option>Medium (2–4 GPUs)</option>
+              <option>High (multi-GPU / cloud cluster)</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Optimization goal</label>
+            <select id="d3-goal">
+              <option>Improve accuracy / metric</option>
+              <option>Reduce overfitting</option>
+              <option>Speed up training</option>
+              <option>Reduce model size</option>
+              <option>Better generalization</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Search strategy</label>
+            <select id="d3-search">
+              <option>Suggest best strategy</option>
+              <option>Grid search</option>
+              <option>Random search</option>
+              <option>Bayesian optimization</option>
+              <option>Manual / intuition-based</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Current hyperparameters &amp; config</label>
+          <textarea id="d3-config" rows="4" placeholder="e.g. lr=0.001, batch_size=32, epochs=50, dropout=0.3, optimizer=Adam, weight_decay=0, scheduler=None, augmentation=None..."></textarea>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="d3-btn" onclick="runExp()">
+            <span>Get recommendations</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">experiment recommendations</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d3-result"><span class="placeholder">// Awaiting input — fill your model config and click "Get recommendations"</span></div>
+    </div>
+  </div>
+
+  <!-- PAGE 4: ML DEBUGGER -->
+  <div id="debug" class="page">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:rgba(248,113,113,0.12)">🐛</div>
+        <div>
+          <div class="panel-title">ML Debugger</div>
+          <div class="panel-sub">Select bug category, paste your code or stack trace — get step-by-step fix with corrected code</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div>
+          <label class="field-label">Bug category</label>
+          <div class="debug-options">
+            <button class="dbg-opt active" onclick="selectDbg(this,'Shape mismatch / tensor dimension error')">
+              <div class="dbg-num">1</div>
+              <div><div class="dbg-title">Shape / tensor mismatch</div><div class="dbg-desc">Wrong dimensions, broadcasting errors, size mismatch</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'NaN or Inf appearing in loss or gradients')">
+              <div class="dbg-num">2</div>
+              <div><div class="dbg-title">NaN / Inf in loss or gradients</div><div class="dbg-desc">Exploding gradients, bad weight init, division by zero</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'Data pipeline bug — wrong dtype, slow loading, or data leakage')">
+              <div class="dbg-num">3</div>
+              <div><div class="dbg-title">Data pipeline bug</div><div class="dbg-desc">Wrong dtype, slow DataLoader, label leakage in CV</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'Model not learning — flat loss curve or near-random accuracy from the start')">
+              <div class="dbg-num">4</div>
+              <div><div class="dbg-title">Model not learning</div><div class="dbg-desc">Flat loss, random accuracy, gradient not flowing</div></div>
+            </button>
+            <button class="dbg-opt" onclick="selectDbg(this,'Deployment or inference bug — slowness, memory leak, or wrong predictions')">
+              <div class="dbg-num">5</div>
+              <div><div class="dbg-title">Deployment / inference bug</div><div class="dbg-desc">Latency, memory leak, wrong outputs in production</div></div>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Paste code, stack trace, or describe the bug</label>
+          <textarea id="d4-input" rows="7" placeholder="Paste your error traceback, code snippet, or describe exactly what's happening and what you expected..."></textarea>
+        </div>
+        <input type="hidden" id="d4-cat" value="Shape mismatch / tensor dimension error">
+        <div>
+          <button class="btn btn-primary" id="d4-btn" onclick="runDebug()">
+            <span>Debug it</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel">
+      <div class="result-header">
+        <span class="result-label">debug output</span>
+        <div class="result-dots">
+          <div class="result-dot" style="background:#f87171"></div>
+          <div class="result-dot" style="background:#fbbf24"></div>
+          <div class="result-dot" style="background:#4ade80"></div>
+        </div>
+      </div>
+      <div class="result-body" id="d4-result"><span class="placeholder">// Awaiting input — select a bug category, paste your code, and click "Debug it"</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-item">
+    <div class="status-dot" id="sb-dot" style="background:var(--text3)"></div>
+    <span id="sb-label">Groq API — no key</span>
+  </div>
+  <div class="status-item" id="sb-model">Model: —</div>
+  <div class="status-item">Streaming: enabled</div>
+  <div class="status-item" style="margin-left:auto">Koudamki.ai · ML Solver · Groq LPU</div>
+</div>
+
+<script>
+function updateStatus() {
+  const key   = document.getElementById('groq-key').value.trim();
+  const model = document.getElementById('groq-model').value;
+  const dot   = document.getElementById('api-dot');
+  const txt   = document.getElementById('api-status-text');
+  const sbDot = document.getElementById('sb-dot');
+  const sbLbl = document.getElementById('sb-label');
+  document.getElementById('sb-model').textContent = 'Model: ' + model;
+
+  if (key.startsWith('gsk_') && key.length > 20) {
+    dot.className = 'api-dot ok';
+    txt.textContent = 'Key looks valid';
+    sbDot.style.background = 'var(--green)';
+    sbLbl.textContent = 'Groq API — ready';
+  } else if (key.length > 0) {
+    dot.className = 'api-dot warn';
+    txt.textContent = 'Key format unexpected';
+    sbDot.style.background = 'var(--amber)';
+    sbLbl.textContent = 'Groq API — check key';
+  } else {
+    dot.className = 'api-dot';
+    txt.textContent = 'No key entered';
+    sbDot.style.background = 'var(--text3)';
+    sbLbl.textContent = 'Groq API — no key';
+  }
+}
+
+function showPage(id, card) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  card.classList.add('active');
+}
+
+function toggleChip(el) { el.classList.toggle('on'); }
+
+function getChips(container) {
+  return Array.from(container.querySelectorAll('.chip.on')).map(c => c.textContent.trim()).join(', ') || 'none specified';
+}
+
+function selectDbg(el, cat) {
+  document.querySelectorAll('.dbg-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('d4-cat').value = cat;
+}
+
+function setLoading(btnId, resId, on, label) {
+  const btn = document.getElementById(btnId);
+  const res = document.getElementById(resId);
+  if (on) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Analyzing...';
+    res.innerHTML = '';
+    res.classList.add('cursor');
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '<span>' + label + '</span>';
+    res.classList.remove('cursor');
+  }
+}
+
+async function callGroq(prompt, resId, systemMsg) {
+  const key   = document.getElementById('groq-key').value.trim();
+  const model = document.getElementById('groq-model').value;
+  const res   = document.getElementById(resId);
+
+  if (!key) {
+    res.textContent = 'Error: Please enter your Groq API key in the bar at the top of the page.';
+    return;
+  }
+
+  res.textContent = '';
+  res.classList.add('cursor');
+
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 1200,
+        stream: true,
+        messages: [
+          { role: 'system', content: systemMsg },
+          { role: 'user',   content: prompt }
+        ]
+      })
+    });
+
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      res.textContent = 'Groq API error ' + r.status + ': ' + (err?.error?.message || r.statusText);
+      res.classList.remove('cursor');
+      return;
+    }
+
+    const reader = r.body.getReader();
+    const dec    = new TextDecoder();
+    let buf      = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const d = line.slice(6).trim();
+        if (d === '[DONE]') continue;
+        try {
+          const j = JSON.parse(d);
+          const delta = j.choices?.[0]?.delta?.content;
+          if (delta) res.textContent += delta;
+        } catch {}
+      }
+    }
+  } catch (e) {
+    res.textContent = 'Network error: ' + e.message + '\n\nCheck your API key and internet connection.';
+  }
+  res.classList.remove('cursor');
+}
+
+const SYS = 'You are a senior ML/AI engineer. Give precise, actionable answers. Use numbered steps for procedures. Be concise but complete. Plain text only — no markdown symbols like ** or ##. Use clear section breaks with a blank line.';
+
+async function runDiag() {
+  const page  = document.getElementById('diag');
+  const chips = getChips(page);
+  const fw    = document.getElementById('d1-fw').value;
+  const task  = document.getElementById('d1-task').value;
+  const input = document.getElementById('d1-input').value;
+  setLoading('d1-btn','d1-result',true,'Run diagnostics');
+  const prompt = `ML DIAGNOSIS REQUEST\nFramework: ${fw}\nTask type: ${task}\nProblem types: ${chips}\nUser description:\n${input||'(no additional context provided)'}\n\nPlease provide:\n1. Root cause analysis — what is most likely causing this\n2. Step-by-step fix — concrete code changes or actions\n3. How to verify the fix worked\n4. Prevention tips for the future`;
+  await callGroq(prompt,'d1-result',SYS);
+  setLoading('d1-btn','d1-result',false,'Run diagnostics');
+}
+
+async function runData() {
+  const page   = document.getElementById('data');
+  const issues = getChips(page);
+  const rows   = document.getElementById('d2-rows').value;
+  const feats  = document.getElementById('d2-feats').value;
+  const miss   = document.getElementById('d2-miss').value;
+  const type   = document.getElementById('d2-type').value;
+  const target = document.getElementById('d2-target').value;
+  const desc   = document.getElementById('d2-desc').value;
+  setLoading('d2-btn','d2-result',true,'Analyze dataset');
+  const prompt = `DATASET ANALYSIS REQUEST\nDataset: ${rows||'?'} rows, ${feats||'?'} features, ~${miss||'?'}% missing values\nType: ${type} | Target: ${target}\nKnown issues: ${issues}\nDetails: ${desc||'(none provided)'}\n\nProvide:\n1. Data quality assessment — severity of each issue\n2. Specific fixes for each identified issue, with code examples\n3. Recommended preprocessing pipeline in order\n4. Feature engineering suggestions\n5. Warnings about potential data leakage or hidden issues`;
+  await callGroq(prompt,'d2-result',SYS);
+  setLoading('d2-btn','d2-result',false,'Analyze dataset');
+}
+
+async function runExp() {
+  const model   = document.getElementById('d3-model').value;
+  const metric  = document.getElementById('d3-metric').value;
+  const compute = document.getElementById('d3-compute').value;
+  const goal    = document.getElementById('d3-goal').value;
+  const search  = document.getElementById('d3-search').value;
+  const config  = document.getElementById('d3-config').value;
+  setLoading('d3-btn','d3-result',true,'Get recommendations');
+  const prompt = `ML EXPERIMENT ADVICE REQUEST\nModel: ${model||'not specified'}\nCurrent metric: ${metric||'not provided'}\nCompute: ${compute}\nGoal: ${goal}\nSearch strategy: ${search}\nCurrent config:\n${config||'(not provided)'}\n\nProvide:\n1. Top 5 hyperparameter changes to try, with specific values and expected impact\n2. Prioritized experiment order — what to try first\n3. Reasoning for each recommendation\n4. Recommended search strategy and why\n5. Diminishing returns warning — when to stop tuning`;
+  await callGroq(prompt,'d3-result',SYS);
+  setLoading('d3-btn','d3-result',false,'Get recommendations');
+}
+
+async function runDebug() {
+  const cat  = document.getElementById('d4-cat').value;
+  const code = document.getElementById('d4-input').value;
+  setLoading('d4-btn','d4-result',true,'Debug it');
+  const prompt = `ML DEBUG REQUEST\nCategory: ${cat}\nCode / Error:\n${code||'(no code or error provided)'}\n\nProvide:\n1. Exact root cause of the bug\n2. Fixed code or specific fix steps (include corrected code snippet)\n3. Explanation of why this error occurs\n4. How to verify the fix works\n5. How to prevent this class of bug in the future`;
+  await callGroq(prompt,'d4-result',SYS);
+  setLoading('d4-btn','d4-result',false,'Debug it');
+}
+</script>
+</body>
+</html>
