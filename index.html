@@ -1,999 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Koudamki.ai — ML Solver</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Koudamki ML Solver</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg: #080c10;
-  --surface: #0e1520;
-  --surface2: #141d2e;
-  --surface3: #1a2540;
-  --border: rgba(56,189,248,0.12);
-  --border2: rgba(56,189,248,0.25);
-  --accent: #38bdf8;
-  --accent2: #7dd3fc;
-  --accent-dim: rgba(56,189,248,0.08);
-  --green: #4ade80;
-  --amber: #fbbf24;
-  --red: #f87171;
-  --text: #e2e8f0;
-  --text2: #94a3b8;
-  --text3: #475569;
-  --mono: 'Space Mono', monospace;
-  --sans: 'Syne', sans-serif;
-  --radius: 8px;
-  --radius-lg: 14px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(56,189,248,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56,189,248,0.035) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none; z-index: 0;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  top: -200px; left: -200px;
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(56,189,248,0.06) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
-}
-
-.glow2 {
-  position: fixed;
-  bottom: -200px; right: -100px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
-}
-
-/* ── HEADER ── */
-header {
-  position: sticky; top: 0; z-index: 100;
-  border-bottom: 1px solid var(--border);
-  background: rgba(8,12,16,0.88);
-  backdrop-filter: blur(14px);
-  padding: 0 2rem;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 60px;
-}
-
-.logo {
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--sans); font-size: 15px; font-weight: 700;
-  color: var(--text); letter-spacing: -0.3px;
-  text-decoration: none;
-}
-
-.logo-icon {
-  width: 30px; height: 30px;
-  border: 1.5px solid var(--accent);
-  border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800;
-  color: var(--accent); font-family: var(--sans);
-}
-
-.header-right { display: flex; align-items: center; gap: 10px; }
-
-.header-badge {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--accent);
-  border: 1px solid var(--border2);
-  padding: 4px 10px; border-radius: 20px;
-  background: var(--accent-dim);
-}
-
-.header-sub {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--text3);
-}
-
-/* ── API BAR ── */
-.api-bar {
-  position: relative; z-index: 10;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 2rem;
-  display: flex; align-items: center; gap: 10px;
-  flex-wrap: wrap;
-}
-
-.api-bar label {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
-  white-space: nowrap;
-}
-
-.api-bar input {
-  flex: 1; min-width: 200px; max-width: 320px;
-  font-family: var(--mono); font-size: 12px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  padding: 7px 12px;
-  outline: none; transition: border-color .15s;
-}
-.api-bar input:focus { border-color: var(--border2); }
-
-.api-bar select {
-  font-family: var(--mono); font-size: 12px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  padding: 7px 12px;
-  outline: none; cursor: pointer; appearance: none;
-  transition: border-color .15s;
-}
-.api-bar select:focus { border-color: var(--border2); }
-
-.api-status {
-  font-family: var(--mono); font-size: 11px;
-  display: flex; align-items: center; gap: 5px;
-  margin-left: auto; white-space: nowrap;
-}
-.api-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); transition: background .3s; }
-.api-dot.ok   { background: var(--green); }
-.api-dot.warn { background: var(--amber); }
-
-/* ── HERO ── */
-.hero {
-  position: relative; z-index: 2;
-  text-align: center;
-  padding: 3.5rem 2rem 2.5rem;
-}
-
-.hero-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: 11px;
-  color: var(--accent); border: 1px solid var(--border2);
-  padding: 5px 12px; border-radius: 20px;
-  background: var(--accent-dim);
-  margin-bottom: 1.5rem;
-  animation: fadeUp 0.6s ease both;
-}
-
-.hero-tag::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%; background: var(--green);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-.hero h1 {
-  font-family: var(--sans);
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -2px;
-  margin-bottom: 1rem;
-  animation: fadeUp 0.6s 0.1s ease both;
-}
-
-.hero h1 span { color: var(--accent); }
-
-.hero p {
-  font-size: 1rem;
-  color: var(--text2);
-  max-width: 520px;
-  margin: 0 auto 2rem;
-  line-height: 1.7;
-  animation: fadeUp 0.6s 0.2s ease both;
-}
-
-.hero-credit {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--text3);
-  animation: fadeUp 0.6s 0.25s ease both;
-  margin-top: -1rem;
-  margin-bottom: 2rem;
-}
-
-@keyframes fadeUp {
-  from { opacity:0; transform: translateY(16px); }
-  to   { opacity:1; transform: translateY(0); }
-}
-
-/* ── TOOL NAV ── */
-.tool-nav {
-  position: relative; z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  max-width: 960px;
-  margin: 0 auto 3rem;
-  padding: 0 2rem;
-  animation: fadeUp 0.6s 0.3s ease both;
-}
-
-.tool-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.1rem 1.2rem;
-  background: var(--surface);
-  cursor: pointer;
-  transition: border-color .2s, background .2s, transform .15s;
-  text-align: left;
-}
-
-.tool-card:hover { border-color: var(--border2); background: var(--surface2); transform: translateY(-1px); }
-.tool-card.active {
-  border-color: var(--accent);
-  background: var(--surface2);
-  box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 4px 24px rgba(56,189,248,0.08);
-}
-
-.tool-card-icon {
-  width: 34px; height: 34px;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; margin-bottom: 10px;
-}
-
-.tool-card-icon.blue  { background: rgba(56,189,248,0.12); }
-.tool-card-icon.green { background: rgba(74,222,128,0.12); }
-.tool-card-icon.amber { background: rgba(251,191,36,0.12); }
-.tool-card-icon.red   { background: rgba(248,113,113,0.12); }
-
-.tool-card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; letter-spacing: -0.2px; }
-.tool-card p  { font-size: 11px; color: var(--text3); line-height: 1.5; }
-
-/* ── MAIN ── */
-.main {
-  position: relative; z-index: 2;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 2rem 4rem;
-}
-
-.page { display: none; animation: fadeUp 0.4s ease both; }
-.page.active { display: block; }
-
-/* ── PANEL ── */
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.panel-header {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
-}
-
-.panel-header-icon {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px;
-}
-
-.panel-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
-.panel-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
-
-.panel-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-
-.field-label {
-  display: block;
-  font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px;
-  color: var(--text3); margin-bottom: 6px;
-}
-
-textarea, input[type=text], input[type=number], select {
-  width: 100%;
-  font-family: var(--mono); font-size: 12.5px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  padding: 10px 14px;
-  outline: none;
-  transition: border-color .15s;
-  resize: vertical;
-}
-
-textarea:focus, input:focus, select:focus { border-color: var(--border2); background: var(--surface3); }
-select { appearance: none; cursor: pointer; }
-textarea::placeholder, input::placeholder { color: var(--text3); }
-
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.chip {
-  padding: 5px 12px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  font-size: 11px; font-family: var(--mono);
-  cursor: pointer; background: transparent;
-  color: var(--text3); transition: all .15s;
-}
-.chip:hover { border-color: var(--border2); color: var(--text2); }
-.chip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 20px;
-  font-family: var(--sans); font-size: 13px; font-weight: 700;
-  border-radius: var(--radius);
-  border: none; cursor: pointer; transition: all .15s;
-}
-.btn-primary { background: var(--accent); color: #080c10; }
-.btn-primary:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(56,189,248,0.25); }
-.btn-primary:active:not(:disabled) { transform: scale(0.98); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-.result-panel {
-  margin-top: 1rem;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.result-header {
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-
-.result-label {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
-}
-
-.result-dots { display: flex; gap: 5px; }
-.result-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-.result-body {
-  padding: 1.25rem 1.5rem;
-  font-family: var(--mono); font-size: 12.5px;
-  line-height: 1.9; color: var(--text2);
-  min-height: 120px;
-  white-space: pre-wrap; word-break: break-word;
-}
-.result-body .placeholder { color: var(--text3); font-style: italic; }
-
-.debug-options { display: flex; flex-direction: column; gap: 8px; }
-
-.dbg-opt {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer; background: var(--surface2);
-  transition: all .15s; text-align: left; width: 100%;
-}
-.dbg-opt:hover { border-color: var(--border2); }
-.dbg-opt.active { border-color: var(--accent); background: var(--surface3); }
-
-.dbg-num {
-  width: 26px; height: 26px; border-radius: 50%;
-  background: var(--surface3); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 11px; color: var(--text3); flex-shrink: 0;
-}
-.dbg-opt.active .dbg-num { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-
-.dbg-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.dbg-desc  { font-size: 11px; color: var(--text3); margin-top: 1px; }
-
-.spin {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid rgba(8,12,16,0.3);
-  border-top-color: #080c10;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.cursor::after {
-  content: '▋'; color: var(--accent);
-  animation: blink 1s step-end infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-/* ── STATUS BAR ── */
-.status-bar {
-  position: relative; z-index: 2;
-  border-top: 1px solid var(--border);
-  background: rgba(8,12,16,0.92);
-  padding: 8px 2rem;
-  display: flex; align-items: center; gap: 16px;
-  font-family: var(--mono); font-size: 11px; color: var(--text3);
-  flex-wrap: wrap;
-}
-.status-item { display: flex; align-items: center; gap: 5px; }
-.status-dot  { width: 6px; height: 6px; border-radius: 50%; }
-
-@media (max-width: 700px) {
-  .tool-nav { grid-template-columns: 1fr 1fr; }
-  .row2, .row3 { grid-template-columns: 1fr; }
-  header { padding: 0 1rem; }
-  .main, .tool-nav { padding: 0 1rem; }
-  .hero { padding: 2rem 1rem 2rem; }
-  .hero h1 { font-size: 2rem; }
-  .api-bar { padding: 10px 1rem; }
-}
-@media (max-width: 480px) {
-  .tool-nav { grid-template-columns: 1fr; }
-}
+:root{--bg:#050a0e;--bg2:#0a1219;--panel:#0d1a24;--border:#1a2e3d;--cyan:#00e5ff;--green:#39ff85;--orange:#ff6b35;--purple:#bd93f9;--text:#c9dde8;--text2:#7a9fb5;--text3:#3d6278;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+@keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+header{position:sticky;top:0;z-index:100;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(5,10,14,0.93);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--cyan),var(--green));border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:13px;color:#000;}
+.logo-text{font-weight:800;font-size:18px;letter-spacing:-.5px;}.logo-text span{color:var(--cyan);}
+.logo-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;}
+.badge{font-family:var(--mono);font-size:10px;color:var(--green);border:1px solid rgba(57,255,133,.4);padding:4px 10px;border-radius:3px;letter-spacing:1px;animation:pulse 2s infinite;}
+.api-bar{position:relative;z-index:10;background:rgba(255,107,53,0.07);border-bottom:1px solid rgba(255,107,53,0.25);padding:10px 28px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.api-bar label{font-family:var(--mono);font-size:10px;color:var(--orange);letter-spacing:1px;white-space:nowrap;}
+.api-bar input{flex:1;min-width:200px;background:rgba(0,0,0,.4);border:1px solid rgba(255,107,53,.4);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 12px;border-radius:5px;outline:none;transition:border .2s;}
+.api-bar input:focus{border-color:var(--orange);}
+.api-bar input::placeholder{color:var(--text3);}
+.api-save{padding:7px 14px;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.5);color:var(--orange);font-family:var(--mono);font-size:10px;border-radius:5px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.api-save:hover{background:rgba(255,107,53,.25);}
+.api-ok{font-family:var(--mono);font-size:10px;color:var(--green);display:none;}
+.model-select{background:rgba(0,0,0,.4);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10px;padding:7px 10px;border-radius:5px;outline:none;}
+.hero{position:relative;z-index:5;padding:50px 28px 34px;text-align:center;}
+.hero-tag{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;border:1px solid rgba(0,229,255,.3);padding:5px 14px;border-radius:3px;margin-bottom:16px;background:rgba(0,229,255,.05);animation:fadein .5s ease;}
+.hero h1{font-weight:800;font-size:clamp(26px,5vw,52px);line-height:1.1;letter-spacing:-2px;margin-bottom:14px;animation:fadein .7s ease;}
+.hero h1 .c{color:var(--cyan);}.hero h1 .g{color:var(--green);}
+.hero p{font-family:var(--mono);font-size:12px;color:var(--text2);max-width:500px;margin:0 auto;line-height:1.9;animation:fadein .9s ease;}
+.tabs-wrap{position:relative;z-index:5;display:flex;justify-content:center;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;padding:14px 22px;font-family:var(--sans);font-weight:600;font-size:13px;color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;position:relative;top:1px;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.tab-num{font-family:var(--mono);font-size:9px;background:rgba(0,229,255,.1);color:var(--cyan);padding:2px 6px;border-radius:3px;}
+.main{position:relative;z-index:5;max-width:920px;margin:0 auto;padding:36px 20px 80px;}
+.tab-panel{display:none;animation:fadein .35s ease;}
+.tab-panel.active{display:block;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:26px;margin-bottom:18px;}
+.card-hd{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+.card-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5);}
+.card-dot.g{background:var(--green);box-shadow:0 0 10px rgba(57,255,133,.5);}
+.card-dot.o{background:var(--orange);box-shadow:0 0 10px rgba(255,107,53,.5);}
+.card-dot.p{background:var(--purple);box-shadow:0 0 10px rgba(189,147,249,.5);}
+.card-title{font-weight:700;font-size:15px;}
+.card-desc{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:20px;line-height:1.8;}
+label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:7px;}
+input,textarea,select{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:11px 14px;border-radius:7px;outline:none;transition:border .2s;resize:vertical;}
+input:focus,textarea:focus,select:focus{border-color:var(--cyan);}
+select option{background:#0d1a24;}
+.field{margin-bottom:16px;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:580px){.row{grid-template-columns:1fr;}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.chip{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--mono);font-size:10px;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none;}
+.chip:hover{border-color:rgba(0,229,255,.4);color:var(--text);}
+.chip.sel{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08);}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:7px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;border:none;transition:all .2s;letter-spacing:.3px;}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;}
+.btn-primary:hover{opacity:.85;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.result-box{background:#020c12;border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:20px;font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--text);min-height:80px;white-space:pre-wrap;word-break:break-word;display:none;}
+.result-box.show{display:block;}
+.result-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.spinner{width:10px;height:10px;border:1.5px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;display:none;}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--panel);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:10px 18px;border-radius:7px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
 </style>
 </head>
 <body>
-<div class="glow2"></div>
-
-<!-- HEADER -->
 <header>
   <div class="logo">
-    <div class="logo-icon">K</div>
-    Koudamki<span style="color:var(--accent)">.ai</span>
+    <div class="logo-icon">ML</div>
+    <div>
+      <div class="logo-text">Koudamki<span>.ai</span></div>
+      <div class="logo-sub">ML Solver Suite</div>
+    </div>
   </div>
-  <div class="header-right">
-    <span class="header-sub">v3 · ML Solver</span>
-    <div class="header-badge">Groq LPU</div>
-  </div>
+  <div class="badge">● LIVE</div>
 </header>
-
-<!-- API BAR -->
 <div class="api-bar">
-  <label>Groq API Key</label>
-  <input type="password" id="groq-key" placeholder="gsk_..." oninput="updateStatus()">
-  <label style="margin-left:8px">Model</label>
-  <select id="groq-model" onchange="updateStatus()">
-    <option value="llama-3.3-70b-versatile">Llama 3.3 70B ⚡ (best)</option>
-    <option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
-    <option value="mixtral-8x7b-32768">Mixtral 8×7B (long ctx)</option>
-    <option value="gemma2-9b-it">Gemma 2 9B</option>
-    <option value="llama-3.3-70b-specdec">Llama 3.3 70B SpecDec</option>
+  <label>🔑 GROQ API KEY:</label>
+  <input type="password" id="groq-key" placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off"/>
+  <select class="model-select" id="groq-model">
+    <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+    <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+    <option value="gemma2-9b-it">Gemma2 9B</option>
     <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
   </select>
-  <div class="api-status" id="api-status">
-    <div class="api-dot" id="api-dot"></div>
-    <span id="api-status-text">No key entered</span>
-  </div>
+  <button class="api-save" onclick="saveKey()">💾 Save Key</button>
+  <span class="api-ok" id="api-ok">✓ Key saved</span>
 </div>
-
-<!-- HERO -->
 <div class="hero">
-  <div class="hero-tag">Koudamki.ai · ML Solver · Groq-Powered</div>
-  <h1>Fix your AI &amp; ML<br><span>problems instantly</span></h1>
-  <p>Four specialized tools — diagnostics, dataset analysis, experiment advice, and step-by-step debugging — all running on Groq's LPU engine.</p>
-  <div class="hero-credit">Created by Koudamki.Pranav</div>
+  <div class="hero-tag">// machine learning intelligence</div>
+  <h1>Your <span class="c">ML Problem</span> Solver<br/>Built for <span class="g">Every Stage</span></h1>
+  <p>Solve ML problems · Decode equations · Recommend models · Build pipelines — all in one place.</p>
 </div>
-
-<!-- TOOL NAV -->
-<div class="tool-nav">
-  <div class="tool-card active" onclick="showPage('diag',this)">
-    <div class="tool-card-icon blue">🩺</div>
-    <h3>ML Diagnostics</h3>
-    <p>Overfitting, loss divergence, accuracy plateaus</p>
-  </div>
-  <div class="tool-card" onclick="showPage('data',this)">
-    <div class="tool-card-icon green">📊</div>
-    <h3>Dataset Analyzer</h3>
-    <p>Quality report, imbalance, missing values, leakage</p>
-  </div>
-  <div class="tool-card" onclick="showPage('exp',this)">
-    <div class="tool-card-icon amber">🧪</div>
-    <h3>Experiment Advisor</h3>
-    <p>Hyperparameter tuning &amp; experiment strategies</p>
-  </div>
-  <div class="tool-card" onclick="showPage('debug',this)">
-    <div class="tool-card-icon red">🐛</div>
-    <h3>ML Debugger</h3>
-    <p>Tensor errors, NaN loss, pipeline &amp; deploy bugs</p>
-  </div>
+<div class="tabs-wrap">
+  <button class="tab-btn active" onclick="switchTab(0)">⚙️ ML Problem Solver <span class="tab-num">01</span></button>
+  <button class="tab-btn" onclick="switchTab(1)">∫ Equation Solver <span class="tab-num">02</span></button>
+  <button class="tab-btn" onclick="switchTab(2)">🎯 Model Recommender <span class="tab-num">03</span></button>
+  <button class="tab-btn" onclick="switchTab(3)">🔬 Pipeline Builder <span class="tab-num">04</span></button>
 </div>
-
 <div class="main">
-
-  <!-- PAGE 1: ML DIAGNOSTICS -->
-  <div id="diag" class="page active">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-header-icon" style="background:rgba(56,189,248,0.12)">🩺</div>
-        <div>
-          <div class="panel-title">ML Diagnostics Assistant</div>
-          <div class="panel-sub">Describe your model behavior or paste metrics — get a root cause analysis and fix</div>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="row2">
-          <div>
-            <label class="field-label">Framework</label>
-            <select id="d1-fw">
-              <option>PyTorch</option>
-              <option>TensorFlow / Keras</option>
-              <option>Scikit-learn</option>
-              <option>XGBoost / LightGBM</option>
-              <option>JAX / Flax</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label">Task type</label>
-            <select id="d1-task">
-              <option>Classification</option>
-              <option>Regression</option>
-              <option>NLP / Text</option>
-              <option>Computer Vision</option>
-              <option>Time Series</option>
-              <option>Reinforcement Learning</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label class="field-label">Problem type (select all that apply)</label>
-          <div class="chips">
-            <button class="chip on" onclick="toggleChip(this)">Overfitting</button>
-            <button class="chip" onclick="toggleChip(this)">Underfitting</button>
-            <button class="chip" onclick="toggleChip(this)">Slow training</button>
-            <button class="chip" onclick="toggleChip(this)">Accuracy plateau</button>
-            <button class="chip" onclick="toggleChip(this)">Loss diverging</button>
-            <button class="chip" onclick="toggleChip(this)">Gradient explosion</button>
-            <button class="chip" onclick="toggleChip(this)">Poor generalization</button>
-            <button class="chip" onclick="toggleChip(this)">Other</button>
-          </div>
-        </div>
-        <div>
-          <label class="field-label">Describe the issue / paste metrics or error output</label>
-          <textarea id="d1-input" rows="5" placeholder="e.g. Training accuracy 98%, validation 62%. Loss stops improving after epoch 5. Using Adam lr=0.001, batch_size=32..."></textarea>
-        </div>
-        <div>
-          <button class="btn btn-primary" id="d1-btn" onclick="runDiag()">
-            <span>Run diagnostics</span>
-          </button>
-        </div>
-      </div>
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-hd"><div class="card-dot"></div><div class="card-title">ML Problem Solver</div></div>
+      <div class="card-desc">Describe your dataset and goal. Get algorithm selection, preprocessing steps, evaluation metrics, and code snippets.</div>
+      <div class="field"><label>Problem Type</label><div class="chips" id="prob-type"><div class="chip sel" onclick="selectChip(this,'prob-type')">Classification</div><div class="chip" onclick="selectChip(this,'prob-type')">Regression</div><div class="chip" onclick="selectChip(this,'prob-type')">Clustering</div><div class="chip" onclick="selectChip(this,'prob-type')">Dimensionality Reduction</div><div class="chip" onclick="selectChip(this,'prob-type')">Time Series</div><div class="chip" onclick="selectChip(this,'prob-type')">Anomaly Detection</div><div class="chip" onclick="selectChip(this,'prob-type')">NLP</div><div class="chip" onclick="selectChip(this,'prob-type')">Recommendation</div></div></div>
+      <div class="row"><div class="field"><label>Dataset Rows</label><input type="number" id="ds-rows" placeholder="e.g. 50000" value="10000"/></div><div class="field"><label>Number of Features</label><input type="number" id="ds-feats" placeholder="e.g. 20" value="15"/></div></div>
+      <div class="field"><label>Data Characteristics</label><div class="chips" id="data-chars"><div class="chip" onclick="toggleChip(this)">Missing Values</div><div class="chip" onclick="toggleChip(this)">Imbalanced Classes</div><div class="chip" onclick="toggleChip(this)">Categorical Features</div><div class="chip" onclick="toggleChip(this)">High Dimensionality</div><div class="chip" onclick="toggleChip(this)">Noisy Data</div><div class="chip" onclick="toggleChip(this)">Structured/Tabular</div></div></div>
+      <div class="field"><label>Describe Your Problem</label><textarea id="prob-desc" rows="4" placeholder="e.g. Predict customer churn from 15 features including age, usage, billing. 10k rows, 20% churn rate..."></textarea></div>
+      <div class="row"><div class="field"><label>Priority</label><select id="prob-priority"><option>Accuracy</option><option>Speed / Low Latency</option><option>Interpretability</option><option>Scalability</option></select></div><div class="field"><label>Experience Level</label><select id="prob-level"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select></div></div>
+      <button class="btn btn-primary" id="prob-btn" onclick="solveProblem()">⚡ Solve My ML Problem</button>
     </div>
-    <div class="result-panel">
-      <div class="result-header">
-        <span class="result-label">diagnosis output</span>
-        <div class="result-dots">
-          <div class="result-dot" style="background:#f87171"></div>
-          <div class="result-dot" style="background:#fbbf24"></div>
-          <div class="result-dot" style="background:#4ade80"></div>
-        </div>
-      </div>
-      <div class="result-body" id="d1-result"><span class="placeholder">// Awaiting input — fill the form and click "Run diagnostics"</span></div>
-    </div>
+    <div class="result-box" id="prob-result"><div class="result-label"><div class="spinner" id="prob-spin"></div><span id="prob-status">Analyzing...</span></div><div id="prob-output"></div></div>
   </div>
-
-  <!-- PAGE 2: DATASET ANALYZER -->
-  <div id="data" class="page">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-header-icon" style="background:rgba(74,222,128,0.12)">📊</div>
-        <div>
-          <div class="panel-title">Dataset Analyzer</div>
-          <div class="panel-sub">Describe your dataset — get a quality report, issue diagnosis, and preprocessing pipeline</div>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="row3">
-          <div>
-            <label class="field-label">Number of rows</label>
-            <input type="number" id="d2-rows" placeholder="e.g. 50000">
-          </div>
-          <div>
-            <label class="field-label">Number of features</label>
-            <input type="number" id="d2-feats" placeholder="e.g. 42">
-          </div>
-          <div>
-            <label class="field-label">Missing value %</label>
-            <input type="number" id="d2-miss" placeholder="e.g. 15">
-          </div>
-        </div>
-        <div class="row2">
-          <div>
-            <label class="field-label">Data type</label>
-            <select id="d2-type">
-              <option>Tabular / CSV</option>
-              <option>Text / NLP</option>
-              <option>Image</option>
-              <option>Time Series</option>
-              <option>Graph / Network</option>
-              <option>Mixed / Multimodal</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label">Target variable</label>
-            <select id="d2-target">
-              <option>Binary classification</option>
-              <option>Multi-class classification</option>
-              <option>Regression / continuous</option>
-              <option>Multi-label</option>
-              <option>Unsupervised / clustering</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label class="field-label">Known issues (select all that apply)</label>
-          <div class="chips">
-            <button class="chip" onclick="toggleChip(this)">Missing values</button>
-            <button class="chip" onclick="toggleChip(this)">Class imbalance</button>
-            <button class="chip" onclick="toggleChip(this)">Duplicate rows</button>
-            <button class="chip" onclick="toggleChip(this)">Outliers</button>
-            <button class="chip" onclick="toggleChip(this)">High cardinality categoricals</button>
-            <button class="chip" onclick="toggleChip(this)">Skewed distributions</button>
-            <button class="chip" onclick="toggleChip(this)">Data leakage suspected</button>
-            <button class="chip" onclick="toggleChip(this)">Inconsistent schema</button>
-          </div>
-        </div>
-        <div>
-          <label class="field-label">Additional context (domain, schema, specific concerns)</label>
-          <textarea id="d2-desc" rows="4" placeholder="e.g. Customer churn dataset. 30% missing in 'last_login'. 5% churn rate (severe imbalance). Includes timestamps and categorical features like 'country' with 180 unique values..."></textarea>
-        </div>
-        <div>
-          <button class="btn btn-primary" id="d2-btn" onclick="runData()">
-            <span>Analyze dataset</span>
-          </button>
-        </div>
-      </div>
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-hd"><div class="card-dot g"></div><div class="card-title">Math & ML Equation Solver</div></div>
+      <div class="card-desc">Solve calculus, linear algebra, statistics, or ML equations with full step-by-step derivations.</div>
+      <div class="field"><label>Category</label><div class="chips" id="eq-cat"><div class="chip sel" onclick="selectChip(this,'eq-cat')">Linear Algebra</div><div class="chip" onclick="selectChip(this,'eq-cat')">Calculus / Gradient</div><div class="chip" onclick="selectChip(this,'eq-cat')">Probability / Bayes</div><div class="chip" onclick="selectChip(this,'eq-cat')">Loss Functions</div><div class="chip" onclick="selectChip(this,'eq-cat')">Optimization</div><div class="chip" onclick="selectChip(this,'eq-cat')">Statistics</div><div class="chip" onclick="selectChip(this,'eq-cat')">Neural Networks</div></div></div>
+      <div class="field"><label>Enter Your Equation or Problem</label><textarea id="eq-input" rows="4" placeholder="e.g. Derive the gradient of cross-entropy loss with softmax..."></textarea></div>
+      <div class="row"><div class="field"><label>Output Format</label><select id="eq-format"><option>Step-by-Step Derivation</option><option>Proof + Intuition</option><option>Quick Solution</option><option>Code Implementation</option></select></div><div class="field"><label>Notation Style</label><select id="eq-notation"><option>Plain Text</option><option>LaTeX-like</option><option>Python / NumPy</option></select></div></div>
+      <button class="btn btn-primary" id="eq-btn" onclick="solveEquation()">∇ Solve Equation</button>
     </div>
-    <div class="result-panel">
-      <div class="result-header">
-        <span class="result-label">analysis output</span>
-        <div class="result-dots">
-          <div class="result-dot" style="background:#f87171"></div>
-          <div class="result-dot" style="background:#fbbf24"></div>
-          <div class="result-dot" style="background:#4ade80"></div>
-        </div>
-      </div>
-      <div class="result-body" id="d2-result"><span class="placeholder">// Awaiting input — describe your dataset and click "Analyze dataset"</span></div>
-    </div>
+    <div class="result-box" id="eq-result"><div class="result-label"><div class="spinner" id="eq-spin"></div><span id="eq-status">Solving...</span></div><div id="eq-output"></div></div>
   </div>
-
-  <!-- PAGE 3: EXPERIMENT ADVISOR -->
-  <div id="exp" class="page">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-header-icon" style="background:rgba(251,191,36,0.12)">🧪</div>
-        <div>
-          <div class="panel-title">Experiment Advisor</div>
-          <div class="panel-sub">Describe your setup — get prioritized hyperparameter tuning and experiment strategies</div>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="row2">
-          <div>
-            <label class="field-label">Model / architecture</label>
-            <input type="text" id="d3-model" placeholder="e.g. ResNet-50, BERT, Random Forest, LSTM">
-          </div>
-          <div>
-            <label class="field-label">Current performance</label>
-            <input type="text" id="d3-metric" placeholder="e.g. F1=0.72, RMSE=0.34, AUC=0.81">
-          </div>
-        </div>
-        <div class="row3">
-          <div>
-            <label class="field-label">Compute budget</label>
-            <select id="d3-compute">
-              <option>Low (CPU / single GPU)</option>
-              <option>Medium (2–4 GPUs)</option>
-              <option>High (multi-GPU / cloud cluster)</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label">Optimization goal</label>
-            <select id="d3-goal">
-              <option>Improve accuracy / metric</option>
-              <option>Reduce overfitting</option>
-              <option>Speed up training</option>
-              <option>Reduce model size</option>
-              <option>Better generalization</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label">Search strategy</label>
-            <select id="d3-search">
-              <option>Suggest best strategy</option>
-              <option>Grid search</option>
-              <option>Random search</option>
-              <option>Bayesian optimization</option>
-              <option>Manual / intuition-based</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label class="field-label">Current hyperparameters &amp; config</label>
-          <textarea id="d3-config" rows="4" placeholder="e.g. lr=0.001, batch_size=32, epochs=50, dropout=0.3, optimizer=Adam, weight_decay=0, scheduler=None, augmentation=None..."></textarea>
-        </div>
-        <div>
-          <button class="btn btn-primary" id="d3-btn" onclick="runExp()">
-            <span>Get recommendations</span>
-          </button>
-        </div>
-      </div>
+  <div class="tab-panel" id="panel-2">
+    <div class="card">
+      <div class="card-hd"><div class="card-dot o"></div><div class="card-title">AI-Powered Model Recommender</div></div>
+      <div class="card-desc">Describe your task and constraints. Get ranked model recommendations with pros, cons, and quick-start code.</div>
+      <div class="field"><label>Task Domain</label><div class="chips" id="domain-chips"><div class="chip sel" onclick="selectChip(this,'domain-chips')">Tabular / Structured</div><div class="chip" onclick="selectChip(this,'domain-chips')">Computer Vision</div><div class="chip" onclick="selectChip(this,'domain-chips')">NLP / Text</div><div class="chip" onclick="selectChip(this,'domain-chips')">Audio / Speech</div><div class="chip" onclick="selectChip(this,'domain-chips')">Time Series</div><div class="chip" onclick="selectChip(this,'domain-chips')">Reinforcement Learning</div><div class="chip" onclick="selectChip(this,'domain-chips')">Multimodal</div></div></div>
+      <div class="field"><label>Describe Your Use Case</label><textarea id="rec-desc" rows="3" placeholder="e.g. Classify 50k medical images into 5 categories. Must run on mobile..."></textarea></div>
+      <div class="row"><div class="field"><label>Compute Budget</label><select id="rec-compute"><option>CPU Only</option><option>Single GPU</option><option>Multi-GPU / Cloud</option><option>Edge Device</option></select></div><div class="field"><label>Training Data Size</label><select id="rec-data"><option>Very Small (&lt;1k)</option><option>Small (1k–10k)</option><option selected>Medium (10k–100k)</option><option>Large (&gt;100k)</option></select></div></div>
+      <div class="row"><div class="field"><label>Inference Speed</label><select id="rec-speed"><option>Real-time (&lt;10ms)</option><option selected>Fast (&lt;100ms)</option><option>Batch OK</option></select></div><div class="field"><label>Interpretability Needed?</label><select id="rec-interp"><option>Yes — Must Explain</option><option selected>Partial</option><option>No — Black Box OK</option></select></div></div>
+      <button class="btn btn-primary" id="rec-btn" onclick="recommendModel()">🎯 Get Recommendations</button>
     </div>
-    <div class="result-panel">
-      <div class="result-header">
-        <span class="result-label">experiment recommendations</span>
-        <div class="result-dots">
-          <div class="result-dot" style="background:#f87171"></div>
-          <div class="result-dot" style="background:#fbbf24"></div>
-          <div class="result-dot" style="background:#4ade80"></div>
-        </div>
-      </div>
-      <div class="result-body" id="d3-result"><span class="placeholder">// Awaiting input — fill your model config and click "Get recommendations"</span></div>
-    </div>
+    <div class="result-box" id="rec-result"><div class="result-label"><div class="spinner" id="rec-spin"></div><span id="rec-status">Recommending...</span></div><div id="rec-output"></div></div>
   </div>
-
-  <!-- PAGE 4: ML DEBUGGER -->
-  <div id="debug" class="page">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-header-icon" style="background:rgba(248,113,113,0.12)">🐛</div>
-        <div>
-          <div class="panel-title">ML Debugger</div>
-          <div class="panel-sub">Select bug category, paste your code or stack trace — get step-by-step fix with corrected code</div>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div>
-          <label class="field-label">Bug category</label>
-          <div class="debug-options">
-            <button class="dbg-opt active" onclick="selectDbg(this,'Shape mismatch / tensor dimension error')">
-              <div class="dbg-num">1</div>
-              <div><div class="dbg-title">Shape / tensor mismatch</div><div class="dbg-desc">Wrong dimensions, broadcasting errors, size mismatch</div></div>
-            </button>
-            <button class="dbg-opt" onclick="selectDbg(this,'NaN or Inf appearing in loss or gradients')">
-              <div class="dbg-num">2</div>
-              <div><div class="dbg-title">NaN / Inf in loss or gradients</div><div class="dbg-desc">Exploding gradients, bad weight init, division by zero</div></div>
-            </button>
-            <button class="dbg-opt" onclick="selectDbg(this,'Data pipeline bug — wrong dtype, slow loading, or data leakage')">
-              <div class="dbg-num">3</div>
-              <div><div class="dbg-title">Data pipeline bug</div><div class="dbg-desc">Wrong dtype, slow DataLoader, label leakage in CV</div></div>
-            </button>
-            <button class="dbg-opt" onclick="selectDbg(this,'Model not learning — flat loss curve or near-random accuracy from the start')">
-              <div class="dbg-num">4</div>
-              <div><div class="dbg-title">Model not learning</div><div class="dbg-desc">Flat loss, random accuracy, gradient not flowing</div></div>
-            </button>
-            <button class="dbg-opt" onclick="selectDbg(this,'Deployment or inference bug — slowness, memory leak, or wrong predictions')">
-              <div class="dbg-num">5</div>
-              <div><div class="dbg-title">Deployment / inference bug</div><div class="dbg-desc">Latency, memory leak, wrong outputs in production</div></div>
-            </button>
-          </div>
-        </div>
-        <div>
-          <label class="field-label">Paste code, stack trace, or describe the bug</label>
-          <textarea id="d4-input" rows="7" placeholder="Paste your error traceback, code snippet, or describe exactly what's happening and what you expected..."></textarea>
-        </div>
-        <input type="hidden" id="d4-cat" value="Shape mismatch / tensor dimension error">
-        <div>
-          <button class="btn btn-primary" id="d4-btn" onclick="runDebug()">
-            <span>Debug it</span>
-          </button>
-        </div>
-      </div>
+  <div class="tab-panel" id="panel-3">
+    <div class="card">
+      <div class="card-hd"><div class="card-dot p"></div><div class="card-title">Full ML Pipeline Builder</div></div>
+      <div class="card-desc">Generate a complete end-to-end ML pipeline with data ingestion, preprocessing, training, evaluation, and deployment code.</div>
+      <div class="field"><label>Pipeline Goal</label><textarea id="pipe-goal" rows="3" placeholder="e.g. Fraud detection system using transaction CSV data. Need full pipeline from raw data to deployed REST API..."></textarea></div>
+      <div class="row"><div class="field"><label>Framework</label><select id="pipe-lang"><option>Python (scikit-learn)</option><option>Python (PyTorch)</option><option>Python (TensorFlow/Keras)</option><option>Python (XGBoost/LightGBM)</option><option>R</option></select></div><div class="field"><label>Deployment Target</label><select id="pipe-deploy"><option>Local Script</option><option>FastAPI / Flask REST</option><option>Docker Container</option><option>Streamlit App</option><option>Cloud (AWS/GCP/Azure)</option></select></div></div>
+      <div class="field"><label>Pipeline Stages</label><div class="chips" id="stage-chips"><div class="chip sel" onclick="toggleChip(this)">Data Loading</div><div class="chip sel" onclick="toggleChip(this)">EDA</div><div class="chip sel" onclick="toggleChip(this)">Preprocessing</div><div class="chip sel" onclick="toggleChip(this)">Feature Engineering</div><div class="chip sel" onclick="toggleChip(this)">Model Training</div><div class="chip sel" onclick="toggleChip(this)">Hyperparameter Tuning</div><div class="chip sel" onclick="toggleChip(this)">Evaluation</div><div class="chip" onclick="toggleChip(this)">MLflow Tracking</div><div class="chip" onclick="toggleChip(this)">Deployment Code</div><div class="chip" onclick="toggleChip(this)">CI/CD</div></div></div>
+      <div class="field"><label>Code Detail</label><div class="chips" id="detail-chips"><div class="chip" onclick="selectChip(this,'detail-chips')">Outline Only</div><div class="chip sel" onclick="selectChip(this,'detail-chips')">Full Code + Comments</div><div class="chip" onclick="selectChip(this,'detail-chips')">Production-Ready</div></div></div>
+      <button class="btn btn-primary" id="pipe-btn" onclick="buildPipeline()">🔬 Build My Pipeline</button>
     </div>
-    <div class="result-panel">
-      <div class="result-header">
-        <span class="result-label">debug output</span>
-        <div class="result-dots">
-          <div class="result-dot" style="background:#f87171"></div>
-          <div class="result-dot" style="background:#fbbf24"></div>
-          <div class="result-dot" style="background:#4ade80"></div>
-        </div>
-      </div>
-      <div class="result-body" id="d4-result"><span class="placeholder">// Awaiting input — select a bug category, paste your code, and click "Debug it"</span></div>
-    </div>
+    <div class="result-box" id="pipe-result"><div class="result-label"><div class="spinner" id="pipe-spin"></div><span id="pipe-status">Building...</span></div><div id="pipe-output"></div></div>
   </div>
-
 </div>
-
-<!-- STATUS BAR -->
-<div class="status-bar">
-  <div class="status-item">
-    <div class="status-dot" id="sb-dot" style="background:var(--text3)"></div>
-    <span id="sb-label">Groq API — no key</span>
-  </div>
-  <div class="status-item" id="sb-model">Model: —</div>
-  <div class="status-item">Streaming: enabled</div>
-  <div class="status-item" style="margin-left:auto">Koudamki.ai · ML Solver · Groq LPU</div>
-</div>
-
+<div class="toast" id="toast"></div>
 <script>
-function updateStatus() {
-  const key   = document.getElementById('groq-key').value.trim();
-  const model = document.getElementById('groq-model').value;
-  const dot   = document.getElementById('api-dot');
-  const txt   = document.getElementById('api-status-text');
-  const sbDot = document.getElementById('sb-dot');
-  const sbLbl = document.getElementById('sb-label');
-  document.getElementById('sb-model').textContent = 'Model: ' + model;
-
-  if (key.startsWith('gsk_') && key.length > 20) {
-    dot.className = 'api-dot ok';
-    txt.textContent = 'Key looks valid';
-    sbDot.style.background = 'var(--green)';
-    sbLbl.textContent = 'Groq API — ready';
-  } else if (key.length > 0) {
-    dot.className = 'api-dot warn';
-    txt.textContent = 'Key format unexpected';
-    sbDot.style.background = 'var(--amber)';
-    sbLbl.textContent = 'Groq API — check key';
-  } else {
-    dot.className = 'api-dot';
-    txt.textContent = 'No key entered';
-    sbDot.style.background = 'var(--text3)';
-    sbLbl.textContent = 'Groq API — no key';
+function saveKey(){const k=document.getElementById('groq-key').value.trim();if(!k){showToast('Enter your Groq API key first.');return;}localStorage.setItem('groq_api_key',k);document.getElementById('api-ok').style.display='inline';showToast('Groq key saved!');setTimeout(()=>document.getElementById('api-ok').style.display='none',3000);}
+function getKey(){const saved=localStorage.getItem('groq_api_key');const input=document.getElementById('groq-key').value.trim();const key=input||saved||'';if(input&&input!==saved)localStorage.setItem('groq_api_key',input);return key;}
+function getModel(){return document.getElementById('groq-model').value;}
+window.addEventListener('DOMContentLoaded',()=>{const saved=localStorage.getItem('groq_api_key');if(saved){document.getElementById('groq-key').value=saved;document.getElementById('api-ok').style.display='inline';setTimeout(()=>document.getElementById('api-ok').style.display='none',2000);}});
+function switchTab(i){document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',i===j));document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',i===j));}
+function selectChip(el,group){el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+function toggleChip(el){el.classList.toggle('sel');}
+function getChip(id){const e=document.querySelector('#'+id+' .chip.sel');return e?e.textContent.trim():'';}
+function getChips(id){return[...document.querySelectorAll('#'+id+' .chip.sel')].map(c=>c.textContent.trim());}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+async function callGroq(systemPrompt,userPrompt,resId,outId,spinId,statId,btnId,loadingMsg){
+  const key=getKey();
+  if(!key){showToast('Enter your Groq API key above!');document.getElementById('groq-key').focus();return;}
+  const res=document.getElementById(resId),out=document.getElementById(outId);
+  const spin=document.getElementById(spinId),stat=document.getElementById(statId);
+  const btn=document.getElementById(btnId);
+  res.style.display='block';out.textContent='';spin.style.display='inline-block';stat.textContent=loadingMsg;btn.disabled=true;
+  try{
+    const response=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:getModel(),max_tokens:3000,stream:true,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}]})});
+    if(!response.ok){const err=await response.json().catch(()=>({error:{message:'HTTP '+response.status}}));throw new Error(err?.error?.message||'HTTP '+response.status);}
+    const reader=response.body.getReader();const decoder=new TextDecoder();let full='';
+    spin.style.display='none';stat.textContent='Streaming response...';
+    while(true){const{done,value}=await reader.read();if(done)break;const chunk=decoder.decode(value,{stream:true});const lines=chunk.split('\n');for(const line of lines){if(!line.startsWith('data: '))continue;const data=line.slice(6).trim();if(data==='[DONE]')continue;try{const json=JSON.parse(data);const delta=json?.choices?.[0]?.delta?.content||'';full+=delta;out.textContent=full;}catch(e){}}}
+    if(!full)out.textContent='No response received.';stat.textContent='Complete';showToast('Done!');
+  }catch(err){
+    spin.style.display='none';stat.textContent='Error';
+    let msg=err.message;
+    if(msg.includes('401')||msg.includes('invalid_api_key'))msg='Invalid Groq API key. Get one free at console.groq.com';
+    else if(msg.includes('Failed to fetch')||msg.includes('NetworkError'))msg='Network error — check your connection.';
+    out.textContent='Error: '+msg;showToast(msg.slice(0,60));
   }
+  btn.disabled=false;
 }
-
-function showPage(id, card) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  card.classList.add('active');
-}
-
-function toggleChip(el) { el.classList.toggle('on'); }
-
-function getChips(container) {
-  return Array.from(container.querySelectorAll('.chip.on')).map(c => c.textContent.trim()).join(', ') || 'none specified';
-}
-
-function selectDbg(el, cat) {
-  document.querySelectorAll('.dbg-opt').forEach(o => o.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('d4-cat').value = cat;
-}
-
-function setLoading(btnId, resId, on, label) {
-  const btn = document.getElementById(btnId);
-  const res = document.getElementById(resId);
-  if (on) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> Analyzing...';
-    res.innerHTML = '';
-    res.classList.add('cursor');
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = '<span>' + label + '</span>';
-    res.classList.remove('cursor');
-  }
-}
-
-async function callGroq(prompt, resId, systemMsg) {
-  const key   = document.getElementById('groq-key').value.trim();
-  const model = document.getElementById('groq-model').value;
-  const res   = document.getElementById(resId);
-
-  if (!key) {
-    res.textContent = 'Error: Please enter your Groq API key in the bar at the top of the page.';
-    return;
-  }
-
-  res.textContent = '';
-  res.classList.add('cursor');
-
-  try {
-    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify({
-        model: model,
-        max_tokens: 1200,
-        stream: true,
-        messages: [
-          { role: 'system', content: systemMsg },
-          { role: 'user',   content: prompt }
-        ]
-      })
-    });
-
-    if (!r.ok) {
-      const err = await r.json().catch(() => ({}));
-      res.textContent = 'Groq API error ' + r.status + ': ' + (err?.error?.message || r.statusText);
-      res.classList.remove('cursor');
-      return;
-    }
-
-    const reader = r.body.getReader();
-    const dec    = new TextDecoder();
-    let buf      = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop();
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const d = line.slice(6).trim();
-        if (d === '[DONE]') continue;
-        try {
-          const j = JSON.parse(d);
-          const delta = j.choices?.[0]?.delta?.content;
-          if (delta) res.textContent += delta;
-        } catch {}
-      }
-    }
-  } catch (e) {
-    res.textContent = 'Network error: ' + e.message + '\n\nCheck your API key and internet connection.';
-  }
-  res.classList.remove('cursor');
-}
-
-const SYS = 'You are a senior ML/AI engineer. Give precise, actionable answers. Use numbered steps for procedures. Be concise but complete. Plain text only — no markdown symbols like ** or ##. Use clear section breaks with a blank line.';
-
-async function runDiag() {
-  const page  = document.getElementById('diag');
-  const chips = getChips(page);
-  const fw    = document.getElementById('d1-fw').value;
-  const task  = document.getElementById('d1-task').value;
-  const input = document.getElementById('d1-input').value;
-  setLoading('d1-btn','d1-result',true,'Run diagnostics');
-  const prompt = `ML DIAGNOSIS REQUEST\nFramework: ${fw}\nTask type: ${task}\nProblem types: ${chips}\nUser description:\n${input||'(no additional context provided)'}\n\nPlease provide:\n1. Root cause analysis — what is most likely causing this\n2. Step-by-step fix — concrete code changes or actions\n3. How to verify the fix worked\n4. Prevention tips for the future`;
-  await callGroq(prompt,'d1-result',SYS);
-  setLoading('d1-btn','d1-result',false,'Run diagnostics');
-}
-
-async function runData() {
-  const page   = document.getElementById('data');
-  const issues = getChips(page);
-  const rows   = document.getElementById('d2-rows').value;
-  const feats  = document.getElementById('d2-feats').value;
-  const miss   = document.getElementById('d2-miss').value;
-  const type   = document.getElementById('d2-type').value;
-  const target = document.getElementById('d2-target').value;
-  const desc   = document.getElementById('d2-desc').value;
-  setLoading('d2-btn','d2-result',true,'Analyze dataset');
-  const prompt = `DATASET ANALYSIS REQUEST\nDataset: ${rows||'?'} rows, ${feats||'?'} features, ~${miss||'?'}% missing values\nType: ${type} | Target: ${target}\nKnown issues: ${issues}\nDetails: ${desc||'(none provided)'}\n\nProvide:\n1. Data quality assessment — severity of each issue\n2. Specific fixes for each identified issue, with code examples\n3. Recommended preprocessing pipeline in order\n4. Feature engineering suggestions\n5. Warnings about potential data leakage or hidden issues`;
-  await callGroq(prompt,'d2-result',SYS);
-  setLoading('d2-btn','d2-result',false,'Analyze dataset');
-}
-
-async function runExp() {
-  const model   = document.getElementById('d3-model').value;
-  const metric  = document.getElementById('d3-metric').value;
-  const compute = document.getElementById('d3-compute').value;
-  const goal    = document.getElementById('d3-goal').value;
-  const search  = document.getElementById('d3-search').value;
-  const config  = document.getElementById('d3-config').value;
-  setLoading('d3-btn','d3-result',true,'Get recommendations');
-  const prompt = `ML EXPERIMENT ADVICE REQUEST\nModel: ${model||'not specified'}\nCurrent metric: ${metric||'not provided'}\nCompute: ${compute}\nGoal: ${goal}\nSearch strategy: ${search}\nCurrent config:\n${config||'(not provided)'}\n\nProvide:\n1. Top 5 hyperparameter changes to try, with specific values and expected impact\n2. Prioritized experiment order — what to try first\n3. Reasoning for each recommendation\n4. Recommended search strategy and why\n5. Diminishing returns warning — when to stop tuning`;
-  await callGroq(prompt,'d3-result',SYS);
-  setLoading('d3-btn','d3-result',false,'Get recommendations');
-}
-
-async function runDebug() {
-  const cat  = document.getElementById('d4-cat').value;
-  const code = document.getElementById('d4-input').value;
-  setLoading('d4-btn','d4-result',true,'Debug it');
-  const prompt = `ML DEBUG REQUEST\nCategory: ${cat}\nCode / Error:\n${code||'(no code or error provided)'}\n\nProvide:\n1. Exact root cause of the bug\n2. Fixed code or specific fix steps (include corrected code snippet)\n3. Explanation of why this error occurs\n4. How to verify the fix works\n5. How to prevent this class of bug in the future`;
-  await callGroq(prompt,'d4-result',SYS);
-  setLoading('d4-btn','d4-result',false,'Debug it');
-}
+function solveProblem(){const type=getChip('prob-type'),rows=document.getElementById('ds-rows').value,feats=document.getElementById('ds-feats').value,chars=getChips('data-chars').join(', '),desc=document.getElementById('prob-desc').value,priority=document.getElementById('prob-priority').value,level=document.getElementById('prob-level').value;const sys=`You are an expert ML engineer. Analyze ML problems and give actionable solutions.\nStructure your answer: PROBLEM ANALYSIS | TOP 3 ALGORITHMS (ranked) | PREPROCESSING STEPS | EVALUATION METRICS | PYTHON CODE SNIPPET | PITFALLS TO AVOID\nBe concise and practical.`;const p=`Problem: ${type}\nDataset: ${rows} rows, ${feats} features\nCharacteristics: ${chars||'standard'}\nDescription: ${desc||'General '+type+' problem'}\nPriority: ${priority}\nLevel: ${level}\n\nGive a complete solution plan.`;callGroq(sys,p,'prob-result','prob-output','prob-spin','prob-status','prob-btn','Analyzing your problem...');}
+function solveEquation(){const cat=getChip('eq-cat'),eq=document.getElementById('eq-input').value,fmt=document.getElementById('eq-format').value,notation=document.getElementById('eq-notation').value;if(!eq.trim()){showToast('Please enter an equation.');return;}const sys=`You are a math and ML expert. Solve equations clearly. Format: ${fmt}. Notation: ${notation}.\nNumber each step. Show intermediate results. Explain intuition after math.`;callGroq(sys,`Category: ${cat}\n\nProblem: ${eq}\n\nSolve with ${fmt} format.`,'eq-result','eq-output','eq-spin','eq-status','eq-btn','Solving equation...');}
+function recommendModel(){const domain=getChip('domain-chips'),desc=document.getElementById('rec-desc').value,compute=document.getElementById('rec-compute').value,data=document.getElementById('rec-data').value,speed=document.getElementById('rec-speed').value,interp=document.getElementById('rec-interp').value;const sys=`You are an ML architect. Recommend models with precision.\nFormat:\nTOP RECOMMENDATION (confidence /10, pros, cons, when to use)\nALTERNATIVE 1 | ALTERNATIVE 2 (same format)\nMODELS TO AVOID (and why)\nQUICK START CODE (5-10 lines)`;const p=`Domain: ${domain}\nTask: ${desc||'General '+domain}\nCompute: ${compute}\nData: ${data}\nSpeed: ${speed}\nInterpretability: ${interp}`;callGroq(sys,p,'rec-result','rec-output','rec-spin','rec-status','rec-btn','Finding best models...');}
+function buildPipeline(){const goal=document.getElementById('pipe-goal').value;if(!goal.trim()){showToast('Please describe your pipeline goal.');return;}const lang=document.getElementById('pipe-lang').value,deploy=document.getElementById('pipe-deploy').value,stages=getChips('stage-chips').join(', '),detail=getChip('detail-chips');const sys=`You are a senior ML engineer. Build complete, production-quality ML pipelines.\nDetail: ${detail}. Include comments. Make code runnable. Structure: overview then each stage with code then how to run.`;const p=`Goal: ${goal}\nFramework: ${lang}\nDeployment: ${deploy}\nStages: ${stages}\nDetail: ${detail}\n\nGenerate the full pipeline.`;callGroq(sys,p,'pipe-result','pipe-output','pipe-spin','pipe-status','pipe-btn','Building your pipeline...');}
 </script>
 </body>
 </html>
