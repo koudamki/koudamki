@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ML Solver — AI & ML Problem Solver</title>
+<title>Koudamki.ai — ML Solver</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -40,14 +40,12 @@ body {
 
 body::before {
   content: '';
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background-image:
     linear-gradient(rgba(56,189,248,0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(56,189,248,0.035) 1px, transparent 1px);
   background-size: 48px 48px;
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
 
 body::after {
@@ -67,11 +65,12 @@ body::after {
   pointer-events: none; z-index: 0;
 }
 
+/* ── HEADER ── */
 header {
-  position: relative; z-index: 10;
+  position: sticky; top: 0; z-index: 100;
   border-bottom: 1px solid var(--border);
-  background: rgba(8,12,16,0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(8,12,16,0.88);
+  backdrop-filter: blur(14px);
   padding: 0 2rem;
   display: flex; align-items: center; justify-content: space-between;
   height: 60px;
@@ -79,9 +78,9 @@ header {
 
 .logo {
   display: flex; align-items: center; gap: 10px;
-  font-family: var(--mono);
-  font-size: 15px; font-weight: 700;
+  font-family: var(--sans); font-size: 15px; font-weight: 700;
   color: var(--text); letter-spacing: -0.3px;
+  text-decoration: none;
 }
 
 .logo-icon {
@@ -89,22 +88,26 @@ header {
   border: 1.5px solid var(--accent);
   border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; color: var(--accent);
+  font-size: 13px; font-weight: 800;
+  color: var(--accent); font-family: var(--sans);
 }
 
 .header-right { display: flex; align-items: center; gap: 10px; }
 
 .header-badge {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--mono); font-size: 11px;
   color: var(--accent);
   border: 1px solid var(--border2);
-  padding: 4px 10px;
-  border-radius: 20px;
+  padding: 4px 10px; border-radius: 20px;
   background: var(--accent-dim);
 }
 
-/* API Key bar */
+.header-sub {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3);
+}
+
+/* ── API BAR ── */
 .api-bar {
   position: relative; z-index: 10;
   background: var(--surface);
@@ -121,14 +124,14 @@ header {
 }
 
 .api-bar input {
-  flex: 1; min-width: 200px;
+  flex: 1; min-width: 200px; max-width: 320px;
   font-family: var(--mono); font-size: 12px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
   padding: 7px 12px;
-  outline: none;
+  outline: none; transition: border-color .15s;
 }
 .api-bar input:focus { border-color: var(--border2); }
 
@@ -139,20 +142,21 @@ header {
   border-radius: var(--radius);
   color: var(--text);
   padding: 7px 12px;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
+  outline: none; cursor: pointer; appearance: none;
+  transition: border-color .15s;
 }
+.api-bar select:focus { border-color: var(--border2); }
 
 .api-status {
   font-family: var(--mono); font-size: 11px;
   display: flex; align-items: center; gap: 5px;
-  white-space: nowrap;
+  margin-left: auto; white-space: nowrap;
 }
-.api-dot { width: 6px; height: 6px; border-radius: 50%; }
-.api-dot.ok { background: var(--green); }
-.api-dot.off { background: var(--text3); }
+.api-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); transition: background .3s; }
+.api-dot.ok   { background: var(--green); }
+.api-dot.warn { background: var(--amber); }
 
+/* ── HERO ── */
 .hero {
   position: relative; z-index: 2;
   text-align: center;
@@ -199,11 +203,20 @@ header {
   animation: fadeUp 0.6s 0.2s ease both;
 }
 
+.hero-credit {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3);
+  animation: fadeUp 0.6s 0.25s ease both;
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+}
+
 @keyframes fadeUp {
   from { opacity:0; transform: translateY(16px); }
   to   { opacity:1; transform: translateY(0); }
 }
 
+/* ── TOOL NAV ── */
 .tool-nav {
   position: relative; z-index: 2;
   display: grid;
@@ -225,7 +238,7 @@ header {
   text-align: left;
 }
 
-.tool-card:hover { border-color: var(--border2); background: var(--surface2); }
+.tool-card:hover { border-color: var(--border2); background: var(--surface2); transform: translateY(-1px); }
 .tool-card.active {
   border-color: var(--accent);
   background: var(--surface2);
@@ -236,8 +249,7 @@ header {
   width: 34px; height: 34px;
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  margin-bottom: 10px;
+  font-size: 16px; margin-bottom: 10px;
 }
 
 .tool-card-icon.blue  { background: rgba(56,189,248,0.12); }
@@ -248,6 +260,7 @@ header {
 .tool-card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; letter-spacing: -0.2px; }
 .tool-card p  { font-size: 11px; color: var(--text3); line-height: 1.5; }
 
+/* ── MAIN ── */
 .main {
   position: relative; z-index: 2;
   max-width: 960px;
@@ -258,6 +271,7 @@ header {
 .page { display: none; animation: fadeUp 0.4s ease both; }
 .page.active { display: block; }
 
+/* ── PANEL ── */
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -287,14 +301,12 @@ header {
   display: block;
   font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 1px;
-  color: var(--text3);
-  margin-bottom: 6px;
+  color: var(--text3); margin-bottom: 6px;
 }
 
 textarea, input[type=text], input[type=number], select {
   width: 100%;
-  font-family: var(--mono);
-  font-size: 12.5px;
+  font-family: var(--mono); font-size: 12.5px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -319,12 +331,9 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
   border: 1px solid var(--border);
   border-radius: 20px;
   font-size: 11px; font-family: var(--mono);
-  cursor: pointer;
-  background: transparent;
-  color: var(--text3);
-  transition: all .15s;
+  cursor: pointer; background: transparent;
+  color: var(--text3); transition: all .15s;
 }
-
 .chip:hover { border-color: var(--border2); color: var(--text2); }
 .chip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
@@ -333,13 +342,11 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
   padding: 10px 20px;
   font-family: var(--sans); font-size: 13px; font-weight: 700;
   border-radius: var(--radius);
-  border: none; cursor: pointer;
-  transition: all .15s;
+  border: none; cursor: pointer; transition: all .15s;
 }
-
 .btn-primary { background: var(--accent); color: #080c10; }
-.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-.btn-primary:active { transform: scale(0.98); }
+.btn-primary:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(56,189,248,0.25); }
+.btn-primary:active:not(:disabled) { transform: scale(0.98); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .result-panel {
@@ -366,15 +373,11 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
 
 .result-body {
   padding: 1.25rem 1.5rem;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  line-height: 1.9;
-  color: var(--text2);
+  font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.9; color: var(--text2);
   min-height: 120px;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: pre-wrap; word-break: break-word;
 }
-
 .result-body .placeholder { color: var(--text3); font-style: italic; }
 
 .debug-options { display: flex; flex-direction: column; gap: 8px; }
@@ -384,33 +387,25 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  cursor: pointer;
-  background: var(--surface2);
-  transition: all .15s;
-  text-align: left;
+  cursor: pointer; background: var(--surface2);
+  transition: all .15s; text-align: left; width: 100%;
 }
-
 .dbg-opt:hover { border-color: var(--border2); }
 .dbg-opt.active { border-color: var(--accent); background: var(--surface3); }
 
 .dbg-num {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: var(--surface3);
-  border: 1px solid var(--border);
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--surface3); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 11px; color: var(--text3);
-  flex-shrink: 0;
+  font-family: var(--mono); font-size: 11px; color: var(--text3); flex-shrink: 0;
 }
-
 .dbg-opt.active .dbg-num { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
 .dbg-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.dbg-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.dbg-desc  { font-size: 11px; color: var(--text3); margin-top: 1px; }
 
 .spin {
-  display: inline-block;
-  width: 14px; height: 14px;
+  display: inline-block; width: 14px; height: 14px;
   border: 2px solid rgba(8,12,16,0.3);
   border-top-color: #080c10;
   border-radius: 50%;
@@ -419,24 +414,23 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .cursor::after {
-  content: '▋';
-  color: var(--accent);
+  content: '▋'; color: var(--accent);
   animation: blink 1s step-end infinite;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
+/* ── STATUS BAR ── */
 .status-bar {
   position: relative; z-index: 2;
   border-top: 1px solid var(--border);
-  background: rgba(8,12,16,0.9);
+  background: rgba(8,12,16,0.92);
   padding: 8px 2rem;
   display: flex; align-items: center; gap: 16px;
   font-family: var(--mono); font-size: 11px; color: var(--text3);
   flex-wrap: wrap;
 }
-
 .status-item { display: flex; align-items: center; gap: 5px; }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.status-dot  { width: 6px; height: 6px; border-radius: 50%; }
 
 @media (max-width: 700px) {
   .tool-nav { grid-template-columns: 1fr 1fr; }
@@ -447,7 +441,6 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
   .hero h1 { font-size: 2rem; }
   .api-bar { padding: 10px 1rem; }
 }
-
 @media (max-width: 480px) {
   .tool-nav { grid-template-columns: 1fr; }
 }
@@ -456,39 +449,46 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
 <body>
 <div class="glow2"></div>
 
+<!-- HEADER -->
 <header>
   <div class="logo">
-    <div class="logo-icon">⚙</div>
-    ML<span style="color:var(--accent)">Solver</span>
+    <div class="logo-icon">K</div>
+    Koudamki<span style="color:var(--accent)">.ai</span>
   </div>
   <div class="header-right">
-    <div class="header-badge">Powered by Groq</div>
+    <span class="header-sub">v3 · ML Solver</span>
+    <div class="header-badge">Groq LPU</div>
   </div>
 </header>
 
-<!-- API KEY BAR -->
+<!-- API BAR -->
 <div class="api-bar">
   <label>Groq API Key</label>
   <input type="password" id="groq-key" placeholder="gsk_..." oninput="updateStatus()">
   <label style="margin-left:8px">Model</label>
-  <select id="groq-model">
-    <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (best)</option>
-    <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (fast)</option>
-    <option value="mixtral-8x7b-32768">mixtral-8x7b-32768 (long ctx)</option>
-    <option value="gemma2-9b-it">gemma2-9b-it</option>
+  <select id="groq-model" onchange="updateStatus()">
+    <option value="llama-3.3-70b-versatile">Llama 3.3 70B ⚡ (best)</option>
+    <option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
+    <option value="mixtral-8x7b-32768">Mixtral 8×7B (long ctx)</option>
+    <option value="gemma2-9b-it">Gemma 2 9B</option>
+    <option value="llama-3.3-70b-specdec">Llama 3.3 70B SpecDec</option>
+    <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
   </select>
   <div class="api-status" id="api-status">
-    <div class="api-dot off" id="api-dot"></div>
+    <div class="api-dot" id="api-dot"></div>
     <span id="api-status-text">No key entered</span>
   </div>
 </div>
 
+<!-- HERO -->
 <div class="hero">
-  <div class="hero-tag">Groq-Powered Developer Toolkit</div>
-  <h1>Fix your AI & ML<br><span>problems instantly</span></h1>
+  <div class="hero-tag">Koudamki.ai · ML Solver · Groq-Powered</div>
+  <h1>Fix your AI &amp; ML<br><span>problems instantly</span></h1>
   <p>Four specialized tools — diagnostics, dataset analysis, experiment advice, and step-by-step debugging — all running on Groq's LPU engine.</p>
+  <div class="hero-credit">Created by Koudamki.Pranav</div>
 </div>
 
+<!-- TOOL NAV -->
 <div class="tool-nav">
   <div class="tool-card active" onclick="showPage('diag',this)">
     <div class="tool-card-icon blue">🩺</div>
@@ -503,12 +503,12 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
   <div class="tool-card" onclick="showPage('exp',this)">
     <div class="tool-card-icon amber">🧪</div>
     <h3>Experiment Advisor</h3>
-    <p>Hyperparameter tuning & experiment strategies</p>
+    <p>Hyperparameter tuning &amp; experiment strategies</p>
   </div>
   <div class="tool-card" onclick="showPage('debug',this)">
     <div class="tool-card-icon red">🐛</div>
     <h3>ML Debugger</h3>
-    <p>Tensor errors, NaN loss, pipeline & deploy bugs</p>
+    <p>Tensor errors, NaN loss, pipeline &amp; deploy bugs</p>
   </div>
 </div>
 
@@ -723,7 +723,7 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
           </div>
         </div>
         <div>
-          <label class="field-label">Current hyperparameters & config</label>
+          <label class="field-label">Current hyperparameters &amp; config</label>
           <textarea id="d3-config" rows="4" placeholder="e.g. lr=0.001, batch_size=32, epochs=50, dropout=0.3, optimizer=Adam, weight_decay=0, scheduler=None, augmentation=None..."></textarea>
         </div>
         <div>
@@ -809,42 +809,44 @@ textarea::placeholder, input::placeholder { color: var(--text3); }
 
 </div>
 
+<!-- STATUS BAR -->
 <div class="status-bar">
-  <div class="status-item"><div class="status-dot" id="sb-dot" style="background:var(--text3)"></div> <span id="sb-label">Groq API — no key</span></div>
+  <div class="status-item">
+    <div class="status-dot" id="sb-dot" style="background:var(--text3)"></div>
+    <span id="sb-label">Groq API — no key</span>
+  </div>
   <div class="status-item" id="sb-model">Model: —</div>
   <div class="status-item">Streaming: enabled</div>
+  <div class="status-item" style="margin-left:auto">Koudamki.ai · ML Solver · Groq LPU</div>
 </div>
 
 <script>
 function updateStatus() {
-  const key = document.getElementById('groq-key').value.trim();
+  const key   = document.getElementById('groq-key').value.trim();
   const model = document.getElementById('groq-model').value;
-  const dot = document.getElementById('api-dot');
-  const txt = document.getElementById('api-status-text');
+  const dot   = document.getElementById('api-dot');
+  const txt   = document.getElementById('api-status-text');
   const sbDot = document.getElementById('sb-dot');
-  const sbLabel = document.getElementById('sb-label');
-  const sbModel = document.getElementById('sb-model');
+  const sbLbl = document.getElementById('sb-label');
+  document.getElementById('sb-model').textContent = 'Model: ' + model;
+
   if (key.startsWith('gsk_') && key.length > 20) {
     dot.className = 'api-dot ok';
     txt.textContent = 'Key looks valid';
     sbDot.style.background = 'var(--green)';
-    sbLabel.textContent = 'Groq API ready';
+    sbLbl.textContent = 'Groq API — ready';
   } else if (key.length > 0) {
-    dot.className = 'api-dot off';
-    dot.style.background = 'var(--amber)';
+    dot.className = 'api-dot warn';
     txt.textContent = 'Key format unexpected';
     sbDot.style.background = 'var(--amber)';
-    sbLabel.textContent = 'Groq API — check key';
+    sbLbl.textContent = 'Groq API — check key';
   } else {
-    dot.className = 'api-dot off';
+    dot.className = 'api-dot';
     txt.textContent = 'No key entered';
     sbDot.style.background = 'var(--text3)';
-    sbLabel.textContent = 'Groq API — no key';
+    sbLbl.textContent = 'Groq API — no key';
   }
-  sbModel.textContent = 'Model: ' + model;
 }
-
-document.getElementById('groq-model').addEventListener('change', updateStatus);
 
 function showPage(id, card) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -881,9 +883,9 @@ function setLoading(btnId, resId, on, label) {
 }
 
 async function callGroq(prompt, resId, systemMsg) {
-  const key = document.getElementById('groq-key').value.trim();
+  const key   = document.getElementById('groq-key').value.trim();
   const model = document.getElementById('groq-model').value;
-  const res = document.getElementById(resId);
+  const res   = document.getElementById(resId);
 
   if (!key) {
     res.textContent = 'Error: Please enter your Groq API key in the bar at the top of the page.';
@@ -896,17 +898,14 @@ async function callGroq(prompt, resId, systemMsg) {
   try {
     const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
       body: JSON.stringify({
         model: model,
-        max_tokens: 1024,
+        max_tokens: 1200,
         stream: true,
         messages: [
           { role: 'system', content: systemMsg },
-          { role: 'user', content: prompt }
+          { role: 'user',   content: prompt }
         ]
       })
     });
@@ -919,8 +918,8 @@ async function callGroq(prompt, resId, systemMsg) {
     }
 
     const reader = r.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
+    const dec    = new TextDecoder();
+    let buf      = '';
 
     while (true) {
       const { done, value } = await reader.read();
@@ -929,15 +928,14 @@ async function callGroq(prompt, resId, systemMsg) {
       const lines = buf.split('\n');
       buf = lines.pop();
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const d = line.slice(6).trim();
-          if (d === '[DONE]') continue;
-          try {
-            const j = JSON.parse(d);
-            const delta = j.choices?.[0]?.delta?.content;
-            if (delta) res.textContent += delta;
-          } catch {}
-        }
+        if (!line.startsWith('data: ')) continue;
+        const d = line.slice(6).trim();
+        if (d === '[DONE]') continue;
+        try {
+          const j = JSON.parse(d);
+          const delta = j.choices?.[0]?.delta?.content;
+          if (delta) res.textContent += delta;
+        } catch {}
       }
     }
   } catch (e) {
@@ -949,96 +947,50 @@ async function callGroq(prompt, resId, systemMsg) {
 const SYS = 'You are a senior ML/AI engineer. Give precise, actionable answers. Use numbered steps for procedures. Be concise but complete. Plain text only — no markdown symbols like ** or ##. Use clear section breaks with a blank line.';
 
 async function runDiag() {
-  const page = document.getElementById('diag');
+  const page  = document.getElementById('diag');
   const chips = getChips(page);
-  const fw = document.getElementById('d1-fw').value;
-  const task = document.getElementById('d1-task').value;
+  const fw    = document.getElementById('d1-fw').value;
+  const task  = document.getElementById('d1-task').value;
   const input = document.getElementById('d1-input').value;
   setLoading('d1-btn','d1-result',true,'Run diagnostics');
-  const prompt = `ML DIAGNOSIS REQUEST
-Framework: ${fw}
-Task type: ${task}
-Problem types: ${chips}
-User description:
-${input || '(no additional context provided)'}
-
-Please provide:
-1. Root cause analysis — what is most likely causing this
-2. Step-by-step fix — concrete code changes or actions
-3. How to verify the fix worked
-4. Prevention tips for the future`;
+  const prompt = `ML DIAGNOSIS REQUEST\nFramework: ${fw}\nTask type: ${task}\nProblem types: ${chips}\nUser description:\n${input||'(no additional context provided)'}\n\nPlease provide:\n1. Root cause analysis — what is most likely causing this\n2. Step-by-step fix — concrete code changes or actions\n3. How to verify the fix worked\n4. Prevention tips for the future`;
   await callGroq(prompt,'d1-result',SYS);
   setLoading('d1-btn','d1-result',false,'Run diagnostics');
 }
 
 async function runData() {
-  const page = document.getElementById('data');
+  const page   = document.getElementById('data');
   const issues = getChips(page);
-  const rows = document.getElementById('d2-rows').value;
-  const feats = document.getElementById('d2-feats').value;
-  const miss = document.getElementById('d2-miss').value;
-  const type = document.getElementById('d2-type').value;
+  const rows   = document.getElementById('d2-rows').value;
+  const feats  = document.getElementById('d2-feats').value;
+  const miss   = document.getElementById('d2-miss').value;
+  const type   = document.getElementById('d2-type').value;
   const target = document.getElementById('d2-target').value;
-  const desc = document.getElementById('d2-desc').value;
+  const desc   = document.getElementById('d2-desc').value;
   setLoading('d2-btn','d2-result',true,'Analyze dataset');
-  const prompt = `DATASET ANALYSIS REQUEST
-Dataset: ${rows||'?'} rows, ${feats||'?'} features, ~${miss||'?'}% missing values
-Type: ${type} | Target: ${target}
-Known issues: ${issues}
-Details: ${desc || '(none provided)'}
-
-Provide:
-1. Data quality assessment — severity of each issue
-2. Specific fixes for each identified issue, with code examples
-3. Recommended preprocessing pipeline in order
-4. Feature engineering suggestions
-5. Warnings about potential data leakage or hidden issues`;
+  const prompt = `DATASET ANALYSIS REQUEST\nDataset: ${rows||'?'} rows, ${feats||'?'} features, ~${miss||'?'}% missing values\nType: ${type} | Target: ${target}\nKnown issues: ${issues}\nDetails: ${desc||'(none provided)'}\n\nProvide:\n1. Data quality assessment — severity of each issue\n2. Specific fixes for each identified issue, with code examples\n3. Recommended preprocessing pipeline in order\n4. Feature engineering suggestions\n5. Warnings about potential data leakage or hidden issues`;
   await callGroq(prompt,'d2-result',SYS);
   setLoading('d2-btn','d2-result',false,'Analyze dataset');
 }
 
 async function runExp() {
-  const model = document.getElementById('d3-model').value;
-  const metric = document.getElementById('d3-metric').value;
+  const model   = document.getElementById('d3-model').value;
+  const metric  = document.getElementById('d3-metric').value;
   const compute = document.getElementById('d3-compute').value;
-  const goal = document.getElementById('d3-goal').value;
-  const search = document.getElementById('d3-search').value;
-  const config = document.getElementById('d3-config').value;
+  const goal    = document.getElementById('d3-goal').value;
+  const search  = document.getElementById('d3-search').value;
+  const config  = document.getElementById('d3-config').value;
   setLoading('d3-btn','d3-result',true,'Get recommendations');
-  const prompt = `ML EXPERIMENT ADVICE REQUEST
-Model: ${model||'not specified'}
-Current metric: ${metric||'not provided'}
-Compute: ${compute}
-Goal: ${goal}
-Search strategy: ${search}
-Current config:
-${config || '(not provided)'}
-
-Provide:
-1. Top 5 hyperparameter changes to try, with specific values and expected impact
-2. Prioritized experiment order — what to try first
-3. Reasoning for each recommendation
-4. Recommended search strategy and why
-5. Diminishing returns warning — when to stop tuning`;
+  const prompt = `ML EXPERIMENT ADVICE REQUEST\nModel: ${model||'not specified'}\nCurrent metric: ${metric||'not provided'}\nCompute: ${compute}\nGoal: ${goal}\nSearch strategy: ${search}\nCurrent config:\n${config||'(not provided)'}\n\nProvide:\n1. Top 5 hyperparameter changes to try, with specific values and expected impact\n2. Prioritized experiment order — what to try first\n3. Reasoning for each recommendation\n4. Recommended search strategy and why\n5. Diminishing returns warning — when to stop tuning`;
   await callGroq(prompt,'d3-result',SYS);
   setLoading('d3-btn','d3-result',false,'Get recommendations');
 }
 
 async function runDebug() {
-  const cat = document.getElementById('d4-cat').value;
+  const cat  = document.getElementById('d4-cat').value;
   const code = document.getElementById('d4-input').value;
   setLoading('d4-btn','d4-result',true,'Debug it');
-  const prompt = `ML DEBUG REQUEST
-Category: ${cat}
-Code / Error:
-${code || '(no code or error provided)'}
-
-Provide:
-1. Exact root cause of the bug
-2. Fixed code or specific fix steps (include corrected code snippet)
-3. Explanation of why this error occurs
-4. How to verify the fix works
-5. How to prevent this class of bug in the future`;
+  const prompt = `ML DEBUG REQUEST\nCategory: ${cat}\nCode / Error:\n${code||'(no code or error provided)'}\n\nProvide:\n1. Exact root cause of the bug\n2. Fixed code or specific fix steps (include corrected code snippet)\n3. Explanation of why this error occurs\n4. How to verify the fix works\n5. How to prevent this class of bug in the future`;
   await callGroq(prompt,'d4-result',SYS);
   setLoading('d4-btn','d4-result',false,'Debug it');
 }
