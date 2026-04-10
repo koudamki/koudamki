@@ -1,3 +1,7 @@
 {
-  "functions": { "api/chat.js": { "maxDuration": 60 } }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/vapt", "dest": "/vapt.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
