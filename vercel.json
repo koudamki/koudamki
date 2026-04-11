@@ -3,5 +3,13 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/vapt", "dest": "/vapt.html" },
     { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).html",
+      "headers": [
+        { "key": "Content-Type", "value": "text/html; charset=utf-8" }
+      ]
+    }
   ]
 }
