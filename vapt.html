@@ -7,26 +7,25 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Courier New',monospace;background:#080c10;color:#e2e8f0;min-height:100vh;font-size:13px}
-/* NAV */
 nav{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;border-bottom:1px solid rgba(255,255,255,0.07);background:#0a0f14;position:sticky;top:0;z-index:100}
 .logo{font-size:14px;font-weight:700;color:#00ffb4;letter-spacing:0.08em;text-decoration:none;display:flex;align-items:center;gap:8px}
 .logo span{color:rgba(255,255,255,0.25);font-weight:400}
-.nav-right{display:flex;align-items:center;gap:8px}
-.back-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;font-family:inherit;text-decoration:none}
+.nav-right{display:flex;align-items:center;gap:10px}
+.back-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;font-family:inherit;text-decoration:none;transition:all 0.15s}
+.back-btn:hover{border-color:rgba(0,255,180,0.3);color:#00ffb4}
 .live-dot{width:7px;height:7px;border-radius:50%;background:#00ffb4;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-/* MODULE TABS */
-.module-tabs{display:flex;gap:4px;padding:1rem 1.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06);background:#0a0f14}
-.mtab{padding:8px 16px;border-radius:8px 8px 0 0;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:0.05em;background:transparent;color:rgba(255,255,255,0.35);font-family:inherit;border-bottom:2px solid transparent;transition:all 0.15s}
-.mtab.active{color:#00ffb4;border-bottom:2px solid #00ffb4;background:rgba(0,255,180,0.05)}
-/* MAIN */
+.module-tabs{display:flex;gap:2px;padding:0 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);background:#0a0f14;overflow-x:auto}
+.mtab{padding:10px 16px;border-radius:0;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:0.05em;background:transparent;color:rgba(255,255,255,0.35);font-family:inherit;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap}
+.mtab.active{color:#00ffb4;border-bottom:2px solid #00ffb4}
+.mtab:hover{color:rgba(255,255,255,0.6)}
 main{padding:1.5rem}
-/* STATS */
+.mod{display:none}
+.mod.active{display:block}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
 .stat-card{border-radius:10px;padding:1rem 1.25rem;background:#0a0f14}
 .stat-num{font-size:30px;font-weight:700;line-height:1}
 .stat-lbl{font-size:10px;color:rgba(255,255,255,0.3);margin-top:5px;letter-spacing:0.06em}
-/* KANBAN */
 .kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .kcol{background:#0a0f14;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem;min-height:300px}
 .kcol-header{display:flex;align-items:center;margin-bottom:14px}
@@ -45,16 +44,14 @@ main{padding:1.5rem}
 .mbtn{padding:2px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.3);font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.15s}
 .mbtn:hover{border-color:rgba(0,255,180,0.4);color:#00ffb4}
 .empty-col{color:rgba(255,255,255,0.12);font-size:11px;text-align:center;padding:2rem 0}
-/* REPORT */
-.report-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.report-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
 .hint{font-size:12px;color:rgba(255,255,255,0.3)}
 .btn-primary{padding:8px 18px;border-radius:8px;border:1px solid rgba(0,255,180,0.3);background:rgba(0,255,180,0.08);color:#00ffb4;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.05em;transition:all 0.15s}
 .btn-primary:hover{background:rgba(0,255,180,0.15)}
 .btn-sec{padding:6px 14px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;font-family:inherit;transition:all 0.15s}
-.btn-sec:hover{background:rgba(255,255,255,0.05)}
-.report-pre{background:#070b0f;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:1.5rem;font-family:monospace;font-size:12px;line-height:1.9;color:#a8c0d6;overflow-y:auto;max-height:500px;white-space:pre-wrap}
+.btn-sec:hover{background:rgba(255,255,255,0.05);color:#fff}
+.report-pre{background:#070b0f;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:1.5rem;font-family:'Courier New',monospace;font-size:12px;line-height:1.9;color:#a8c0d6;overflow-y:auto;max-height:500px;white-space:pre-wrap;word-break:break-word}
 .report-placeholder{background:#0a0f14;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:4rem;text-align:center;color:rgba(255,255,255,0.15);font-size:12px}
-/* SCANNER */
 .scanner-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem}
 .diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .diff-col{background:#0a0f14;border-radius:10px;padding:1rem}
@@ -63,21 +60,19 @@ main{padding:1.5rem}
 .diff-item-title{font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:4px}
 .diff-meta{display:flex;gap:8px;align-items:center}
 .diff-tag{font-size:10px;color:rgba(255,255,255,0.3)}
-/* DEFENSIVE */
 .vuln-sel{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
 .vsel-btn{padding:6px 14px;border-radius:7px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.35);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s}
 .vsel-btn.active{background:rgba(0,255,180,0.08);color:#00ffb4;border-color:rgba(0,255,180,0.3)}
 .code-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem}
 .code-label{font-size:10px;font-weight:700;letter-spacing:0.07em;margin-bottom:7px}
-pre.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:monospace;font-size:11px;line-height:1.7;color:#a8c0d6;overflow-x:auto;white-space:pre}
+.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:'Courier New',monospace;font-size:11px;line-height:1.7;color:#a8c0d6;overflow-x:auto;white-space:pre;display:block}
 .practices{background:#0a0f14;border:1px solid rgba(0,255,180,0.1);border-radius:10px;padding:1.25rem}
 .practices-title{font-size:10px;font-weight:700;color:#00ffb4;letter-spacing:0.08em;margin-bottom:12px;text-transform:uppercase}
 .prac{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:12px;color:rgba(255,255,255,0.6);border-bottom:1px solid rgba(255,255,255,0.04)}
 .prac:last-child{border-bottom:none}
 .prac-arrow{color:#00ffb4;font-size:10px;margin-top:2px;flex-shrink:0}
-/* VAPT INFO TABS (reference/mythos/agentic/chat) */
-.info-tabs{display:flex;gap:4px;margin-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:0}
-.itab{padding:7px 14px;border-radius:0;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:0.05em;background:transparent;color:rgba(255,255,255,0.35);font-family:inherit;border-bottom:2px solid transparent;transition:all 0.15s}
+.info-tabs{display:flex;gap:2px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:1.25rem}
+.itab{padding:8px 14px;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:0.05em;background:transparent;color:rgba(255,255,255,0.35);font-family:inherit;border-bottom:2px solid transparent;transition:all 0.15s}
 .itab.active{color:#00ffb4;border-bottom:2px solid #00ffb4}
 .icontent{display:none;flex-direction:column;gap:14px}
 .icontent.active{display:flex}
@@ -93,21 +88,21 @@ pre.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:monospa
 .pill{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);background:#0d1117}
 .banner{border-radius:10px;padding:0.85rem 1rem;display:flex;align-items:flex-start;gap:10px}
 .banner.warn{background:rgba(255,170,0,0.06);border:1px solid rgba(255,170,0,0.2)}
-.banner.info{background:rgba(0,180,255,0.06);border:1px solid rgba(0,180,255,0.2)}
-.banner-text{font-size:12px;line-height:1.6}
-.banner.warn .banner-text{color:rgba(255,170,0,0.85)}
-.banner.warn .banner-text strong{color:#ffaa00}
-.banner.info .banner-text{color:rgba(0,180,255,0.85)}
-.banner.info .banner-text strong{color:#00b4ff}
+.banner.info-b{background:rgba(0,180,255,0.06);border:1px solid rgba(0,180,255,0.2)}
+.btext{font-size:12px;line-height:1.6}
+.banner.warn .btext{color:rgba(255,170,0,0.85)}
+.banner.warn .btext strong{color:#ffaa00}
+.banner.info-b .btext{color:rgba(0,180,255,0.85)}
+.banner.info-b .btext strong{color:#00b4ff}
 .agentic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px}
 .acard{background:#0d1117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:0.85rem 1rem}
 .acard-num{font-size:10px;color:rgba(0,255,180,0.5);font-weight:700;letter-spacing:0.1em;margin-bottom:4px}
 .acard-title{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:3px}
 .acard-body{font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5}
-/* CHAT */
-.api-row{display:flex;gap:8px;margin-bottom:10px}
+.api-row{display:flex;gap:8px;margin-bottom:8px}
 .api-row input{flex:1;padding:0.5rem 0.75rem;font-size:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0d1117;color:#fff;font-family:inherit}
 .api-save{padding:0.5rem 0.9rem;font-size:11px;border-radius:8px;border:1px solid rgba(0,255,180,0.3);background:rgba(0,255,180,0.06);color:#00ffb4;cursor:pointer;font-family:inherit;font-weight:700}
+.api-hint{font-size:11px;color:rgba(0,255,180,0.6);margin-bottom:10px;padding:6px 10px;background:rgba(0,255,180,0.04);border-radius:6px;border:1px solid rgba(0,255,180,0.12);display:none}
 .quick-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .qbtn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.08);background:#0d1117;color:rgba(255,255,255,0.38);cursor:pointer;font-family:inherit;transition:all 0.15s}
 .qbtn:hover{border-color:rgba(0,255,180,0.3);color:#00ffb4}
@@ -118,61 +113,46 @@ pre.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:monospa
 .msg.loading{color:rgba(255,255,255,0.3);font-style:italic}
 .chat-input-row{display:flex;gap:8px}
 .chat-input-row input{flex:1;padding:0.5rem 0.85rem;font-size:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0d1117;color:#fff;font-family:inherit}
-.send-btn{padding:0.5rem 1.1rem;font-size:11px;border-radius:8px;border:1px solid rgba(0,255,180,0.3);background:rgba(0,255,180,0.08);color:#00ffb4;cursor:pointer;font-weight:700;font-family:inherit}
-.send-btn:hover{background:rgba(0,255,180,0.15)}
-/* RESPONSIVE */
-@media(max-width:768px){
-  .kanban{grid-template-columns:1fr 1fr}
-  .stats-row{grid-template-columns:1fr 1fr}
-  .code-grid{grid-template-columns:1fr}
-  .diff-grid{grid-template-columns:1fr}
-}
-@media(max-width:480px){
-  .kanban{grid-template-columns:1fr}
-  .stats-row{grid-template-columns:1fr 1fr}
-}
+.send-btn{padding:0.5rem 1.1rem;font-size:11px;border-radius:8px;border:1px solid rgba(0,255,180,0.3);background:rgba(0,255,180,0.08);color:#00ffb4;cursor:pointer;font-weight:700;font-family:inherit;transition:all 0.15s}
+.send-btn:hover{background:rgba(0,255,180,0.16)}
+@media(max-width:900px){.kanban{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.kanban{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.code-grid{grid-template-columns:1fr}.diff-grid{grid-template-columns:1fr}.scanner-stats{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="/" class="logo">◈ KOUDAMKI <span>/ VAPT SUITE</span></a>
+  <a href="/" class="logo">&#9670; KOUDAMKI <span>/ VAPT SUITE</span></a>
   <div class="nav-right">
     <div class="live-dot"></div>
     <span style="font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:0.05em" id="finding-count">7 FINDINGS</span>
-    <a href="/" class="back-btn">← Back to App</a>
+    <a href="/" class="back-btn">&larr; Back to App</a>
   </div>
 </nav>
 
 <div class="module-tabs">
-  <button class="mtab active" onclick="showModule('kanban',this)">⬡ Kanban</button>
-  <button class="mtab" onclick="showModule('report',this)">📄 Report</button>
-  <button class="mtab" onclick="showModule('scanner',this)">🔍 Scanner Diff</button>
-  <button class="mtab" onclick="showModule('defensive',this)">🛡 Defensive Lib</button>
-  <button class="mtab" onclick="showModule('vapt-info',this)">📚 VAPT Info</button>
+  <button class="mtab active" onclick="showModule('kanban',this)">&#11041; Kanban</button>
+  <button class="mtab" onclick="showModule('report',this)">&#128196; Report</button>
+  <button class="mtab" onclick="showModule('scanner',this)">&#128269; Scanner Diff</button>
+  <button class="mtab" onclick="showModule('defensive',this)">&#128737; Defensive Lib</button>
+  <button class="mtab" onclick="showModule('vapt-info',this)">&#128218; VAPT Info</button>
 </div>
 
 <main>
-  <!-- ═══ KANBAN ═══ -->
-  <div id="mod-kanban"></div>
+  <div id="mod-kanban" class="mod active"></div>
 
-  <!-- ═══ REPORT ═══ -->
-  <div id="mod-report" style="display:none">
-    <div class="report-actions">
+  <div id="mod-report" class="mod">
+    <div class="report-bar">
       <span class="hint">Compile all tracked findings into a structured stakeholder report.</span>
-      <button class="btn-primary" onclick="genReport()">⚡ Generate Report</button>
+      <button class="btn-primary" onclick="genReport()">&#9889; Generate Report</button>
     </div>
     <div id="report-out" class="report-placeholder">Click "Generate Report" to compile findings into a professional Markdown report.</div>
   </div>
 
-  <!-- ═══ SCANNER DIFF ═══ -->
-  <div id="mod-scanner" style="display:none"></div>
+  <div id="mod-scanner" class="mod"></div>
+  <div id="mod-defensive" class="mod"></div>
 
-  <!-- ═══ DEFENSIVE LIB ═══ -->
-  <div id="mod-defensive" style="display:none"></div>
-
-  <!-- ═══ VAPT INFO ═══ -->
-  <div id="mod-vapt-info" style="display:none">
+  <div id="mod-vapt-info" class="mod">
     <div class="info-tabs">
       <button class="itab active" onclick="iTab('ref',this)">Reference</button>
       <button class="itab" onclick="iTab('mythos',this)">Claude Mythos</button>
@@ -180,10 +160,8 @@ pre.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:monospa
       <button class="itab" onclick="iTab('chat',this)">AI Chat</button>
     </div>
 
-    <!-- Reference -->
     <div id="it-ref" class="icontent active">
-      <div>
-        <div class="sec-label">Roles</div>
+      <div><div class="sec-label">Roles</div>
         <div class="info-cards">
           <div class="icard"><div class="icard-title">Ethical / White Hat Hacker</div><div class="icard-body">Authorized hacking to find gaps before attackers do.</div></div>
           <div class="icard"><div class="icard-title">Penetration Tester</div><div class="icard-body">Actively exploits vulnerabilities to assess real-world impact.</div></div>
@@ -193,89 +171,71 @@ pre.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:monospa
           <div class="icard"><div class="icard-title">Third-Party Auditor</div><div class="icard-body">External firms hired for assessments and compliance audits.</div></div>
         </div>
       </div>
-      <div>
-        <div class="sec-label">Tools & Scanners</div>
+      <div><div class="sec-label">Tools &amp; Scanners</div>
         <div class="info-cards">
-          <div class="icard"><div class="icard-title">Vulnerability Scanner</div><div class="icard-body">Crawls systems for unpatched software & misconfigurations.</div></div>
-          <div class="icard"><div class="icard-title">DAST / Web App Scanners</div><div class="icard-body">Burp Suite, Acunetix — SQLi, XSS, CSRF detection.</div></div>
-          <div class="icard"><div class="icard-title">Network Scanners</div><div class="icard-body">Nmap, Nessus — open ports and vulnerable services.</div></div>
+          <div class="icard"><div class="icard-title">Vulnerability Scanner</div><div class="icard-body">Crawls systems for unpatched software &amp; misconfigurations.</div></div>
+          <div class="icard"><div class="icard-title">DAST / Web App Scanners</div><div class="icard-body">Burp Suite, Acunetix &mdash; SQLi, XSS, CSRF detection.</div></div>
+          <div class="icard"><div class="icard-title">Network Scanners</div><div class="icard-body">Nmap, Nessus &mdash; open ports and vulnerable services.</div></div>
           <div class="icard"><div class="icard-title">SAST Tools</div><div class="icard-body">Static source code analysis without executing the program.</div></div>
           <div class="icard"><div class="icard-title">SCA Tools</div><div class="icard-body">Scan open-source dependencies for known CVEs.</div></div>
         </div>
       </div>
-      <div>
-        <div class="sec-label">Key Processes</div>
-        <div class="pills">
-          <span class="pill">Vulnerability Assessment (VA)</span><span class="pill">Penetration Testing (PT)</span><span class="pill">VAPT</span><span class="pill">Vulnerability Management</span><span class="pill">Ethical Hacking</span><span class="pill">Threat Modeling</span><span class="pill">SCA</span>
-        </div>
+      <div><div class="sec-label">Key Processes</div>
+        <div class="pills"><span class="pill">Vulnerability Assessment (VA)</span><span class="pill">Penetration Testing (PT)</span><span class="pill">VAPT</span><span class="pill">Vulnerability Management</span><span class="pill">Ethical Hacking</span><span class="pill">Threat Modeling</span><span class="pill">SCA</span></div>
       </div>
-      <div>
-        <div class="sec-label">Popular Tools</div>
-        <div class="pills">
-          <span class="pill">Tenable Nessus</span><span class="pill">Qualys</span><span class="pill">Rapid7 InsightVM</span><span class="pill">OpenVAS</span><span class="pill">Burp Suite</span><span class="pill">Nmap</span><span class="pill">Metasploit</span>
-        </div>
+      <div><div class="sec-label">Popular Tools</div>
+        <div class="pills"><span class="pill">Tenable Nessus</span><span class="pill">Qualys</span><span class="pill">Rapid7 InsightVM</span><span class="pill">OpenVAS</span><span class="pill">Burp Suite</span><span class="pill">Nmap</span><span class="pill">Metasploit</span></div>
       </div>
     </div>
 
-    <!-- Mythos -->
     <div id="it-mythos" class="icontent">
-      <div class="banner warn"><span style="font-size:16px;flex-shrink:0">⚠️</span><div class="banner-text"><strong>Claude Mythos Preview</strong> — Anthropic's most powerful model, not publicly released due to its unprecedented offensive cybersecurity capabilities. Available only to Project Glasswing partners.</div></div>
-      <div>
-        <div class="sec-label">Core Capabilities</div>
+      <div class="banner warn"><span style="font-size:16px;flex-shrink:0">&#9888;&#65039;</span><div class="btext"><strong>Claude Mythos Preview</strong> &mdash; Anthropic's most powerful model, not publicly released due to its unprecedented offensive cybersecurity capabilities. Available only to Project Glasswing partners.</div></div>
+      <div><div class="sec-label">Core Capabilities</div>
         <div class="info-cards">
           <div class="icard hl"><div class="icard-title">Zero-Day Discovery</div><div class="icard-body">Automatically finds novel vulnerabilities in mature software missed by tools and researchers for years.</div></div>
-          <div class="icard hl"><div class="icard-title">Deep Codebase Reasoning</div><div class="icard-body">Analyzes large codebases like OpenBSD and FFmpeg — understanding system-level behavior.</div></div>
+          <div class="icard hl"><div class="icard-title">Deep Codebase Reasoning</div><div class="icard-body">Analyzes large codebases like OpenBSD and FFmpeg &mdash; understanding system-level behavior.</div></div>
           <div class="icard hl"><div class="icard-title">Defensive Optimization</div><div class="icard-body">Shifts security from reactive to proactive. Designed for "AI vs AI" defense at scale.</div></div>
           <div class="icard hl"><div class="icard-title">Exploit Reproduction</div><div class="icard-body">Accurately reproduces known vulnerabilities to validate patches and understand exploit chains.</div></div>
         </div>
       </div>
-      <div>
-        <div class="sec-label">Project Glasswing</div>
+      <div><div class="sec-label">Project Glasswing</div>
         <div class="info-cards">
           <div class="icard"><div class="icard-title">$100M credits committed</div><div class="icard-body">Anthropic's investment for partners securing critical global infrastructure.</div></div>
           <div class="icard"><div class="icard-title">Thousands of zero-days</div><div class="icard-body">High/critical vulnerabilities surviving decades of human review already found.</div></div>
-          <div class="icard"><div class="icard-title">89% accuracy</div><div class="icard-body">Expert contractors agreed exactly with Mythos severity assessments in 89% of reports.</div></div>
-          <div class="icard"><div class="icard-title">Available on</div><div class="icard-body">Claude API · Amazon Bedrock · Google Vertex AI · Microsoft Foundry (partners only).</div></div>
+          <div class="icard"><div class="icard-title">89% accuracy</div><div class="icard-body">Expert contractors agreed with Mythos severity assessments in 89% of reviewed reports.</div></div>
+          <div class="icard"><div class="icard-title">Available on</div><div class="icard-body">Claude API &middot; Amazon Bedrock &middot; Google Vertex AI &middot; Microsoft Foundry (partners only).</div></div>
         </div>
       </div>
-      <div>
-        <div class="sec-label">Why It's Restricted</div>
-        <div class="pills">
-          <span class="pill">Broke containment during testing</span><span class="pill">Too capable at offensive hacking</span><span class="pill">National security implications</span><span class="pill">Dual-use risk</span><span class="pill">Unprecedented exploit generation</span>
-        </div>
+      <div><div class="sec-label">Why It's Restricted</div>
+        <div class="pills"><span class="pill">Broke containment during testing</span><span class="pill">Too capable at offensive hacking</span><span class="pill">National security implications</span><span class="pill">Dual-use risk</span><span class="pill">Unprecedented exploit generation</span></div>
       </div>
     </div>
 
-    <!-- Agentic -->
     <div id="it-agentic" class="icontent">
-      <div class="banner info"><span style="font-size:16px;flex-shrink:0">🤖</span><div class="banner-text"><strong>Agentic framework</strong> — Mythos doesn't just generate text. It interacts with software, navigates codebases, runs tools, and iterates autonomously within isolated containers.</div></div>
-      <div>
-        <div class="sec-label">What It Can Do Autonomously</div>
+      <div class="banner info-b"><span style="font-size:16px;flex-shrink:0">&#129302;</span><div class="btext"><strong>Agentic framework</strong> &mdash; Mythos doesn't just generate text. It interacts with software, navigates codebases, runs tools, and iterates autonomously within isolated containers.</div></div>
+      <div><div class="sec-label">What It Can Do Autonomously</div>
         <div class="agentic-grid">
-          <div class="acard"><div class="acard-num">01</div><div class="acard-title">Security Scan & Audit</div><div class="acard-body">Deep automated auditing for buffer overflows, logic errors, and misconfigurations.</div></div>
-          <div class="acard"><div class="acard-num">02</div><div class="acard-title">PoC Generation</div><div class="acard-body">Creates functional exploits to prove a vulnerability is real — not just theoretical.</div></div>
+          <div class="acard"><div class="acard-num">01</div><div class="acard-title">Security Scan &amp; Audit</div><div class="acard-body">Deep automated auditing for buffer overflows, logic errors, and misconfigurations.</div></div>
+          <div class="acard"><div class="acard-num">02</div><div class="acard-title">PoC Generation</div><div class="acard-body">Creates functional exploits to prove a vulnerability is real &mdash; not just theoretical.</div></div>
           <div class="acard"><div class="acard-num">03</div><div class="acard-title">Automated Patch Generation</div><div class="acard-body">Suggests and tests code-level fixes for discovered bugs.</div></div>
-          <div class="acard"><div class="acard-num">04</div><div class="acard-title">Codebase Navigation</div><div class="acard-body">Navigates large, multi-file software projects — not just isolated snippets.</div></div>
-          <div class="acard"><div class="acard-num">05</div><div class="acard-title">Hypothesis & Validation</div><div class="acard-body">Reads code to hypothesize, runs software to confirm, adds debug logic as needed.</div></div>
+          <div class="acard"><div class="acard-num">04</div><div class="acard-title">Codebase Navigation</div><div class="acard-body">Navigates large, multi-file software projects &mdash; not just isolated snippets.</div></div>
+          <div class="acard"><div class="acard-num">05</div><div class="acard-title">Hypothesis &amp; Validation</div><div class="acard-body">Reads code to hypothesize, runs software to confirm, adds debug logic as needed.</div></div>
           <div class="acard"><div class="acard-num">06</div><div class="acard-title">Parallel Execution</div><div class="acard-body">Multiple agents run simultaneously, each focused on different files.</div></div>
-          <div class="acard"><div class="acard-num">07</div><div class="acard-title">Severity Triage</div><div class="acard-body">Ranks files by vulnerability likelihood (1–5) and auto-filters low-impact findings.</div></div>
+          <div class="acard"><div class="acard-num">07</div><div class="acard-title">Severity Triage</div><div class="acard-body">Ranks files by vulnerability likelihood (1&ndash;5) and auto-filters low-impact findings.</div></div>
           <div class="acard"><div class="acard-num">08</div><div class="acard-title">Bug Report Validation</div><div class="acard-body">A final agent validates all reports ensuring only high-quality findings are disclosed.</div></div>
         </div>
       </div>
-      <div>
-        <div class="sec-label">How It Works</div>
-        <div class="pills">
-          <span class="pill">Isolated container execution</span><span class="pill">Internet-sandboxed</span><span class="pill">Claude Code powered</span><span class="pill">Iterative experimentation</span><span class="pill">Multi-agent parallelism</span><span class="pill">Responsible disclosure</span>
-        </div>
+      <div><div class="sec-label">How It Works</div>
+        <div class="pills"><span class="pill">Isolated container execution</span><span class="pill">Internet-sandboxed</span><span class="pill">Claude Code powered</span><span class="pill">Iterative experimentation</span><span class="pill">Multi-agent parallelism</span><span class="pill">Responsible disclosure</span></div>
       </div>
     </div>
 
-    <!-- AI Chat -->
     <div id="it-chat" class="icontent">
       <div class="api-row">
-        <input type="password" id="chat-api-key" placeholder="Groq API key (auto-loads from saved key)"/>
+        <input type="password" id="chat-api-key" placeholder="Groq API key"/>
         <button class="api-save" onclick="saveApiKey()">Save</button>
       </div>
+      <div class="api-hint" id="api-hint">&#10003; Groq key loaded from your saved session &mdash; ready to chat</div>
       <div class="quick-btns">
         <button class="qbtn" onclick="quickAsk('What is VAPT and why is it important?')">What is VAPT?</button>
         <button class="qbtn" onclick="quickAsk('Which scanner should I use for a web app?')">Best scanner?</button>
@@ -288,354 +248,217 @@ pre.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:monospa
       </div>
       <div class="chat-input-row">
         <input type="text" id="chat-input" placeholder="Ask a security question..." onkeydown="if(event.key==='Enter')sendChat()"/>
-        <button class="send-btn" onclick="sendChat()">Send →</button>
+        <button class="send-btn" onclick="sendChat()">Send &rarr;</button>
       </div>
     </div>
   </div>
 </main>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-const SEV={
-  Critical:{c:"#ff2d55",bg:"rgba(255,45,85,0.12)",b:"rgba(255,45,85,0.35)"},
-  High:{c:"#ff6b00",bg:"rgba(255,107,0,0.12)",b:"rgba(255,107,0,0.35)"},
-  Medium:{c:"#ffd60a",bg:"rgba(255,214,10,0.1)",b:"rgba(255,214,10,0.3)"},
-  Low:{c:"#30d158",bg:"rgba(48,209,88,0.1)",b:"rgba(48,209,88,0.3)"}
-};
-const STAGES=["Discovered","In Progress","Remediation","Resolved"];
-let vulns=[
+var SEV={Critical:{c:"#ff2d55",bg:"rgba(255,45,85,0.12)",b:"rgba(255,45,85,0.35)"},High:{c:"#ff6b00",bg:"rgba(255,107,0,0.12)",b:"rgba(255,107,0,0.35)"},Medium:{c:"#ffd60a",bg:"rgba(255,214,10,0.1)",b:"rgba(255,214,10,0.3)"},Low:{c:"#30d158",bg:"rgba(48,209,88,0.1)",b:"rgba(48,209,88,0.3)"}};
+var STAGES=["Discovered","In Progress","Remediation","Resolved"];
+var vulns=[
   {id:"V001",title:"SQL Injection in Login",severity:"Critical",cvss:9.8,stage:"Discovered",cve:"CVE-2024-1234",target:"auth.api/login",discovered:"2025-04-01",desc:"Unsanitised user input passed directly to SQL query in authentication handler."},
-  {id:"V002",title:"Reflected XSS – Search",severity:"High",cvss:7.4,stage:"In Progress",cve:"CVE-2024-5678",target:"web/search",discovered:"2025-04-03",desc:"User-controlled q param reflected without encoding in search results page."},
+  {id:"V002",title:"Reflected XSS - Search",severity:"High",cvss:7.4,stage:"In Progress",cve:"CVE-2024-5678",target:"web/search",discovered:"2025-04-03",desc:"User-controlled q param reflected without encoding in search results page."},
   {id:"V003",title:"IDOR on Profile API",severity:"High",cvss:7.1,stage:"In Progress",cve:"N/A",target:"api/v2/profile",discovered:"2025-04-04",desc:"Numeric user IDs in REST endpoint allow horizontal privilege escalation."},
   {id:"V004",title:"Outdated OpenSSL 1.0.2",severity:"Medium",cvss:5.9,stage:"Remediation",cve:"CVE-2023-0286",target:"server/tls",discovered:"2025-03-28",desc:"Server running end-of-life OpenSSL with known memory corruption flaws."},
   {id:"V005",title:"Missing HSTS Header",severity:"Low",cvss:3.1,stage:"Resolved",cve:"N/A",target:"nginx config",discovered:"2025-03-20",desc:"HTTP Strict-Transport-Security header absent, enabling SSL-stripping attacks."},
   {id:"V006",title:"Stored XSS in Comments",severity:"Critical",cvss:9.0,stage:"Discovered",cve:"N/A",target:"blog/comments",discovered:"2025-04-08",desc:"HTML content in comment body persisted to DB without sanitisation."},
   {id:"V007",title:"Weak JWT Secret",severity:"High",cvss:8.1,stage:"Remediation",cve:"N/A",target:"auth/jwt",discovered:"2025-04-02",desc:"JWT signed with short, predictable secret susceptible to brute-force."}
 ];
-const SA=[
-  {id:"S-001",title:"SQL Injection – /login",severity:"Critical",cvss:9.8,source:"SQLMap"},
+var SA=[
+  {id:"S-001",title:"SQL Injection - /login",severity:"Critical",cvss:9.8,source:"SQLMap"},
   {id:"S-002",title:"Open Port 8080",severity:"Low",cvss:2.1,source:"Nmap"},
   {id:"S-003",title:"Reflected XSS /search",severity:"High",cvss:7.4,source:"OWASP ZAP"},
   {id:"S-004",title:"Directory Listing",severity:"Medium",cvss:5.3,source:"Nikto"},
   {id:"S-005",title:"SSL/TLS BEAST Attack",severity:"Medium",cvss:5.9,source:"SSLyze"}
 ];
-const SB=[
-  {id:"M-001",title:"SQL Injection – /login",severity:"Critical",cvss:9.8,source:"Manual"},
+var SB=[
+  {id:"M-001",title:"SQL Injection - /login",severity:"Critical",cvss:9.8,source:"Manual"},
   {id:"M-002",title:"IDOR on /api/v2/profile",severity:"High",cvss:7.1,source:"Manual"},
   {id:"M-003",title:"Reflected XSS /search",severity:"High",cvss:7.4,source:"Manual"},
   {id:"M-004",title:"Weak JWT Secret",severity:"High",cvss:8.1,source:"Manual"},
   {id:"M-005",title:"Missing HSTS Header",severity:"Low",cvss:3.1,source:"Manual"}
 ];
-const DLIB={
+var DLIB={
   SQLi:{label:"SQL Injection",
-    bad:`// ❌ INSECURE
-const q = "SELECT * FROM users WHERE email = '" + email + "'";
-db.query(q);
-// Attacker: ' OR '1'='1 → full table dump`,
-    good:`// ✅ SECURE — Parameterised Query
-const q = "SELECT * FROM users WHERE email = $1";
-db.query(q, [email]);
-// Input never interpolated into SQL`,
+    bad:"// INSECURE\nconst q = \"SELECT * FROM users WHERE email = '\" + email + \"'\";\ndb.query(q);\n// Attacker: ' OR '1'='1 -> full table dump",
+    good:"// SECURE - Parameterised Query\nconst q = \"SELECT * FROM users WHERE email = $1\";\ndb.query(q, [email]);\n// Input never interpolated into SQL",
     practices:["Always use parameterised queries or prepared statements","Never concatenate user input into SQL strings","Apply allowlist input validation on all fields","Use a WAF as a secondary defence layer","Restrict DB user to minimum required permissions","Log and alert on SQL error responses"]},
   XSS:{label:"Cross-Site Scripting",
-    bad:`// ❌ INSECURE
-document.getElementById('out').innerHTML =
-  'Hello, ' + req.query.name;
-// ?name=<script>stealCookies()</script>`,
-    good:`// ✅ SECURE
-import DOMPurify from 'dompurify';
-const safe = DOMPurify.sanitize(req.query.name);
-document.getElementById('out').textContent =
-  'Hello, ' + safe;
-// Also set strict Content-Security-Policy`,
+    bad:"// INSECURE\ndocument.getElementById('out').innerHTML =\n  'Hello, ' + req.query.name;\n// ?name=<script>stealCookies()</script>",
+    good:"// SECURE\nimport DOMPurify from 'dompurify';\nconst safe = DOMPurify.sanitize(req.query.name);\ndocument.getElementById('out').textContent =\n  'Hello, ' + safe;\n// Also set strict Content-Security-Policy",
     practices:["Use textContent over innerHTML wherever possible","Sanitise all HTML with DOMPurify before DOM insertion","Implement a strict Content-Security-Policy header","Encode output in context: HTML, JS, or URL","Set HttpOnly + Secure flags on all cookies","Enable X-XSS-Protection and X-Content-Type-Options"]},
   IDOR:{label:"Insecure Direct Object Ref",
-    bad:`// ❌ INSECURE — No ownership check
-app.get('/api/doc/:id', async (req, res) => {
-  const doc = await db.find({ id: req.params.id });
-  res.json(doc); // Returns ANY user's document
-});`,
-    good:`// ✅ SECURE — Ownership enforced
-app.get('/api/doc/:id', authenticate, async (req, res) => {
-  const doc = await db.find({
-    id: req.params.id,
-    ownerId: req.user.id
-  });
-  if (!doc) return res.status(404).end();
-  res.json(doc);
-});`,
+    bad:"// INSECURE - No ownership check\napp.get('/api/doc/:id', async (req, res) => {\n  const doc = await db.find({ id: req.params.id });\n  res.json(doc); // Returns ANY user's document\n});",
+    good:"// SECURE - Ownership enforced\napp.get('/api/doc/:id', authenticate, async (req, res) => {\n  const doc = await db.find({\n    id: req.params.id,\n    ownerId: req.user.id\n  });\n  if (!doc) return res.status(404).end();\n  res.json(doc);\n});",
     practices:["Verify resource ownership server-side on every request","Use UUIDs instead of sequential integer IDs in URLs","Implement RBAC/ABAC for all resource access","Never expose internal DB IDs in public APIs","Centralise authorisation into a single middleware","Audit all API endpoints for missing ownership checks"]},
   BufferOverflow:{label:"Buffer Overflow",
-    bad:`// ❌ INSECURE — C: No bounds check
-char buf[64];
-gets(buf);
-// reads unlimited input → stack smash
-// Result: arbitrary code execution`,
-    good:`// ✅ SECURE — Bounded read
-fgets(buf, sizeof(buf), stdin);
-
-// Rust (memory-safe by design):
-let mut input = String::new();
-io::stdin().read_line(&mut input).unwrap();
-// Rust ownership prevents overflow entirely`,
+    bad:"// INSECURE - C: No bounds check\nchar buf[64];\ngets(buf);\n// reads unlimited input -> stack smash\n// Result: arbitrary code execution",
+    good:"// SECURE - Bounded read\nfgets(buf, sizeof(buf), stdin);\n\n// Rust (memory-safe by design):\nlet mut input = String::new();\nio::stdin().read_line(&mut input).unwrap();\n// Rust ownership prevents overflow entirely",
     practices:["Use memory-safe languages (Rust, Go) for new systems","Replace gets() with fgets(), strcpy() with strlcpy()","Enable stack canaries, ASLR, and NX bit flags","Use static analysis: CodeQL, Coverity, Semgrep","Fuzz test all input-handling functions regularly","Apply AddressSanitizer during development builds"]}
 };
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function badge(sev){
-  const s=SEV[sev];
-  return `<span class="badge" style="background:${s.bg};color:${s.c};border:1px solid ${s.b}">${sev}</span>`;
-}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function badge(sev){var s=SEV[sev];return '<span class="badge" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+sev+'</span>';}
 function norm(t){return t.toLowerCase().replace(/[^a-z0-9]/g,"");}
 
-// ─── MODULE SWITCHING ────────────────────────────────────────────────────────
 function showModule(name,el){
-  ["kanban","report","scanner","defensive","vapt-info"].forEach(m=>{
-    document.getElementById("mod-"+m).style.display=m===name?"block":"none";
+  ["kanban","report","scanner","defensive","vapt-info"].forEach(function(m){
+    document.getElementById("mod-"+m).style.display=(m===name)?"block":"none";
   });
-  document.querySelectorAll(".mtab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".mtab").forEach(function(t){t.classList.remove("active");});
   el.classList.add("active");
 }
 
-// ─── KANBAN ──────────────────────────────────────────────────────────────────
 function renderKanban(){
-  const counts={Critical:0,High:0,Medium:0,Low:0};
-  vulns.forEach(v=>counts[v.severity]++);
+  var counts={Critical:0,High:0,Medium:0,Low:0};
+  vulns.forEach(function(v){counts[v.severity]++;});
   document.getElementById("finding-count").textContent=vulns.length+" FINDINGS";
-  let h=`<div class="stats-row">`;
-  for(const[sev,n] of Object.entries(counts)){
-    const s=SEV[sev];
-    h+=`<div class="stat-card" style="border:1px solid ${s.b}">
-      <div class="stat-num" style="color:${s.c}">${n}</div>
-      <div class="stat-lbl">${sev.toUpperCase()}</div>
-    </div>`;
-  }
-  h+=`</div><div class="kanban">`;
-  for(const stage of STAGES){
-    const sv=vulns.filter(v=>v.stage===stage);
-    h+=`<div class="kcol">
-      <div class="kcol-header">
-        <span class="kcol-title">${stage}</span>
-        <span class="kcol-count">${sv.length}</span>
-      </div>`;
-    if(!sv.length)h+=`<div class="empty-col">No items</div>`;
-    for(const v of sv){
-      const s=SEV[v.severity];
-      const others=STAGES.filter(st=>st!==stage);
-      h+=`<div class="vcard" style="border-left:3px solid ${s.c}">
-        <div class="vcard-top"><span class="vid">${v.id}</span>${badge(v.severity)}</div>
-        <div class="vtitle">${v.title}</div>
-        <div class="vtarget">${v.target}</div>
-        <div class="vfoot">
-          <span class="cvss-val">CVSS ${v.cvss}</span>
-          <span class="vdate">${v.discovered}</span>
-        </div>
-        <div class="move-btns">${others.map(o=>`<button class="mbtn" onclick="moveVuln('${v.id}','${o.replace(/'/g,"\\'")}')">→ ${o}</button>`).join("")}</div>
-      </div>`;
-    }
-    h+=`</div>`;
-  }
-  h+=`</div>`;
+  var h='<div class="stats-row">';
+  Object.keys(counts).forEach(function(sev){
+    var s=SEV[sev];
+    h+='<div class="stat-card" style="border:1px solid '+s.b+'"><div class="stat-num" style="color:'+s.c+'">'+counts[sev]+'</div><div class="stat-lbl">'+sev.toUpperCase()+'</div></div>';
+  });
+  h+='</div><div class="kanban">';
+  STAGES.forEach(function(stage){
+    var sv=vulns.filter(function(v){return v.stage===stage;});
+    h+='<div class="kcol"><div class="kcol-header"><span class="kcol-title">'+stage+'</span><span class="kcol-count">'+sv.length+'</span></div>';
+    if(!sv.length)h+='<div class="empty-col">No items</div>';
+    sv.forEach(function(v){
+      var s=SEV[v.severity];
+      var others=STAGES.filter(function(st){return st!==stage;});
+      h+='<div class="vcard" style="border-left:3px solid '+s.c+'">';
+      h+='<div class="vcard-top"><span class="vid">'+v.id+'</span>'+badge(v.severity)+'</div>';
+      h+='<div class="vtitle">'+esc(v.title)+'</div>';
+      h+='<div class="vtarget">'+esc(v.target)+'</div>';
+      h+='<div class="vfoot"><span class="cvss-val">CVSS '+v.cvss+'</span><span class="vdate">'+v.discovered+'</span></div>';
+      h+='<div class="move-btns">';
+      others.forEach(function(o){h+='<button class="mbtn" onclick="moveVuln(\''+v.id+'\',\''+o.replace(/'/g,"\\'")+'\')">&rarr; '+esc(o)+'</button>';});
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
   document.getElementById("mod-kanban").innerHTML=h;
 }
+
 function moveVuln(id,stage){
-  vulns=vulns.map(v=>v.id===id?{...v,stage}:v);
+  vulns=vulns.map(function(v){return v.id===id?Object.assign({},v,{stage:stage}):v;});
   renderKanban();
 }
 
-// ─── REPORT ──────────────────────────────────────────────────────────────────
 function genReport(){
-  const counts={Critical:0,High:0,Medium:0,Low:0};
-  vulns.forEach(v=>counts[v.severity]++);
-  const rs=((counts.Critical*10+counts.High*7+counts.Medium*4+counts.Low)/(vulns.length||1)).toFixed(1);
-  const resolved=vulns.filter(v=>v.stage==="Resolved").length;
-  const date=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
-  const report=`# VAPT Assessment Report
-Prepared by: Koudamki Security Suite
-Date: ${date}
-Classification: CONFIDENTIAL
-
----
-
-## Executive Summary
-
-A comprehensive VAPT engagement was conducted. Total vulnerabilities: ${vulns.length}
-
-| Severity  | Count |
-|-----------|-------|
-| Critical  | ${counts.Critical} |
-| High      | ${counts.High} |
-| Medium    | ${counts.Medium} |
-| Low       | ${counts.Low} |
-
-Overall Risk Score: ${rs}/10
-Resolved: ${resolved}/${vulns.length} (${Math.round(resolved/vulns.length*100)}%)
-Immediate Action Required: ${counts.Critical+counts.High} findings
-
----
-
-## Technical Findings (Critical & High)
-
-${vulns.filter(v=>v.severity==="Critical"||v.severity==="High").map((v,i)=>`${i+1}. ${v.title}
-   ID: ${v.id} | CVE: ${v.cve}
-   Severity: ${v.severity} | CVSS: ${v.cvss}
-   Target: ${v.target} | Status: ${v.stage}
-   Description: ${v.desc}
-`).join("\n")}
----
-
-## Remediation Steps
-
-${vulns.map((v,i)=>`${i+1}. [${v.severity}] ${v.title} — Apply vendor patch or implement input validation as appropriate.`).join("\n")}
-
----
-Report generated by Koudamki VAPT Suite. Handle with appropriate data classification.`;
-
-  document.getElementById("report-out").innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <span class="hint">Markdown preview — copy and render via Pandoc or md-to-pdf</span>
-      <button class="btn-sec" onclick="navigator.clipboard.writeText(document.getElementById('rtext').textContent).then(()=>this.textContent='✓ Copied!')">📋 Copy</button>
-    </div>
-    <pre class="report-pre" id="rtext">${report}</pre>`;
+  var counts={Critical:0,High:0,Medium:0,Low:0};
+  vulns.forEach(function(v){counts[v.severity]++;});
+  var rs=((counts.Critical*10+counts.High*7+counts.Medium*4+counts.Low)/(vulns.length||1)).toFixed(1);
+  var resolved=vulns.filter(function(v){return v.stage==="Resolved";}).length;
+  var date=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+  var critHigh=vulns.filter(function(v){return v.severity==="Critical"||v.severity==="High";});
+  var findings=critHigh.map(function(v,i){
+    return (i+1)+". "+v.title+"\n   ID: "+v.id+" | CVE: "+v.cve+"\n   Severity: "+v.severity+" | CVSS: "+v.cvss+"\n   Target: "+v.target+" | Status: "+v.stage+"\n   Description: "+v.desc;
+  }).join("\n\n");
+  var remSteps=vulns.map(function(v,i){return (i+1)+". ["+v.severity+"] "+v.title+" -- Apply vendor patch or implement input validation.";}).join("\n");
+  var report="# VAPT Assessment Report\nPrepared by: Koudamki Security Suite\nDate: "+date+"\nClassification: CONFIDENTIAL\n\n---\n\n## Executive Summary\n\nTotal vulnerabilities: "+vulns.length+"\n\nSeverity   | Count\n-----------|------\nCritical   | "+counts.Critical+"\nHigh       | "+counts.High+"\nMedium     | "+counts.Medium+"\nLow        | "+counts.Low+"\n\nRisk Score: "+rs+"/10\nResolved: "+resolved+"/"+vulns.length+" ("+Math.round(resolved/vulns.length*100)+"%)\nImmediate Action: "+(counts.Critical+counts.High)+" findings\n\n---\n\n## Technical Findings (Critical & High)\n\n"+findings+"\n\n---\n\n## Remediation Steps\n\n"+remSteps+"\n\n---\nReport generated by Koudamki VAPT Suite.";
+  window._report=report;
+  document.getElementById("report-out").innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="hint">Markdown preview</span><button class="btn-sec" id="cbtn" onclick="copyReport()">&#128203; Copy</button></div><pre class="report-pre" id="rtext">'+esc(report)+'</pre>';
+}
+function copyReport(){
+  if(window._report){navigator.clipboard.writeText(window._report).then(function(){var b=document.getElementById("cbtn");b.textContent="Copied!";setTimeout(function(){b.textContent="Copy";},2000);});}
 }
 
-// ─── SCANNER DIFF ─────────────────────────────────────────────────────────────
 function renderScanner(){
-  const confirmed=[],fp=[],missed=[];
-  SA.forEach(a=>{
-    const m=SB.find(b=>norm(b.title).includes(norm(a.title).slice(0,7))||norm(a.title).includes(norm(b.title).slice(0,7)));
-    if(m)confirmed.push({s:a,m});else fp.push(a);
+  var confirmed=[],fp=[],missed=[];
+  SA.forEach(function(a){
+    var m=SB.find(function(b){return norm(b.title).indexOf(norm(a.title).slice(0,7))>-1||norm(a.title).indexOf(norm(b.title).slice(0,7))>-1;});
+    if(m)confirmed.push({s:a,m:m});else fp.push(a);
   });
-  SB.forEach(b=>{
-    const inA=SA.some(a=>norm(a.title).includes(norm(b.title).slice(0,7))||norm(b.title).includes(norm(a.title).slice(0,7)));
+  SB.forEach(function(b){
+    var inA=SA.some(function(a){return norm(a.title).indexOf(norm(b.title).slice(0,7))>-1||norm(b.title).indexOf(norm(a.title).slice(0,7))>-1;});
     if(!inA)missed.push(b);
   });
-  let h=`<div class="scanner-stats">
-    <div class="stat-card" style="border:1px solid rgba(48,209,88,0.3)"><div class="stat-num" style="color:#30d158">${confirmed.length}</div><div class="stat-lbl">CONFIRMED</div></div>
-    <div class="stat-card" style="border:1px solid rgba(255,214,10,0.3)"><div class="stat-num" style="color:#ffd60a">${fp.length}</div><div class="stat-lbl">POTENTIAL FALSE POSITIVES</div></div>
-    <div class="stat-card" style="border:1px solid rgba(255,45,85,0.3)"><div class="stat-num" style="color:#ff2d55">${missed.length}</div><div class="stat-lbl">MISSED BY SCANNER</div></div>
-  </div><div class="diff-grid">`;
-
-  // Scanner A column
-  h+=`<div class="diff-col" style="border:1px solid rgba(0,229,255,0.12)">
-    <div class="diff-col-title" style="color:rgba(0,229,255,0.6)">🔵 Scanner A — Nmap / ZAP (${SA.length})</div>`;
-  SA.forEach(f=>{
-    const isC=confirmed.some(c=>c.s.id===f.id);
-    const isFP=fp.some(x=>x.id===f.id);
-    const bg=isC?"rgba(48,209,88,0.07)":isFP?"rgba(255,214,10,0.07)":"rgba(255,255,255,0.02)";
-    const bl=isC?"#30d158":isFP?"#ffd60a":"rgba(255,255,255,0.08)";
-    h+=`<div class="diff-item" style="background:${bg};border-left-color:${bl}">
-      <div class="diff-item-title">${f.title}</div>
-      <div class="diff-meta">${badge(f.severity)}<span class="diff-tag">${isC?"✓ Confirmed":isFP?"⚠ Potential FP":""}</span></div>
-    </div>`;
+  var h='<div class="scanner-stats"><div class="stat-card" style="border:1px solid rgba(48,209,88,0.3)"><div class="stat-num" style="color:#30d158">'+confirmed.length+'</div><div class="stat-lbl">CONFIRMED</div></div><div class="stat-card" style="border:1px solid rgba(255,214,10,0.3)"><div class="stat-num" style="color:#ffd60a">'+fp.length+'</div><div class="stat-lbl">POTENTIAL FALSE POSITIVES</div></div><div class="stat-card" style="border:1px solid rgba(255,45,85,0.3)"><div class="stat-num" style="color:#ff2d55">'+missed.length+'</div><div class="stat-lbl">MISSED BY SCANNER</div></div></div><div class="diff-grid">';
+  h+='<div class="diff-col" style="border:1px solid rgba(0,229,255,0.12)"><div class="diff-col-title" style="color:rgba(0,229,255,0.6)">Scanner A &mdash; Nmap / ZAP ('+SA.length+')</div>';
+  SA.forEach(function(f){
+    var isC=confirmed.some(function(c){return c.s.id===f.id;});
+    var isFP=fp.some(function(x){return x.id===f.id;});
+    var bg=isC?"rgba(48,209,88,0.07)":isFP?"rgba(255,214,10,0.07)":"rgba(255,255,255,0.02)";
+    var bl=isC?"#30d158":isFP?"#ffd60a":"rgba(255,255,255,0.08)";
+    h+='<div class="diff-item" style="background:'+bg+';border-left-color:'+bl+'"><div class="diff-item-title">'+esc(f.title)+'</div><div class="diff-meta">'+badge(f.severity)+'<span class="diff-tag">'+(isC?"&#10003; Confirmed":isFP?"&#9888; Potential FP":"")+'</span></div></div>';
   });
-  h+=`</div>`;
-
-  // Manual Audit column
-  h+=`<div class="diff-col" style="border:1px solid rgba(255,165,0,0.12)">
-    <div class="diff-col-title" style="color:rgba(255,165,0,0.6)">🟠 Manual Audit (${SB.length})</div>`;
-  SB.forEach(f=>{
-    const isC=confirmed.some(c=>c.m.id===f.id);
-    const isMissed=missed.some(x=>x.id===f.id);
-    const bg=isC?"rgba(48,209,88,0.07)":isMissed?"rgba(255,45,85,0.07)":"rgba(255,255,255,0.02)";
-    const bl=isC?"#30d158":isMissed?"#ff2d55":"rgba(255,255,255,0.08)";
-    h+=`<div class="diff-item" style="background:${bg};border-left-color:${bl}">
-      <div class="diff-item-title">${f.title}</div>
-      <div class="diff-meta">${badge(f.severity)}<span class="diff-tag">${isC?"✓ Confirmed":isMissed?"✗ Missed by Scanner":""}</span></div>
-    </div>`;
+  h+='</div><div class="diff-col" style="border:1px solid rgba(255,165,0,0.12)"><div class="diff-col-title" style="color:rgba(255,165,0,0.6)">Manual Audit ('+SB.length+')</div>';
+  SB.forEach(function(f){
+    var isC=confirmed.some(function(c){return c.m.id===f.id;});
+    var isMissed=missed.some(function(x){return x.id===f.id;});
+    var bg=isC?"rgba(48,209,88,0.07)":isMissed?"rgba(255,45,85,0.07)":"rgba(255,255,255,0.02)";
+    var bl=isC?"#30d158":isMissed?"#ff2d55":"rgba(255,255,255,0.08)";
+    h+='<div class="diff-item" style="background:'+bg+';border-left-color:'+bl+'"><div class="diff-item-title">'+esc(f.title)+'</div><div class="diff-meta">'+badge(f.severity)+'<span class="diff-tag">'+(isC?"&#10003; Confirmed":isMissed?"&#10007; Missed":"")+'</span></div></div>';
   });
-  h+=`</div></div>`;
+  h+='</div></div>';
   document.getElementById("mod-scanner").innerHTML=h;
 }
 
-// ─── DEFENSIVE LIB ───────────────────────────────────────────────────────────
-let activeLib="SQLi";
+var activeLib="SQLi";
 function renderDefensive(key){
   activeLib=key||activeLib;
-  const lib=DLIB[activeLib];
-  let h=`<div class="vuln-sel">`;
-  for(const[k,v] of Object.entries(DLIB)){
-    h+=`<button class="vsel-btn${k===activeLib?" active":""}" onclick="renderDefensive('${k}')">${v.label}</button>`;
-  }
-  h+=`</div>
-  <div class="code-grid">
-    <div>
-      <div class="code-label" style="color:#ff2d55">❌ INSECURE PATTERN</div>
-      <pre class="cblock" style="border:1px solid rgba(255,45,85,0.2)">${lib.bad}</pre>
-    </div>
-    <div>
-      <div class="code-label" style="color:#30d158">✅ SECURE PATTERN</div>
-      <pre class="cblock" style="border:1px solid rgba(48,209,88,0.2)">${lib.good}</pre>
-    </div>
-  </div>
-  <div class="practices">
-    <div class="practices-title">Defensive best practices — ${lib.label}</div>
-    ${lib.practices.map(p=>`<div class="prac"><span class="prac-arrow">▸</span><span>${p}</span></div>`).join("")}
-  </div>`;
+  var lib=DLIB[activeLib];
+  var h='<div class="vuln-sel">';
+  Object.keys(DLIB).forEach(function(k){h+='<button class="vsel-btn'+(k===activeLib?" active":"")+'" onclick="renderDefensive(\''+k+'\')">'+DLIB[k].label+'</button>';});
+  h+='</div><div class="code-grid"><div><div class="code-label" style="color:#ff2d55">&#10060; INSECURE PATTERN</div><code class="cblock" style="border:1px solid rgba(255,45,85,0.2)">'+esc(lib.bad)+'</code></div><div><div class="code-label" style="color:#30d158">&#10003; SECURE PATTERN</div><code class="cblock" style="border:1px solid rgba(48,209,88,0.2)">'+esc(lib.good)+'</code></div></div>';
+  h+='<div class="practices"><div class="practices-title">Defensive best practices &mdash; '+lib.label+'</div>';
+  lib.practices.forEach(function(p){h+='<div class="prac"><span class="prac-arrow">&#9658;</span><span>'+esc(p)+'</span></div>';});
+  h+='</div>';
   document.getElementById("mod-defensive").innerHTML=h;
 }
 
-// ─── VAPT INFO TABS ──────────────────────────────────────────────────────────
 function iTab(name,el){
-  document.querySelectorAll(".itab").forEach(t=>t.classList.remove("active"));
-  document.querySelectorAll(".icontent").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".itab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".icontent").forEach(function(t){t.classList.remove("active");});
   document.getElementById("it-"+name).classList.add("active");
   el.classList.add("active");
 }
 
-// ─── AI CHAT ─────────────────────────────────────────────────────────────────
 function saveApiKey(){
-  const k=document.getElementById("chat-api-key").value.trim();
-  if(k){localStorage.setItem("groq_key",k);document.getElementById("chat-api-key").placeholder="Key saved!";}
+  var k=document.getElementById("chat-api-key").value.trim();
+  if(k){localStorage.setItem("groq_key",k);document.getElementById("chat-api-key").placeholder="Key saved!";document.getElementById("api-hint").style.display="block";}
 }
 function quickAsk(q){
   iTab("chat",document.querySelectorAll(".itab")[3]);
-  setTimeout(()=>{document.getElementById("chat-input").value=q;sendChat();},100);
+  setTimeout(function(){document.getElementById("chat-input").value=q;sendChat();},150);
 }
 function addMsg(text,cls){
-  const div=document.createElement("div");
+  var div=document.createElement("div");
   div.className="msg "+cls;
   div.textContent=text;
-  const msgs=document.getElementById("chat-messages");
+  var msgs=document.getElementById("chat-messages");
   msgs.appendChild(div);
   msgs.scrollTop=msgs.scrollHeight;
   return div;
 }
 async function sendChat(){
-  const input=document.getElementById("chat-input");
-  const msg=input.value.trim();
+  var input=document.getElementById("chat-input");
+  var msg=input.value.trim();
   if(!msg)return;
   input.value="";
   addMsg(msg,"user");
-  const loading=addMsg("Thinking...","ai loading");
-  const apiKey=document.getElementById("chat-api-key").value.trim()||localStorage.getItem("groq_key")||"";
-  if(!apiKey){loading.textContent="Please enter your Groq API key above.";loading.classList.remove("loading");return;}
+  var loading=addMsg("Thinking...","ai loading");
+  var apiKey=document.getElementById("chat-api-key").value.trim()||localStorage.getItem("groq_key")||"";
+  if(!apiKey){loading.textContent="No Groq API key found. Enter your key above and click Save.";loading.classList.remove("loading");return;}
   try{
-    const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},
-      body:JSON.stringify({
-        model:"llama-3.3-70b-versatile",
-        max_tokens:500,
-        messages:[
-          {role:"system",content:"You are a cybersecurity and VAPT expert. Answer concisely and practically about vulnerability assessment, penetration testing, security tools, and defensive coding."},
-          {role:"user",content:msg}
-        ]
-      })
-    });
-    const data=await res.json();
-    loading.textContent=data.choices?.[0]?.message?.content||"No response received.";
+    var res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},body:JSON.stringify({model:"llama-3.3-70b-versatile",max_tokens:500,messages:[{role:"system",content:"You are a cybersecurity and VAPT expert. Answer concisely and practically."},{role:"user",content:msg}]})});
+    var data=await res.json();
+    if(data.error){loading.textContent="API Error: "+data.error.message;}
+    else{loading.textContent=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||"No response received.";}
     loading.classList.remove("loading");
-  }catch(e){
-    loading.textContent="Error: "+e.message;
-    loading.classList.remove("loading");
-  }
+  }catch(e){loading.textContent="Network error: "+e.message;loading.classList.remove("loading");}
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-renderKanban();
-renderScanner();
-renderDefensive();
+(function(){
+  if(localStorage.getItem("groq_key")){document.getElementById("api-hint").style.display="block";}
+  renderKanban();
+  renderScanner();
+  renderDefensive();
+})();
 </script>
 </body>
 </html>
