@@ -197,6 +197,219 @@ function solveProblem(){const type=getChip('prob-type'),rows=document.getElement
 function solveEquation(){const cat=getChip('eq-cat'),eq=document.getElementById('eq-input').value,fmt=document.getElementById('eq-format').value,notation=document.getElementById('eq-notation').value;if(!eq.trim()){showToast('Please enter an equation.');return;}const sys=`You are a math and ML expert. Solve equations clearly. Format: ${fmt}. Notation: ${notation}.\nNumber each step. Show intermediate results. Explain intuition after math.`;callGroq(sys,`Category: ${cat}\n\nProblem: ${eq}\n\nSolve with ${fmt} format.`,'eq-result','eq-output','eq-spin','eq-status','eq-btn','Solving equation...');}
 function recommendModel(){const domain=getChip('domain-chips'),desc=document.getElementById('rec-desc').value,compute=document.getElementById('rec-compute').value,data=document.getElementById('rec-data').value,speed=document.getElementById('rec-speed').value,interp=document.getElementById('rec-interp').value;const sys=`You are an ML architect. Recommend models with precision.\nFormat:\nTOP RECOMMENDATION (confidence /10, pros, cons, when to use)\nALTERNATIVE 1 | ALTERNATIVE 2 (same format)\nMODELS TO AVOID (and why)\nQUICK START CODE (5-10 lines)`;const p=`Domain: ${domain}\nTask: ${desc||'General '+domain}\nCompute: ${compute}\nData: ${data}\nSpeed: ${speed}\nInterpretability: ${interp}`;callGroq(sys,p,'rec-result','rec-output','rec-spin','rec-status','rec-btn','Finding best models...');}
 function buildPipeline(){const goal=document.getElementById('pipe-goal').value;if(!goal.trim()){showToast('Please describe your pipeline goal.');return;}const lang=document.getElementById('pipe-lang').value,deploy=document.getElementById('pipe-deploy').value,stages=getChips('stage-chips').join(', '),detail=getChip('detail-chips');const sys=`You are a senior ML engineer. Build complete, production-quality ML pipelines.\nDetail: ${detail}. Include comments. Make code runnable. Structure: overview then each stage with code then how to run.`;const p=`Goal: ${goal}\nFramework: ${lang}\nDeployment: ${deploy}\nStages: ${stages}\nDetail: ${detail}\n\nGenerate the full pipeline.`;callGroq(sys,p,'pipe-result','pipe-output','pipe-spin','pipe-status','pipe-btn','Building your pipeline...');}
+</script> 
+  cat > inject_ruflo.py << 'PYEOF'
+with open("index.html", "r", encoding="utf-8") as f:
+    content = f.read()
+
+bubble_code = """
+<!-- ============================================ -->
+<!--         RUFLO AI AGENT BUBBLE               -->
+<!-- ============================================ -->
+<style>
+  #ruflo-bubble {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 62px; height: 62px; border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    box-shadow: 0 4px 20px rgba(14,165,233,0.5);
+    cursor: pointer; z-index: 99999;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: rfpulse 2.5s infinite;
+  }
+  #ruflo-bubble:hover { transform: scale(1.12); }
+  @keyframes rfpulse {
+    0%,100%{ box-shadow: 0 4px 20px rgba(14,165,233,0.5); }
+    50%    { box-shadow: 0 4px 40px rgba(99,102,241,0.9); }
+  }
+  #ruflo-bubble::after {
+    content: "Ruflo AI Agent";
+    position: absolute; right: 70px; top: 50%;
+    transform: translateY(-50%);
+    background: #1e293b; color: #e2e8f0;
+    font-size: 12px; font-family: monospace;
+    white-space: nowrap; padding: 5px 10px;
+    border-radius: 6px; opacity: 0;
+    pointer-events: none; transition: opacity 0.2s;
+  }
+  #ruflo-bubble:hover::after { opacity: 1; }
+
+  #ruflo-panel {
+    position: fixed; bottom: 105px; right: 28px;
+    width: 420px; max-width: calc(100vw - 40px);
+    height: 570px; max-height: calc(100vh - 140px);
+    background: #0f172a; border: 1px solid #334155;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    z-index: 99998; display: none; flex-direction: column;
+    overflow: hidden; animation: rfslide 0.3s ease;
+  }
+  #ruflo-panel.rf-open { display: flex; }
+  @keyframes rfslide {
+    from { opacity:0; transform: translateY(18px) scale(0.97); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+  #rfhdr {
+    display:flex; align-items:center; gap:10px;
+    padding:13px 16px;
+    background: linear-gradient(90deg,#0f172a,#1e293b);
+    border-bottom:1px solid #334155;
+  }
+  #rfhdr .rfdot {
+    width:8px; height:8px; border-radius:50%;
+    background:#22c55e; box-shadow:0 0 6px #22c55e;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  #rfhdr span { color:#e2e8f0; font-family:monospace; font-size:14px; font-weight:bold; flex:1; }
+  #rfclose { background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer; }
+  #rfclose:hover { color:#f87171; }
+
+  #rftabs { display:flex; background:#1e293b; border-bottom:1px solid #334155; }
+  .rftab {
+    flex:1; padding:10px 0; font-size:12px; font-family:monospace;
+    color:#64748b; background:none; border:none; cursor:pointer;
+    border-bottom:2px solid transparent; transition:all 0.2s;
+  }
+  .rftab.active { color:#0ea5e9; border-bottom-color:#0ea5e9; }
+  .rftab:hover { color:#e2e8f0; }
+
+  #rfbody { flex:1; overflow-y:auto; padding:14px; font-family:monospace; }
+  #rfbody::-webkit-scrollbar{width:4px;}
+  #rfbody::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
+
+  .rfcard {
+    background:#1e293b; border:1px solid #334155;
+    border-radius:10px; padding:14px; margin-bottom:12px;
+  }
+  .rfcard h4 { color:#0ea5e9; margin:0 0 6px; font-size:13px; }
+  .rfcard p  { color:#94a3b8; margin:0; font-size:12px; line-height:1.6; }
+  .rfcard code {
+    display:block; margin-top:8px;
+    background:#0f172a; padding:8px 10px;
+    border-radius:6px; color:#86efac;
+    font-size:11px; line-height:1.7;
+    white-space:pre-wrap; overflow-x:auto;
+  }
+  .rfbtn {
+    display:block; width:100%; padding:12px; margin-top:4px;
+    background:linear-gradient(135deg,#0ea5e9,#6366f1);
+    color:white; border:none; border-radius:8px;
+    font-family:monospace; font-size:13px; font-weight:bold;
+    cursor:pointer; text-decoration:none; text-align:center;
+    transition:opacity 0.2s, transform 0.1s;
+  }
+  .rfbtn:hover{ opacity:0.88; transform:translateY(-1px); }
+</style>
+
+<button id="ruflo-bubble" onclick="rfToggle()" title="Ruflo AI Agent">🌊</button>
+
+<div id="ruflo-panel">
+  <div id="rfhdr">
+    <div class="rfdot"></div>
+    <span>🌊 Ruflo AI Agent Suite</span>
+    <button id="rfclose" onclick="rfToggle()">✕</button>
+  </div>
+  <div id="rftabs">
+    <button class="rftab active" onclick="rfTab(this,'overview')">Overview</button>
+    <button class="rftab" onclick="rfTab(this,'install')">Install</button>
+    <button class="rftab" onclick="rfTab(this,'commands')">Commands</button>
+  </div>
+  <div id="rfbody">
+
+    <div id="rftab-overview">
+      <div class="rfcard">
+        <h4>🌊 What is Ruflo?</h4>
+        <p>The leading agent orchestration platform for Claude. Deploy intelligent multi-agent swarms, coordinate autonomous workflows, and build conversational AI systems with 314 MCP tools.</p>
+      </div>
+      <div class="rfcard">
+        <h4>⚡ Key Features</h4>
+        <p>
+          🤖 100+ Specialized Agents<br>
+          🐝 Swarm Intelligence (hierarchical / mesh)<br>
+          🧠 Self-Learning Memory across sessions<br>
+          🔗 314 MCP Tools built-in<br>
+          🔐 Zero-trust Agent Federation<br>
+          🖥️ Web UI — no install needed to try
+        </p>
+      </div>
+      <a class="rfbtn" href="https://github.com/ruvnet/ruflo" target="_blank" rel="noopener">📖 View Full Docs on GitHub →</a>
+    </div>
+
+    <div id="rftab-install" style="display:none">
+      <div class="rfcard">
+        <h4>⚡ Quickest Way (npx)</h4>
+        <code>npx ruflo@latest init --wizard</code>
+      </div>
+      <div class="rfcard">
+        <h4>🌐 Global Install</h4>
+        <code>npm install -g ruflo@latest</code>
+      </div>
+      <div class="rfcard">
+        <h4>🔌 Add as MCP Server in Claude Code</h4>
+        <code>claude mcp add ruflo -- npx -y @claude-flow/cli@latest</code>
+      </div>
+      <div class="rfcard">
+        <h4>🐚 One-line curl Install</h4>
+        <code>curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/ruflo@main/scripts/install.sh | bash</code>
+      </div>
+    </div>
+
+    <div id="rftab-commands" style="display:none">
+      <div class="rfcard">
+        <h4>🚀 Spawn an Agent</h4>
+        <code>npx claude-flow agent spawn --type coder --name "my-coder"</code>
+      </div>
+      <div class="rfcard">
+        <h4>🐝 Init a Swarm</h4>
+        <code>npx claude-flow swarm init --topology hierarchical --max-agents 5</code>
+      </div>
+      <div class="rfcard">
+        <h4>🧠 Search Memory</h4>
+        <code>npx claude-flow memory search -q "your query"</code>
+      </div>
+      <div class="rfcard">
+        <h4>🩺 Health Check</h4>
+        <code>npx claude-flow doctor --fix</code>
+      </div>
+      <a class="rfbtn" href="https://github.com/ruvnet/ruflo/releases" target="_blank" rel="noopener">🌊 Get Latest Release →</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function rfToggle() {
+    document.getElementById('ruflo-panel').classList.toggle('rf-open');
+  }
+  function rfTab(btn, tab) {
+    document.querySelectorAll('.rftab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    ['overview','install','commands'].forEach(id => {
+      document.getElementById('rftab-'+id).style.display = (id===tab)?'block':'none';
+    });
+  }
+  document.addEventListener('click', function(e) {
+    const panel = document.getElementById('ruflo-panel');
+    const bubble = document.getElementById('ruflo-bubble');
+    if (panel.classList.contains('rf-open') && !panel.contains(e.target) && e.target !== bubble) {
+      panel.classList.remove('rf-open');
+    }
+  });
 </script>
+<!-- ============================================ -->
+<!--         END RUFLO BUBBLE                    -->
+<!-- ============================================ -->
+"""
+
+if "</body>" in content:
+    content = content.replace("</body>", bubble_code + "\n</body>", 1)
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(content)
+    print("SUCCESS: Ruflo bubble injected before </body>")
+else:
+    print("ERROR: Could not find </body> tag in index.html")
+PYEOF
 </body>
 </html>
