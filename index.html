@@ -1,415 +1,1127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koudamki ML Solver</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#050a0e;--bg2:#0a1219;--panel:#0d1a24;--border:#1a2e3d;--cyan:#00e5ff;--green:#39ff85;--orange:#ff6b35;--purple:#bd93f9;--text:#c9dde8;--text2:#7a9fb5;--text3:#3d6278;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
-@keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+:root{
+  --bg:#050507;--surface:#0d0d12;--surface2:#13131a;--surface3:#1a1a24;
+  --border:#1e1e2a;--border2:#2a2a38;
+  --green:#00ff88;--green2:#00cc6a;--green-dim:#003322;
+  --blue:#4da6ff;--purple:#9b6dff;--amber:#ffb347;--red:#ff6b6b;
+  --text:#d4d4e0;--muted:#5a5a70;--dim:#3a3a50;
+  --font:'JetBrains Mono',monospace;
+  --r:8px;--r2:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:200;background:rgba(5,5,7,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:16px}
+.nav-logo{font-size:16px;font-weight:600;color:var(--green);letter-spacing:-0.5px;margin-right:8px}
+.nav-logo span{color:var(--muted);font-weight:300}
+.nav-live{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:1px}
+.nav-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-spacer{flex:1}
+.nav-key-wrap{display:flex;align-items:center;gap:8px}
+.nav-key-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.nav-key{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-family:var(--font);font-size:11px;color:var(--text);width:220px;outline:none}
+.nav-key:focus{border-color:var(--green)}
+.nav-model{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-family:var(--font);font-size:11px;color:var(--text);outline:none;cursor:pointer}
+.nav-model:focus{border-color:var(--green)}
+.nav-save{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 10px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
+.nav-save:hover{border-color:var(--green);color:var(--green)}
+.nav-saved{color:var(--green);font-size:10px;display:none}
+.nav-saved.show{display:block}
+
+/* CONTEXT BAR */
+.ctx-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px}
+.ctx-toggle{display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;user-select:none}
+.ctx-toggle:hover{color:var(--text)}
+.ctx-badge{background:var(--green-dim);color:var(--green);border-radius:4px;padding:1px 6px;font-size:10px}
+.ctx-toggle .arrow{transition:transform .2s}
+.ctx-toggle.open .arrow{transform:rotate(90deg)}
+.ctx-panel{display:none;padding:0 0 12px;border-top:1px solid var(--border)}
+.ctx-panel.open{display:block}
+.ctx-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.ctx-field{display:flex;flex-direction:column;gap:4px}
+.ctx-field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.ctx-field input,.ctx-field textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:none}
+.ctx-field input:focus,.ctx-field textarea:focus{border-color:var(--green)}
+.ctx-actions{display:flex;gap:8px;margin-top:10px;align-items:center}
+.ctx-hint{font-size:10px;color:var(--muted);margin-left:auto}
+.ctx-clear{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer}
+.ctx-clear:hover{border-color:var(--red);color:var(--red)}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 52px)}
+
+/* SIDEBAR */
+.sidebar{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto}
+.sidebar-section{padding:4px 12px 8px;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:8px}
+.sidebar-section:first-child{margin-top:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:12px;color:var(--muted)}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--green);border-left-color:var(--green);background:var(--green-dim)}
+.nav-item .num{font-size:9px;color:var(--dim);min-width:16px}
+.nav-item.active .num{color:var(--green2)}
+.nav-item .ico{font-size:14px;width:18px;text-align:center}
+
+/* MAIN */
+.main{flex:1;padding:24px;min-width:0;overflow-y:auto}
+.page{display:none}
+.page.active{display:block}
+
+/* PAGE HEADER */
+.pg-head{margin-bottom:20px}
+.pg-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:4px}
+.pg-sub{font-size:11px;color:var(--muted);line-height:1.7}
+.pg-crumbs{display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:10px;color:var(--dim)}
+.pg-crumbs span{color:var(--muted)}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld.full{grid-column:1/-1}
+.fld label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.fld input,.fld select,.fld textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 12px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:vertical;transition:border .2s;-webkit-appearance:none;appearance:none}
+.fld select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235a5a70' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--green)}
+.fld textarea{line-height:1.65}
+
+/* CHIPS */
+.chip-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.chip{padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border2);cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;font-family:var(--font)}
+.chip.on{background:rgba(0,255,136,.1);color:var(--green);border-color:var(--green)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;font-family:var(--font);font-size:12px;font-weight:500;border-radius:var(--r);cursor:pointer;transition:all .2s;border:1px solid transparent;text-decoration:none}
+.btn-primary{background:var(--green);color:#000;border-color:var(--green)}
+.btn-primary:hover{background:var(--green2)}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.btn-link{background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.2);color:var(--green);font-size:11px;padding:6px 12px}
+.btn-link:hover{background:rgba(0,255,136,.14)}
+.btn-blue{background:rgba(77,166,255,.1);border-color:rgba(77,166,255,.3);color:var(--blue);font-size:11px;padding:6px 12px}
+.btn-blue:hover{background:rgba(77,166,255,.18)}
+.btn-amber{background:rgba(255,179,71,.08);border-color:rgba(255,179,71,.25);color:var(--amber);font-size:11px;padding:6px 12px}
+.btn-amber:hover{background:rgba(255,179,71,.15)}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+
+/* RESULT */
+.result{margin-top:16px;border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden}
+.result-head{background:var(--surface2);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.result-head-left{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.result-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.result-head-right{display:flex;gap:6px}
+.result-body{background:var(--surface);padding:16px;font-size:13px;line-height:1.85;white-space:pre-wrap;min-height:80px;max-height:500px;overflow-y:auto;color:var(--text)}
+.result-placeholder{color:var(--muted);font-size:12px;font-style:italic}
+.result-actions{background:var(--surface2);border-top:1px solid var(--border);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.result-actions-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+
+/* COPY BTN */
+.copy-btn{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:4px 10px;font-family:var(--font);font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s}
+.copy-btn:hover{border-color:var(--green);color:var(--green)}
+.copy-btn.copied{color:var(--green);border-color:var(--green)}
+
+/* FOLLOW-UP */
+.followup{border-top:1px solid var(--border);background:var(--surface2)}
+.followup-head{padding:8px 16px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.followup-input-row{display:flex;gap:0;padding:8px 12px;gap:8px;align-items:flex-end}
+.followup-input{flex:1;background:var(--surface3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 12px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:none;min-height:36px;max-height:120px;line-height:1.5}
+.followup-input:focus{border-color:var(--green)}
+.followup-send{background:var(--green);border:none;border-radius:var(--r);padding:8px 14px;font-family:var(--font);font-size:11px;color:#000;cursor:pointer;font-weight:500;transition:all .15s;flex-shrink:0}
+.followup-send:hover{background:var(--green2)}
+.followup-send:disabled{opacity:.4;cursor:not-allowed}
+.followup-history{padding:0 16px 8px;display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto}
+.fu-msg{padding:8px 12px;border-radius:var(--r);font-size:12px;line-height:1.7;white-space:pre-wrap}
+.fu-msg.user{background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.1);color:var(--text)}
+.fu-msg.assistant{background:var(--surface3);border:1px solid var(--border);color:var(--text)}
+.fu-msg-label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.fu-msg.user .fu-msg-label{color:var(--green)}
+.fu-msg.assistant .fu-msg-label{color:var(--muted)}
+
+/* SPINNER */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,255,136,.2);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-header{position:sticky;top:0;z-index:100;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(5,10,14,0.93);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;}
-.logo{display:flex;align-items:center;gap:10px;}
-.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--cyan),var(--green));border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:13px;color:#000;}
-.logo-text{font-weight:800;font-size:18px;letter-spacing:-.5px;}.logo-text span{color:var(--cyan);}
-.logo-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;}
-.badge{font-family:var(--mono);font-size:10px;color:var(--green);border:1px solid rgba(57,255,133,.4);padding:4px 10px;border-radius:3px;letter-spacing:1px;animation:pulse 2s infinite;}
-.api-bar{position:relative;z-index:10;background:rgba(255,107,53,0.07);border-bottom:1px solid rgba(255,107,53,0.25);padding:10px 28px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.api-bar label{font-family:var(--mono);font-size:10px;color:var(--orange);letter-spacing:1px;white-space:nowrap;}
-.api-bar input{flex:1;min-width:200px;background:rgba(0,0,0,.4);border:1px solid rgba(255,107,53,.4);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 12px;border-radius:5px;outline:none;transition:border .2s;}
-.api-bar input:focus{border-color:var(--orange);}
-.api-bar input::placeholder{color:var(--text3);}
-.api-save{padding:7px 14px;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.5);color:var(--orange);font-family:var(--mono);font-size:10px;border-radius:5px;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.api-save:hover{background:rgba(255,107,53,.25);}
-.api-ok{font-family:var(--mono);font-size:10px;color:var(--green);display:none;}
-.model-select{background:rgba(0,0,0,.4);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10px;padding:7px 10px;border-radius:5px;outline:none;}
-.hero{position:relative;z-index:5;padding:50px 28px 34px;text-align:center;}
-.hero-tag{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;border:1px solid rgba(0,229,255,.3);padding:5px 14px;border-radius:3px;margin-bottom:16px;background:rgba(0,229,255,.05);animation:fadein .5s ease;}
-.hero h1{font-weight:800;font-size:clamp(26px,5vw,52px);line-height:1.1;letter-spacing:-2px;margin-bottom:14px;animation:fadein .7s ease;}
-.hero h1 .c{color:var(--cyan);}.hero h1 .g{color:var(--green);}
-.hero p{font-family:var(--mono);font-size:12px;color:var(--text2);max-width:500px;margin:0 auto;line-height:1.9;animation:fadein .9s ease;}
-.tabs-wrap{position:relative;z-index:5;display:flex;justify-content:center;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);}
-.tabs-wrap::-webkit-scrollbar{display:none;}
-.tab-btn{flex-shrink:0;padding:14px 22px;font-family:var(--sans);font-weight:600;font-size:13px;color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;position:relative;top:1px;}
-.tab-btn:hover{color:var(--text);}
-.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan);}
-.tab-num{font-family:var(--mono);font-size:9px;background:rgba(0,229,255,.1);color:var(--cyan);padding:2px 6px;border-radius:3px;}
-.main{position:relative;z-index:5;max-width:920px;margin:0 auto;padding:36px 20px 80px;}
-.tab-panel{display:none;animation:fadein .35s ease;}
-.tab-panel.active{display:block;}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:26px;margin-bottom:18px;}
-.card-hd{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
-.card-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5);}
-.card-dot.g{background:var(--green);box-shadow:0 0 10px rgba(57,255,133,.5);}
-.card-dot.o{background:var(--orange);box-shadow:0 0 10px rgba(255,107,53,.5);}
-.card-dot.p{background:var(--purple);box-shadow:0 0 10px rgba(189,147,249,.5);}
-.card-title{font-weight:700;font-size:15px;}
-.card-desc{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:20px;line-height:1.8;}
-label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:7px;}
-input,textarea,select{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:11px 14px;border-radius:7px;outline:none;transition:border .2s;resize:vertical;}
-input:focus,textarea:focus,select:focus{border-color:var(--cyan);}
-select option{background:#0d1a24;}
-.field{margin-bottom:16px;}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-@media(max-width:580px){.row{grid-template-columns:1fr;}}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
-.chip{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--mono);font-size:10px;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none;}
-.chip:hover{border-color:rgba(0,229,255,.4);color:var(--text);}
-.chip.sel{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08);}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:7px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;border:none;transition:all .2s;letter-spacing:.3px;}
-.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;}
-.btn-primary:hover{opacity:.85;transform:translateY(-1px);}
-.btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none;}
-.result-box{background:#020c12;border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:20px;font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--text);min-height:80px;white-space:pre-wrap;word-break:break-word;display:none;}
-.result-box.show{display:block;}
-.result-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.spinner{width:10px;height:10px;border:1.5px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;display:none;}
-.toast{position:fixed;bottom:28px;right:28px;background:var(--panel);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:10px 18px;border-radius:7px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
-.toast.show{opacity:1;transform:translateY(0);}
+
+/* STATUS */
+.status{font-size:10px;color:var(--muted);margin-top:6px;min-height:14px;display:flex;align-items:center;gap:6px}
+
+/* DEBUG STEPS */
+.dsteps{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.dstep{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px}
+.dstep:hover,.dstep.active{border-color:var(--green);background:rgba(0,255,136,.04)}
+.dicon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;background:var(--green-dim);color:var(--green)}
+.dicon.git{background:rgba(255,179,71,.08);color:var(--amber)}
+.dstep-info .t{font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px}
+.dstep-info .s{font-size:11px;color:var(--muted)}
+
+/* QUICK CMDS */
+.qcmds{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px}
+.qcmd{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer;text-align:left;transition:all .15s}
+.qcmd:hover{border-color:var(--green);color:var(--green)}
+
+/* TOKEN COUNTER */
+.token-bar{display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--surface2);border-top:1px solid var(--border);font-size:10px;color:var(--muted)}
+.token-val{color:var(--text)}
+.token-saved{color:var(--green)}
+
+/* HERO */
+.hero{text-align:center;padding:40px 20px 32px;border-bottom:1px solid var(--border);margin-bottom:24px}
+.hero-label{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.hero h1{font-size:clamp(22px,3vw,34px);font-weight:600;color:var(--text);line-height:1.2;margin-bottom:10px}
+.hero h1 span{color:var(--green)}
+.hero p{font-size:12px;color:var(--muted);max-width:480px;margin:0 auto 20px;line-height:1.7}
+.hero-cards{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+.hero-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hero-card span{color:var(--green)}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* SECTION LABEL */
+.sec-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid.three{grid-template-columns:1fr}
+  .ctx-fields{grid-template-columns:1fr}
+  .nav-key{width:140px}
+}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">
-    <div class="logo-icon">ML</div>
-    <div>
-      <div class="logo-text">Koudamki<span>.ai</span></div>
-      <div class="logo-sub">ML Solver Suite</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">Koudamki<span>.ai</span></div>
+  <div class="nav-live">Live</div>
+  <div class="nav-spacer"></div>
+  <div class="nav-key-wrap">
+    <span class="nav-key-label">Groq Key</span>
+    <input class="nav-key" type="password" id="apiKey" placeholder="gsk_...">
+    <select class="nav-model" id="modelSel">
+      <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+      <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+      <option value="gemma2-9b-it">Gemma2 9B</option>
+      <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
+    </select>
+    <button class="nav-save" onclick="saveKey()">💾 Save</button>
+    <span class="nav-saved" id="keySaved">✓ Saved</span>
+  </div>
+</nav>
+
+<!-- CONTEXT BAR -->
+<div class="ctx-bar">
+  <div class="ctx-toggle" id="ctxToggle" onclick="toggleCtx()">
+    <span>▶</span>
+    <span style="margin-left:2px">Project Context</span>
+    <span class="ctx-badge" id="ctxBadge" style="display:none">Active</span>
+    <span style="margin-left:6px;font-size:10px;color:var(--dim)">— describe once, reused across all tools to save tokens</span>
+  </div>
+  <div class="ctx-panel" id="ctxPanel">
+    <div class="ctx-fields">
+      <div class="ctx-field">
+        <label>Problem description</label>
+        <textarea id="ctx-problem" rows="2" placeholder="e.g. Predict customer churn for a SaaS product..." oninput="ctxChanged()"></textarea>
+      </div>
+      <div class="ctx-field">
+        <label>Dataset info</label>
+        <textarea id="ctx-dataset" rows="2" placeholder="e.g. 50k rows, 40 features, tabular, 5% churn rate, missing values in login_date..." oninput="ctxChanged()"></textarea>
+      </div>
+      <div class="ctx-field">
+        <label>Model / framework</label>
+        <textarea id="ctx-model" rows="2" placeholder="e.g. XGBoost, PyTorch, scikit-learn, currently at F1=0.72..." oninput="ctxChanged()"></textarea>
+      </div>
+    </div>
+    <div class="ctx-actions">
+      <span class="ctx-hint" id="ctxHint">Fill context above — all 7 tools will auto-inject it, saving you from retyping</span>
+      <button class="ctx-clear" onclick="clearCtx()">Clear context</button>
     </div>
   </div>
-  <div class="badge">● LIVE</div>
-</header>
-<div class="api-bar">
-  <label>🔑 GROQ API KEY:</label>
-  <input type="password" id="groq-key" placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off"/>
-  <select class="model-select" id="groq-model">
-    <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
-    <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-    <option value="gemma2-9b-it">Gemma2 9B</option>
-    <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
-  </select>
-  <button class="api-save" onclick="saveKey()">💾 Save Key</button>
-  <span class="api-ok" id="api-ok">✓ Key saved</span>
 </div>
-<div class="hero">
-  <div class="hero-tag">// machine learning intelligence</div>
-  <h1>Your <span class="c">ML Problem</span> Solver<br/>Built for <span class="g">Every Stage</span></h1>
-  <p>Solve ML problems · Decode equations · Recommend models · Build pipelines — all in one place.</p>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-section">Core Tools</div>
+  <div class="nav-item active" onclick="goPage('home',this)" id="nav-home"><span class="num">00</span><span class="ico">⌂</span>Overview</div>
+  <div class="nav-item" onclick="goPage('p1',this)" id="nav-p1"><span class="num">01</span><span class="ico">⚙</span>ML Solver</div>
+  <div class="nav-item" onclick="goPage('p2',this)" id="nav-p2"><span class="num">02</span><span class="ico">∫</span>Equations</div>
+  <div class="nav-item" onclick="goPage('p3',this)" id="nav-p3"><span class="num">03</span><span class="ico">🎯</span>Recommender</div>
+  <div class="nav-item" onclick="goPage('p4',this)" id="nav-p4"><span class="num">04</span><span class="ico">🔬</span>Pipeline</div>
+  <div class="sidebar-section">New Tools</div>
+  <div class="nav-item" onclick="goPage('p5',this)" id="nav-p5"><span class="num">05</span><span class="ico">🩺</span>Diagnostics</div>
+  <div class="nav-item" onclick="goPage('p6',this)" id="nav-p6"><span class="num">06</span><span class="ico">📈</span>Experiments</div>
+  <div class="nav-item" onclick="goPage('p7',this)" id="nav-p7"><span class="num">07</span><span class="ico">⑂</span>Git + ML</div>
 </div>
-<div class="tabs-wrap">
-  <button class="tab-btn active" onclick="switchTab(0)">⚙️ ML Problem Solver <span class="tab-num">01</span></button>
-  <button class="tab-btn" onclick="switchTab(1)">∫ Equation Solver <span class="tab-num">02</span></button>
-  <button class="tab-btn" onclick="switchTab(2)">🎯 Model Recommender <span class="tab-num">03</span></button>
-  <button class="tab-btn" onclick="switchTab(3)">🔬 Pipeline Builder <span class="tab-num">04</span></button>
-</div>
+
+<!-- MAIN -->
 <div class="main">
-  <div class="tab-panel active" id="panel-0">
-    <div class="card">
-      <div class="card-hd"><div class="card-dot"></div><div class="card-title">ML Problem Solver</div></div>
-      <div class="card-desc">Describe your dataset and goal. Get algorithm selection, preprocessing steps, evaluation metrics, and code snippets.</div>
-      <div class="field"><label>Problem Type</label><div class="chips" id="prob-type"><div class="chip sel" onclick="selectChip(this,'prob-type')">Classification</div><div class="chip" onclick="selectChip(this,'prob-type')">Regression</div><div class="chip" onclick="selectChip(this,'prob-type')">Clustering</div><div class="chip" onclick="selectChip(this,'prob-type')">Dimensionality Reduction</div><div class="chip" onclick="selectChip(this,'prob-type')">Time Series</div><div class="chip" onclick="selectChip(this,'prob-type')">Anomaly Detection</div><div class="chip" onclick="selectChip(this,'prob-type')">NLP</div><div class="chip" onclick="selectChip(this,'prob-type')">Recommendation</div></div></div>
-      <div class="row"><div class="field"><label>Dataset Rows</label><input type="number" id="ds-rows" placeholder="e.g. 50000" value="10000"/></div><div class="field"><label>Number of Features</label><input type="number" id="ds-feats" placeholder="e.g. 20" value="15"/></div></div>
-      <div class="field"><label>Data Characteristics</label><div class="chips" id="data-chars"><div class="chip" onclick="toggleChip(this)">Missing Values</div><div class="chip" onclick="toggleChip(this)">Imbalanced Classes</div><div class="chip" onclick="toggleChip(this)">Categorical Features</div><div class="chip" onclick="toggleChip(this)">High Dimensionality</div><div class="chip" onclick="toggleChip(this)">Noisy Data</div><div class="chip" onclick="toggleChip(this)">Structured/Tabular</div></div></div>
-      <div class="field"><label>Describe Your Problem</label><textarea id="prob-desc" rows="4" placeholder="e.g. Predict customer churn from 15 features including age, usage, billing. 10k rows, 20% churn rate..."></textarea></div>
-      <div class="row"><div class="field"><label>Priority</label><select id="prob-priority"><option>Accuracy</option><option>Speed / Low Latency</option><option>Interpretability</option><option>Scalability</option></select></div><div class="field"><label>Experience Level</label><select id="prob-level"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select></div></div>
-      <button class="btn btn-primary" id="prob-btn" onclick="solveProblem()">⚡ Solve My ML Problem</button>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="hero">
+    <div class="hero-label">// machine learning intelligence</div>
+    <h1>Your ML Problem Solver<br><span>Built for Every Stage</span></h1>
+    <p>Solve ML problems · Decode equations · Recommend models · Build pipelines · Diagnose errors · Tune experiments · Fix Git — all linked together.</p>
+    <div class="hero-cards">
+      <div class="hero-card"><span>⚙</span> ML Solver 01</div>
+      <div class="hero-card"><span>∫</span> Equations 02</div>
+      <div class="hero-card"><span>🎯</span> Recommender 03</div>
+      <div class="hero-card"><span>🔬</span> Pipeline 04</div>
+      <div class="hero-card"><span>🩺</span> Diagnostics 05</div>
+      <div class="hero-card"><span>📈</span> Experiments 06</div>
+      <div class="hero-card"><span>⑂</span> Git + ML 07</div>
     </div>
-    <div class="result-box" id="prob-result"><div class="result-label"><div class="spinner" id="prob-spin"></div><span id="prob-status">Analyzing...</span></div><div id="prob-output"></div></div>
   </div>
-  <div class="tab-panel" id="panel-1">
-    <div class="card">
-      <div class="card-hd"><div class="card-dot g"></div><div class="card-title">Math & ML Equation Solver</div></div>
-      <div class="card-desc">Solve calculus, linear algebra, statistics, or ML equations with full step-by-step derivations.</div>
-      <div class="field"><label>Category</label><div class="chips" id="eq-cat"><div class="chip sel" onclick="selectChip(this,'eq-cat')">Linear Algebra</div><div class="chip" onclick="selectChip(this,'eq-cat')">Calculus / Gradient</div><div class="chip" onclick="selectChip(this,'eq-cat')">Probability / Bayes</div><div class="chip" onclick="selectChip(this,'eq-cat')">Loss Functions</div><div class="chip" onclick="selectChip(this,'eq-cat')">Optimization</div><div class="chip" onclick="selectChip(this,'eq-cat')">Statistics</div><div class="chip" onclick="selectChip(this,'eq-cat')">Neural Networks</div></div></div>
-      <div class="field"><label>Enter Your Equation or Problem</label><textarea id="eq-input" rows="4" placeholder="e.g. Derive the gradient of cross-entropy loss with softmax..."></textarea></div>
-      <div class="row"><div class="field"><label>Output Format</label><select id="eq-format"><option>Step-by-Step Derivation</option><option>Proof + Intuition</option><option>Quick Solution</option><option>Code Implementation</option></select></div><div class="field"><label>Notation Style</label><select id="eq-notation"><option>Plain Text</option><option>LaTeX-like</option><option>Python / NumPy</option></select></div></div>
-      <button class="btn btn-primary" id="eq-btn" onclick="solveEquation()">∇ Solve Equation</button>
+  <div class="sec-label">How to save tokens with cross-linking</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px">
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);padding:14px">
+      <div style="color:var(--green);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Step 1</div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:4px">Fill Project Context</div>
+      <div style="font-size:11px;color:var(--muted)">Describe your problem, dataset, and model once in the Context bar above.</div>
     </div>
-    <div class="result-box" id="eq-result"><div class="result-label"><div class="spinner" id="eq-spin"></div><span id="eq-status">Solving...</span></div><div id="eq-output"></div></div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);padding:14px">
+      <div style="color:var(--green);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Step 2</div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:4px">Run any tool</div>
+      <div style="font-size:11px;color:var(--muted)">Context auto-injects into every prompt — no re-typing your dataset on each page.</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);padding:14px">
+      <div style="color:var(--green);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Step 3</div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:4px">Cross-link results</div>
+      <div style="font-size:11px;color:var(--muted)">Use "→ Continue in [Tool]" buttons to flow output into the next tool instantly.</div>
+    </div>
   </div>
-  <div class="tab-panel" id="panel-2">
-    <div class="card">
-      <div class="card-hd"><div class="card-dot o"></div><div class="card-title">AI-Powered Model Recommender</div></div>
-      <div class="card-desc">Describe your task and constraints. Get ranked model recommendations with pros, cons, and quick-start code.</div>
-      <div class="field"><label>Task Domain</label><div class="chips" id="domain-chips"><div class="chip sel" onclick="selectChip(this,'domain-chips')">Tabular / Structured</div><div class="chip" onclick="selectChip(this,'domain-chips')">Computer Vision</div><div class="chip" onclick="selectChip(this,'domain-chips')">NLP / Text</div><div class="chip" onclick="selectChip(this,'domain-chips')">Audio / Speech</div><div class="chip" onclick="selectChip(this,'domain-chips')">Time Series</div><div class="chip" onclick="selectChip(this,'domain-chips')">Reinforcement Learning</div><div class="chip" onclick="selectChip(this,'domain-chips')">Multimodal</div></div></div>
-      <div class="field"><label>Describe Your Use Case</label><textarea id="rec-desc" rows="3" placeholder="e.g. Classify 50k medical images into 5 categories. Must run on mobile..."></textarea></div>
-      <div class="row"><div class="field"><label>Compute Budget</label><select id="rec-compute"><option>CPU Only</option><option>Single GPU</option><option>Multi-GPU / Cloud</option><option>Edge Device</option></select></div><div class="field"><label>Training Data Size</label><select id="rec-data"><option>Very Small (&lt;1k)</option><option>Small (1k–10k)</option><option selected>Medium (10k–100k)</option><option>Large (&gt;100k)</option></select></div></div>
-      <div class="row"><div class="field"><label>Inference Speed</label><select id="rec-speed"><option>Real-time (&lt;10ms)</option><option selected>Fast (&lt;100ms)</option><option>Batch OK</option></select></div><div class="field"><label>Interpretability Needed?</label><select id="rec-interp"><option>Yes — Must Explain</option><option selected>Partial</option><option>No — Black Box OK</option></select></div></div>
-      <button class="btn btn-primary" id="rec-btn" onclick="recommendModel()">🎯 Get Recommendations</button>
-    </div>
-    <div class="result-box" id="rec-result"><div class="result-label"><div class="spinner" id="rec-spin"></div><span id="rec-status">Recommending...</span></div><div id="rec-output"></div></div>
-  </div>
-  <div class="tab-panel" id="panel-3">
-    <div class="card">
-      <div class="card-hd"><div class="card-dot p"></div><div class="card-title">Full ML Pipeline Builder</div></div>
-      <div class="card-desc">Generate a complete end-to-end ML pipeline with data ingestion, preprocessing, training, evaluation, and deployment code.</div>
-      <div class="field"><label>Pipeline Goal</label><textarea id="pipe-goal" rows="3" placeholder="e.g. Fraud detection system using transaction CSV data. Need full pipeline from raw data to deployed REST API..."></textarea></div>
-      <div class="row"><div class="field"><label>Framework</label><select id="pipe-lang"><option>Python (scikit-learn)</option><option>Python (PyTorch)</option><option>Python (TensorFlow/Keras)</option><option>Python (XGBoost/LightGBM)</option><option>R</option></select></div><div class="field"><label>Deployment Target</label><select id="pipe-deploy"><option>Local Script</option><option>FastAPI / Flask REST</option><option>Docker Container</option><option>Streamlit App</option><option>Cloud (AWS/GCP/Azure)</option></select></div></div>
-      <div class="field"><label>Pipeline Stages</label><div class="chips" id="stage-chips"><div class="chip sel" onclick="toggleChip(this)">Data Loading</div><div class="chip sel" onclick="toggleChip(this)">EDA</div><div class="chip sel" onclick="toggleChip(this)">Preprocessing</div><div class="chip sel" onclick="toggleChip(this)">Feature Engineering</div><div class="chip sel" onclick="toggleChip(this)">Model Training</div><div class="chip sel" onclick="toggleChip(this)">Hyperparameter Tuning</div><div class="chip sel" onclick="toggleChip(this)">Evaluation</div><div class="chip" onclick="toggleChip(this)">MLflow Tracking</div><div class="chip" onclick="toggleChip(this)">Deployment Code</div><div class="chip" onclick="toggleChip(this)">CI/CD</div></div></div>
-      <div class="field"><label>Code Detail</label><div class="chips" id="detail-chips"><div class="chip" onclick="selectChip(this,'detail-chips')">Outline Only</div><div class="chip sel" onclick="selectChip(this,'detail-chips')">Full Code + Comments</div><div class="chip" onclick="selectChip(this,'detail-chips')">Production-Ready</div></div></div>
-      <button class="btn btn-primary" id="pipe-btn" onclick="buildPipeline()">🔬 Build My Pipeline</button>
-    </div>
-    <div class="result-box" id="pipe-result"><div class="result-label"><div class="spinner" id="pipe-spin"></div><span id="pipe-status">Building...</span></div><div id="pipe-output"></div></div>
+  <div class="sec-label">Suggested workflow</div>
+  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--muted)">
+    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">01 ML Solver</span>
+    <span style="color:var(--green)">→</span>
+    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">03 Recommender</span>
+    <span style="color:var(--green)">→</span>
+    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">04 Pipeline</span>
+    <span style="color:var(--green)">→</span>
+    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">05 Diagnostics</span>
+    <span style="color:var(--green)">→</span>
+    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">06 Experiments</span>
+    <span style="color:var(--green)">→</span>
+    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">07 Git + ML</span>
   </div>
 </div>
-<div class="toast" id="toast"></div>
+
+<!-- PAGE 1: ML SOLVER -->
+<div id="p1" class="page">
+  <div class="pg-head">
+    <div class="pg-crumbs"><span>01</span> / ML Problem Solver</div>
+    <div class="pg-title">⚙ ML Problem Solver</div>
+    <div class="pg-sub">Describe your dataset and goal. Get algorithm selection, preprocessing steps, evaluation metrics, and code.</div>
+  </div>
+  <div class="form-grid">
+    <div class="fld">
+      <label>Problem Type</label>
+      <select id="p1-type">
+        <option>Classification</option><option>Regression</option><option>Clustering</option>
+        <option>Dimensionality Reduction</option><option>Time Series</option>
+        <option>Anomaly Detection</option><option>NLP</option><option>Recommendation</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Experience Level</label>
+      <select id="p1-exp"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+    </div>
+    <div class="fld">
+      <label>Dataset Rows</label>
+      <input type="number" id="p1-rows" placeholder="e.g. 50000">
+    </div>
+    <div class="fld">
+      <label>Number of Features</label>
+      <input type="number" id="p1-feats" placeholder="e.g. 42">
+    </div>
+    <div class="fld full">
+      <label>Data Characteristics</label>
+      <div class="chip-wrap" id="p1-chips">
+        <button class="chip" onclick="tc(this)">Missing Values</button>
+        <button class="chip" onclick="tc(this)">Imbalanced Classes</button>
+        <button class="chip" onclick="tc(this)">Categorical Features</button>
+        <button class="chip" onclick="tc(this)">High Dimensionality</button>
+        <button class="chip" onclick="tc(this)">Noisy Data</button>
+        <button class="chip" onclick="tc(this)">Structured/Tabular</button>
+      </div>
+    </div>
+    <div class="fld full">
+      <label>Describe Your Problem</label>
+      <textarea id="p1-desc" rows="4" placeholder="e.g. Predict customer churn. Binary classification. 3 months of user activity data..."></textarea>
+    </div>
+    <div class="fld">
+      <label>Priority</label>
+      <select id="p1-pri"><option>Accuracy</option><option>Speed / Low Latency</option><option>Interpretability</option><option>Scalability</option></select>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="p1-btn" onclick="run('p1')">⚡ Solve My ML Problem</button>
+  </div>
+  <div class="status" id="p1-status"></div>
+  <div class="result" id="p1-result" style="display:none">
+    <div class="result-head">
+      <div class="result-head-left"><span class="result-dot"></span> Output — ML Solver</div>
+      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p1-body',this)">Copy</button></div>
+    </div>
+    <div class="result-body" id="p1-body"><span class="result-placeholder">Running analysis...</span></div>
+    <div class="result-actions">
+      <span class="result-actions-label">Continue →</span>
+      <button class="btn btn-link" onclick="linkTo('p3','From ML Solver: use the recommended approach from the analysis above as my use case.')">→ Recommend Models</button>
+      <button class="btn btn-link" onclick="linkTo('p4','From ML Solver: build a pipeline for the approach recommended above.')">→ Build Pipeline</button>
+      <button class="btn btn-blue" onclick="saveCtxFromResult('p1-body')">💾 Save to Context</button>
+    </div>
+    <div class="followup">
+      <div class="followup-head">Follow-up (continues conversation, saves tokens)</div>
+      <div class="followup-history" id="p1-fu-hist"></div>
+      <div class="followup-input-row">
+        <textarea class="followup-input" id="p1-fu-input" placeholder="Ask a follow-up about the result above..." rows="1" onkeydown="fuKey(event,'p1')"></textarea>
+        <button class="followup-send" onclick="followUp('p1')" id="p1-fu-btn">Send</button>
+      </div>
+    </div>
+    <div class="token-bar">
+      <span>Est. tokens used: <span class="token-val" id="p1-tokens">—</span></span>
+      <span>Context injected: <span class="token-saved" id="p1-ctx-status">—</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: EQUATIONS -->
+<div id="p2" class="page">
+  <div class="pg-head">
+    <div class="pg-crumbs"><span>02</span> / Equation Solver</div>
+    <div class="pg-title">∫ Math & ML Equation Solver</div>
+    <div class="pg-sub">Solve calculus, linear algebra, statistics, or ML equations with full step-by-step derivations.</div>
+  </div>
+  <div class="form-grid">
+    <div class="fld">
+      <label>Category</label>
+      <select id="p2-cat">
+        <option>Linear Algebra</option><option>Calculus / Gradient</option>
+        <option>Probability / Bayes</option><option>Loss Functions</option>
+        <option>Optimization</option><option>Statistics</option><option>Neural Networks</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Output Format</label>
+      <select id="p2-fmt"><option>Step-by-Step Derivation</option><option>Proof + Intuition</option><option>Quick Solution</option><option>Code Implementation</option></select>
+    </div>
+    <div class="fld">
+      <label>Notation Style</label>
+      <select id="p2-notation"><option>Plain Text</option><option>LaTeX-like</option><option>Python / NumPy</option></select>
+    </div>
+    <div class="fld full">
+      <label>Enter Your Equation or Problem</label>
+      <textarea id="p2-eq" rows="5" placeholder="e.g. Derive the gradient of cross-entropy loss with respect to softmax output..."></textarea>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="p2-btn" onclick="run('p2')">∇ Solve Equation</button>
+  <div class="status" id="p2-status"></div>
+  <div class="result" id="p2-result" style="display:none">
+    <div class="result-head">
+      <div class="result-head-left"><span class="result-dot"></span> Output — Equation Solver</div>
+      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p2-body',this)">Copy</button></div>
+    </div>
+    <div class="result-body" id="p2-body"></div>
+    <div class="result-actions">
+      <span class="result-actions-label">Continue →</span>
+      <button class="btn btn-link" onclick="linkTo('p1','Apply the equation solution above to my ML problem.')">→ Apply to ML Solver</button>
+      <button class="btn btn-link" onclick="linkTo('p6','Use this equation result in an experiment.')">→ Use in Experiments</button>
+    </div>
+    <div class="followup">
+      <div class="followup-head">Follow-up</div>
+      <div class="followup-history" id="p2-fu-hist"></div>
+      <div class="followup-input-row">
+        <textarea class="followup-input" id="p2-fu-input" placeholder="Ask a follow-up..." rows="1" onkeydown="fuKey(event,'p2')"></textarea>
+        <button class="followup-send" onclick="followUp('p2')" id="p2-fu-btn">Send</button>
+      </div>
+    </div>
+    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p2-tokens">—</span></span><span>Context: <span class="token-saved" id="p2-ctx-status">—</span></span></div>
+  </div>
+</div>
+
+<!-- PAGE 3: MODEL RECOMMENDER -->
+<div id="p3" class="page">
+  <div class="pg-head">
+    <div class="pg-crumbs"><span>03</span> / Model Recommender</div>
+    <div class="pg-title">🎯 AI-Powered Model Recommender</div>
+    <div class="pg-sub">Describe your task and constraints. Get ranked recommendations with pros, cons, and quick-start code.</div>
+  </div>
+  <div class="form-grid">
+    <div class="fld">
+      <label>Task Domain</label>
+      <select id="p3-domain">
+        <option>Tabular / Structured</option><option>Computer Vision</option><option>NLP / Text</option>
+        <option>Audio / Speech</option><option>Time Series</option><option>Reinforcement Learning</option><option>Multimodal</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Compute Budget</label>
+      <select id="p3-compute"><option>CPU Only</option><option>Single GPU</option><option>Multi-GPU / Cloud</option><option>Edge Device</option></select>
+    </div>
+    <div class="fld">
+      <label>Training Data Size</label>
+      <select id="p3-size"><option>Very Small (&lt;1k)</option><option>Small (1k–10k)</option><option>Medium (10k–100k)</option><option>Large (&gt;100k)</option></select>
+    </div>
+    <div class="fld">
+      <label>Inference Speed</label>
+      <select id="p3-speed"><option>Real-time (&lt;10ms)</option><option>Fast (&lt;100ms)</option><option>Batch OK</option></select>
+    </div>
+    <div class="fld">
+      <label>Interpretability</label>
+      <select id="p3-interp"><option>Yes — Must Explain</option><option>Partial</option><option>No — Black Box OK</option></select>
+    </div>
+    <div class="fld full">
+      <label>Describe Your Use Case</label>
+      <textarea id="p3-desc" rows="4" placeholder="e.g. Fraud detection on transaction data. Need high recall. Imbalanced 1% fraud rate..."></textarea>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="p3-btn" onclick="run('p3')">🎯 Get Recommendations</button>
+  <div class="status" id="p3-status"></div>
+  <div class="result" id="p3-result" style="display:none">
+    <div class="result-head">
+      <div class="result-head-left"><span class="result-dot"></span> Output — Model Recommender</div>
+      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p3-body',this)">Copy</button></div>
+    </div>
+    <div class="result-body" id="p3-body"></div>
+    <div class="result-actions">
+      <span class="result-actions-label">Continue →</span>
+      <button class="btn btn-link" onclick="linkTo('p4','Build a pipeline using the top recommended model above.')">→ Build Pipeline</button>
+      <button class="btn btn-link" onclick="linkTo('p6','Tune the top recommended model above.')">→ Tune in Experiments</button>
+      <button class="btn btn-blue" onclick="saveCtxFromResult('p3-body')">💾 Save to Context</button>
+    </div>
+    <div class="followup">
+      <div class="followup-head">Follow-up</div>
+      <div class="followup-history" id="p3-fu-hist"></div>
+      <div class="followup-input-row">
+        <textarea class="followup-input" id="p3-fu-input" placeholder="Ask a follow-up..." rows="1" onkeydown="fuKey(event,'p3')"></textarea>
+        <button class="followup-send" onclick="followUp('p3')" id="p3-fu-btn">Send</button>
+      </div>
+    </div>
+    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p3-tokens">—</span></span><span>Context: <span class="token-saved" id="p3-ctx-status">—</span></span></div>
+  </div>
+</div>
+
+<!-- PAGE 4: PIPELINE BUILDER -->
+<div id="p4" class="page">
+  <div class="pg-head">
+    <div class="pg-crumbs"><span>04</span> / Pipeline Builder</div>
+    <div class="pg-title">🔬 Full ML Pipeline Builder</div>
+    <div class="pg-sub">Generate a complete end-to-end pipeline with data ingestion, preprocessing, training, evaluation, and deployment code.</div>
+  </div>
+  <div class="form-grid">
+    <div class="fld full">
+      <label>Pipeline Goal</label>
+      <textarea id="p4-goal" rows="3" placeholder="e.g. End-to-end churn prediction pipeline with XGBoost, SMOTE, and FastAPI deployment..."></textarea>
+    </div>
+    <div class="fld">
+      <label>Framework</label>
+      <select id="p4-fw"><option>Python (scikit-learn)</option><option>Python (PyTorch)</option><option>Python (TensorFlow/Keras)</option><option>Python (XGBoost/LightGBM)</option><option>R</option></select>
+    </div>
+    <div class="fld">
+      <label>Deployment Target</label>
+      <select id="p4-deploy"><option>Local Script</option><option>FastAPI / Flask REST</option><option>Docker Container</option><option>Streamlit App</option><option>Cloud (AWS/GCP/Azure)</option></select>
+    </div>
+    <div class="fld full">
+      <label>Pipeline Stages</label>
+      <div class="chip-wrap" id="p4-chips">
+        <button class="chip on" onclick="tc(this)">Data Loading</button>
+        <button class="chip on" onclick="tc(this)">EDA</button>
+        <button class="chip on" onclick="tc(this)">Preprocessing</button>
+        <button class="chip" onclick="tc(this)">Feature Engineering</button>
+        <button class="chip on" onclick="tc(this)">Model Training</button>
+        <button class="chip" onclick="tc(this)">Hyperparameter Tuning</button>
+        <button class="chip on" onclick="tc(this)">Evaluation</button>
+        <button class="chip" onclick="tc(this)">MLflow Tracking</button>
+        <button class="chip" onclick="tc(this)">Deployment Code</button>
+        <button class="chip" onclick="tc(this)">CI/CD</button>
+      </div>
+    </div>
+    <div class="fld">
+      <label>Code Detail</label>
+      <select id="p4-detail"><option>Outline Only</option><option>Full Code + Comments</option><option>Production-Ready</option></select>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="p4-btn" onclick="run('p4')">🔬 Build My Pipeline</button>
+  <div class="status" id="p4-status"></div>
+  <div class="result" id="p4-result" style="display:none">
+    <div class="result-head">
+      <div class="result-head-left"><span class="result-dot"></span> Output — Pipeline Builder</div>
+      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p4-body',this)">Copy</button></div>
+    </div>
+    <div class="result-body" id="p4-body"></div>
+    <div class="result-actions">
+      <span class="result-actions-label">Continue →</span>
+      <button class="btn btn-link" onclick="linkTo('p5','Debug issues with the pipeline code generated above.')">→ Debug Pipeline</button>
+      <button class="btn btn-link" onclick="linkTo('p7','Set up Git / CI/CD for the pipeline above.')">→ Git + CI/CD Setup</button>
+      <button class="btn btn-amber" onclick="linkTo('p6','Tune the model in the pipeline above.')">→ Tune Experiments</button>
+    </div>
+    <div class="followup">
+      <div class="followup-head">Follow-up</div>
+      <div class="followup-history" id="p4-fu-hist"></div>
+      <div class="followup-input-row">
+        <textarea class="followup-input" id="p4-fu-input" placeholder="Ask a follow-up about the pipeline..." rows="1" onkeydown="fuKey(event,'p4')"></textarea>
+        <button class="followup-send" onclick="followUp('p4')" id="p4-fu-btn">Send</button>
+      </div>
+    </div>
+    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p4-tokens">—</span></span><span>Context: <span class="token-saved" id="p4-ctx-status">—</span></span></div>
+  </div>
+</div>
+
+<!-- PAGE 5: DIAGNOSTICS -->
+<div id="p5" class="page">
+  <div class="pg-head">
+    <div class="pg-crumbs"><span>05</span> / ML Diagnostics</div>
+    <div class="pg-title">🩺 ML Diagnostics Assistant</div>
+    <div class="pg-sub">Paste an error, metric output, or model behavior — get root cause analysis and a step-by-step fix.</div>
+  </div>
+  <div class="fld" style="margin-bottom:14px">
+    <label>Bug / Problem Category</label>
+    <div class="dsteps" id="p5-steps">
+      <div class="dstep active" onclick="selectStep(this,'p5-steps','p5-cat','Overfitting or underfitting — generalization gap between train and validation')">
+        <div class="dicon">1</div><div class="dstep-info"><div class="t">Overfitting / underfitting</div><div class="s">Train/val gap, generalization issues</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Shape mismatch or tensor dimension error — wrong dimensions or broadcasting failure')">
+        <div class="dicon">2</div><div class="dstep-info"><div class="t">Shape / tensor mismatch</div><div class="s">Wrong dimensions, broadcasting errors</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','NaN or Inf in loss or gradients — exploding or vanishing gradients')">
+        <div class="dicon">3</div><div class="dstep-info"><div class="t">NaN / Inf in loss or gradients</div><div class="s">Exploding gradients, bad initialization</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Model not learning — flat loss curve or stuck at random baseline accuracy')">
+        <div class="dicon">4</div><div class="dstep-info"><div class="t">Model not learning</div><div class="s">Flat loss, random accuracy plateau</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Data pipeline bug — wrong dtype, slow loading, or data leakage in CV splits')">
+        <div class="dicon">5</div><div class="dstep-info"><div class="t">Data pipeline bug</div><div class="s">Wrong dtype, leakage, slow loading</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Deployment or inference bug — latency, memory, or wrong predictions in production')">
+        <div class="dicon">6</div><div class="dstep-info"><div class="t">Deployment / inference bug</div><div class="s">Latency, memory issues, wrong output</div></div>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" id="p5-cat" value="Overfitting or underfitting — generalization gap between train and validation">
+  <div class="form-grid">
+    <div class="fld">
+      <label>Framework</label>
+      <select id="p5-fw"><option>PyTorch</option><option>TensorFlow/Keras</option><option>Scikit-learn</option><option>XGBoost/LightGBM</option><option>Other</option></select>
+    </div>
+    <div class="fld">
+      <label>Task</label>
+      <select id="p5-task"><option>Classification</option><option>Regression</option><option>NLP</option><option>Computer Vision</option><option>Time Series</option></select>
+    </div>
+    <div class="fld full">
+      <label>Paste error, metrics, or describe the issue</label>
+      <textarea id="p5-input" rows="6" placeholder="Paste stack trace, metrics output, or describe what you're observing...&#10;e.g. Train acc: 98%, Val acc: 61%. Loss flat after epoch 3..."></textarea>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="p5-btn" onclick="run('p5')">🩺 Diagnose</button>
+  <div class="status" id="p5-status"></div>
+  <div class="result" id="p5-result" style="display:none">
+    <div class="result-head">
+      <div class="result-head-left"><span class="result-dot"></span> Output — Diagnostics</div>
+      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p5-body',this)">Copy</button></div>
+    </div>
+    <div class="result-body" id="p5-body"></div>
+    <div class="result-actions">
+      <span class="result-actions-label">Continue →</span>
+      <button class="btn btn-link" onclick="linkTo('p6','Tune experiments to fix the issue diagnosed above.')">→ Tune to Fix</button>
+      <button class="btn btn-link" onclick="linkTo('p3','Re-recommend models based on the diagnostic findings above.')">→ Re-recommend Models</button>
+      <button class="btn btn-blue" onclick="linkTo('p4','Update the pipeline to fix the issue diagnosed above.')">→ Update Pipeline</button>
+    </div>
+    <div class="followup">
+      <div class="followup-head">Follow-up</div>
+      <div class="followup-history" id="p5-fu-hist"></div>
+      <div class="followup-input-row">
+        <textarea class="followup-input" id="p5-fu-input" placeholder="Ask a follow-up..." rows="1" onkeydown="fuKey(event,'p5')"></textarea>
+        <button class="followup-send" onclick="followUp('p5')" id="p5-fu-btn">Send</button>
+      </div>
+    </div>
+    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p5-tokens">—</span></span><span>Context: <span class="token-saved" id="p5-ctx-status">—</span></span></div>
+  </div>
+</div>
+
+<!-- PAGE 6: EXPERIMENT ADVISOR -->
+<div id="p6" class="page">
+  <div class="pg-head">
+    <div class="pg-crumbs"><span>06</span> / Experiment Advisor</div>
+    <div class="pg-title">📈 Experiment Advisor</div>
+    <div class="pg-sub">Describe your model setup and current metrics — get prioritized hyperparameter tuning recommendations.</div>
+  </div>
+  <div class="form-grid">
+    <div class="fld">
+      <label>Model / Architecture</label>
+      <input type="text" id="p6-model" placeholder="e.g. ResNet-50, LSTM, XGBoost">
+    </div>
+    <div class="fld">
+      <label>Current Metric</label>
+      <input type="text" id="p6-metric" placeholder="e.g. F1=0.72, RMSE=0.34, AUC=0.81">
+    </div>
+    <div class="fld">
+      <label>Compute Budget</label>
+      <select id="p6-compute"><option>Low (CPU / single GPU)</option><option>Medium (1-4 GPUs)</option><option>High (cluster / cloud)</option></select>
+    </div>
+    <div class="fld">
+      <label>Optimization Goal</label>
+      <select id="p6-goal"><option>Improve accuracy / metric</option><option>Reduce overfitting</option><option>Speed up training</option><option>Reduce model size</option><option>Improve generalization</option></select>
+    </div>
+    <div class="fld full">
+      <label>Current Hyperparameters & Config</label>
+      <textarea id="p6-config" rows="4" placeholder="e.g. lr=0.001, batch_size=32, epochs=50, dropout=0.3, optimizer=Adam, no scheduler..."></textarea>
+    </div>
+    <div class="fld full">
+      <label>What have you already tried?</label>
+      <textarea id="p6-tried" rows="2" placeholder="e.g. Tried lr=0.01 (diverged), dropout=0.5 (slight improvement)..."></textarea>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="p6-btn" onclick="run('p6')">📈 Get Recommendations</button>
+  <div class="status" id="p6-status"></div>
+  <div class="result" id="p6-result" style="display:none">
+    <div class="result-head">
+      <div class="result-head-left"><span class="result-dot"></span> Output — Experiment Advisor</div>
+      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p6-body',this)">Copy</button></div>
+    </div>
+    <div class="result-body" id="p6-body"></div>
+    <div class="result-actions">
+      <span class="result-actions-label">Continue →</span>
+      <button class="btn btn-link" onclick="linkTo('p4','Update the pipeline with the experiment recommendations above.')">→ Update Pipeline</button>
+      <button class="btn btn-link" onclick="linkTo('p5','Diagnose why the current config isnt working based on experiments above.')">→ Diagnose Issues</button>
+      <button class="btn btn-blue" onclick="saveCtxFromResult('p6-body')">💾 Save to Context</button>
+    </div>
+    <div class="followup">
+      <div class="followup-head">Follow-up</div>
+      <div class="followup-history" id="p6-fu-hist"></div>
+      <div class="followup-input-row">
+        <textarea class="followup-input" id="p6-fu-input" placeholder="Ask about specific hyperparameters..." rows="1" onkeydown="fuKey(event,'p6')"></textarea>
+        <button class="followup-send" onclick="followUp('p6')" id="p6-fu-btn">Send</button>
+      </div>
+    </div>
+    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p6-tokens">—</span></span><span>Context: <span class="token-saved" id="p6-ctx-status">—</span></span></div>
+  </div>
+</div>
+
+<!-- PAGE 7: GIT + ML -->
+<div id="p7" class="page">
+  <div class="pg-head">
+    <div class="pg-crumbs"><span>07</span> / Git + ML</div>
+    <div class="pg-title">⑂ Git + ML Assistant</div>
+    <div class="pg-sub">Fix Git issues in your ML projects — merge conflicts, large files, experiment branching, CI/CD, and history debugging.</div>
+  </div>
+  <div class="fld" style="margin-bottom:14px">
+    <label>Git Problem Category</label>
+    <div class="dsteps" id="p7-steps">
+      <div class="dstep active" onclick="selectStep(this,'p7-steps','p7-cat','Merge conflict in Jupyter notebook or Python ML script — .ipynb JSON conflicts')">
+        <div class="dicon git">NB</div><div class="dstep-info"><div class="t">Notebook / script merge conflict</div><div class="s">Jupyter .ipynb conflicts, diff hell</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','Large model files or datasets in Git — need Git LFS, .gitignore setup, or repo cleanup')">
+        <div class="dicon git">LF</div><div class="dstep-info"><div class="t">Large files / Git LFS</div><div class="s">Model weights, datasets, bloated repo</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','ML experiment branching strategy — managing multiple experiment runs, reproducibility, tagging')">
+        <div class="dicon git">BR</div><div class="dstep-info"><div class="t">Experiment branching strategy</div><div class="s">Branch-per-run, tags, reproducibility</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','CI/CD pipeline for ML — GitHub Actions, automated testing, model validation on push')">
+        <div class="dicon git">CI</div><div class="dstep-info"><div class="t">CI/CD for ML pipelines</div><div class="s">GitHub Actions, auto test, model gate</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','Git history issue — finding when model accuracy dropped, git bisect, reverting changes')">
+        <div class="dicon git">HX</div><div class="dstep-info"><div class="t">Git history / reverting changes</div><div class="s">Bisect, revert regression, git blame</div></div>
+      </div>
+      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','General Git error or command question for an ML project')">
+        <div class="dicon git">?</div><div class="dstep-info"><div class="t">Other Git error or command</div><div class="s">Any git issue or workflow question</div></div>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" id="p7-cat" value="Merge conflict in Jupyter notebook or Python ML script — .ipynb JSON conflicts">
+  <div class="fld" style="margin-bottom:14px">
+    <label>Quick commands — click to insert</label>
+    <div class="qcmds">
+      <button class="qcmd" onclick="insertCmd('p7-input',this)">git log --oneline --graph --all</button>
+      <button class="qcmd" onclick="insertCmd('p7-input',this)">git lfs track "*.pt" "*.h5" "*.pkl"</button>
+      <button class="qcmd" onclick="insertCmd('p7-input',this)">git stash list</button>
+      <button class="qcmd" onclick="insertCmd('p7-input',this)">git bisect start</button>
+      <button class="qcmd" onclick="insertCmd('p7-input',this)">git diff HEAD~1 HEAD -- train.py</button>
+      <button class="qcmd" onclick="insertCmd('p7-input',this)">git tag -a v1.0-baseline -m "baseline"</button>
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="fld">
+      <label>Git Hosting</label>
+      <select id="p7-host"><option>GitHub</option><option>GitLab</option><option>Bitbucket</option><option>Self-hosted</option></select>
+    </div>
+    <div class="fld">
+      <label>Project Type</label>
+      <select id="p7-proj"><option>Jupyter notebooks</option><option>Python scripts</option><option>Mixed notebooks + scripts</option><option>MLOps / pipeline repo</option></select>
+    </div>
+    <div class="fld full">
+      <label>Paste Git error, command output, or describe the problem</label>
+      <textarea id="p7-input" rows="6" placeholder="e.g. CONFLICT (content): Merge conflict in notebook.ipynb&#10;Auto-merging failed. Fix conflicts and then commit the result..."></textarea>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="p7-btn" onclick="run('p7')">⑂ Solve Git Issue</button>
+  <div class="status" id="p7-status"></div>
+  <div class="result" id="p7-result" style="display:none">
+    <div class="result-head">
+      <div class="result-head-left"><span class="result-dot"></span> Output — Git + ML</div>
+      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p7-body',this)">Copy</button></div>
+    </div>
+    <div class="result-body" id="p7-body"></div>
+    <div class="result-actions">
+      <span class="result-actions-label">Continue →</span>
+      <button class="btn btn-link" onclick="linkTo('p4','Update the pipeline with the CI/CD or Git workflow described above.')">→ Update Pipeline</button>
+      <button class="btn btn-link" onclick="linkTo('p5','Diagnose any ML issues related to the Git problem above.')">→ Diagnose ML Issues</button>
+    </div>
+    <div class="followup">
+      <div class="followup-head">Follow-up</div>
+      <div class="followup-history" id="p7-fu-hist"></div>
+      <div class="followup-input-row">
+        <textarea class="followup-input" id="p7-fu-input" placeholder="Ask a follow-up about the Git issue..." rows="1" onkeydown="fuKey(event,'p7')"></textarea>
+        <button class="followup-send" onclick="followUp('p7')" id="p7-fu-btn">Send</button>
+      </div>
+    </div>
+    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p7-tokens">—</span></span><span>Context: <span class="token-saved" id="p7-ctx-status">—</span></span></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
 <script>
-function saveKey(){const k=document.getElementById('groq-key').value.trim();if(!k){showToast('Enter your Groq API key first.');return;}localStorage.setItem('groq_api_key',k);document.getElementById('api-ok').style.display='inline';showToast('Groq key saved!');setTimeout(()=>document.getElementById('api-ok').style.display='none',3000);}
-function getKey(){const saved=localStorage.getItem('groq_api_key');const input=document.getElementById('groq-key').value.trim();const key=input||saved||'';if(input&&input!==saved)localStorage.setItem('groq_api_key',input);return key;}
-function getModel(){return document.getElementById('groq-model').value;}
-window.addEventListener('DOMContentLoaded',()=>{const saved=localStorage.getItem('groq_api_key');if(saved){document.getElementById('groq-key').value=saved;document.getElementById('api-ok').style.display='inline';setTimeout(()=>document.getElementById('api-ok').style.display='none',2000);}});
-function switchTab(i){document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',i===j));document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',i===j));}
-function selectChip(el,group){el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
-function toggleChip(el){el.classList.toggle('sel');}
-function getChip(id){const e=document.querySelector('#'+id+' .chip.sel');return e?e.textContent.trim():'';}
-function getChips(id){return[...document.querySelectorAll('#'+id+' .chip.sel')].map(c=>c.textContent.trim());}
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-async function callGroq(systemPrompt,userPrompt,resId,outId,spinId,statId,btnId,loadingMsg){
-  const key=getKey();
-  if(!key){showToast('Enter your Groq API key above!');document.getElementById('groq-key').focus();return;}
-  const res=document.getElementById(resId),out=document.getElementById(outId);
-  const spin=document.getElementById(spinId),stat=document.getElementById(statId);
-  const btn=document.getElementById(btnId);
-  res.style.display='block';out.textContent='';spin.style.display='inline-block';stat.textContent=loadingMsg;btn.disabled=true;
-  try{
-    const response=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:getModel(),max_tokens:3000,stream:true,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}]})});
-    if(!response.ok){const err=await response.json().catch(()=>({error:{message:'HTTP '+response.status}}));throw new Error(err?.error?.message||'HTTP '+response.status);}
-    const reader=response.body.getReader();const decoder=new TextDecoder();let full='';
-    spin.style.display='none';stat.textContent='Streaming response...';
-    while(true){const{done,value}=await reader.read();if(done)break;const chunk=decoder.decode(value,{stream:true});const lines=chunk.split('\n');for(const line of lines){if(!line.startsWith('data: '))continue;const data=line.slice(6).trim();if(data==='[DONE]')continue;try{const json=JSON.parse(data);const delta=json?.choices?.[0]?.delta?.content||'';full+=delta;out.textContent=full;}catch(e){}}}
-    if(!full)out.textContent='No response received.';stat.textContent='Complete';showToast('Done!');
-  }catch(err){
-    spin.style.display='none';stat.textContent='Error';
-    let msg=err.message;
-    if(msg.includes('401')||msg.includes('invalid_api_key'))msg='Invalid Groq API key. Get one free at console.groq.com';
-    else if(msg.includes('Failed to fetch')||msg.includes('NetworkError'))msg='Network error — check your connection.';
-    out.textContent='Error: '+msg;showToast(msg.slice(0,60));
-  }
-  btn.disabled=false;
+// ---- STATE ----
+const hist = {p1:[],p2:[],p3:[],p4:[],p5:[],p6:[],p7:[]};
+const SYSPROMPT = `You are an expert ML/AI engineer, data scientist, and Git power user. Give precise, actionable answers with exact code, commands, and numbered steps where appropriate. Be thorough but concise. Use plain text output — no markdown headers or excessive formatting. Prioritize working code and practical solutions.`;
+
+// ---- NAV ----
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(el) el.classList.add('active');
+  else document.getElementById('nav-'+id).classList.add('active');
 }
-function solveProblem(){const type=getChip('prob-type'),rows=document.getElementById('ds-rows').value,feats=document.getElementById('ds-feats').value,chars=getChips('data-chars').join(', '),desc=document.getElementById('prob-desc').value,priority=document.getElementById('prob-priority').value,level=document.getElementById('prob-level').value;const sys=`You are an expert ML engineer. Analyze ML problems and give actionable solutions.\nStructure your answer: PROBLEM ANALYSIS | TOP 3 ALGORITHMS (ranked) | PREPROCESSING STEPS | EVALUATION METRICS | PYTHON CODE SNIPPET | PITFALLS TO AVOID\nBe concise and practical.`;const p=`Problem: ${type}\nDataset: ${rows} rows, ${feats} features\nCharacteristics: ${chars||'standard'}\nDescription: ${desc||'General '+type+' problem'}\nPriority: ${priority}\nLevel: ${level}\n\nGive a complete solution plan.`;callGroq(sys,p,'prob-result','prob-output','prob-spin','prob-status','prob-btn','Analyzing your problem...');}
-function solveEquation(){const cat=getChip('eq-cat'),eq=document.getElementById('eq-input').value,fmt=document.getElementById('eq-format').value,notation=document.getElementById('eq-notation').value;if(!eq.trim()){showToast('Please enter an equation.');return;}const sys=`You are a math and ML expert. Solve equations clearly. Format: ${fmt}. Notation: ${notation}.\nNumber each step. Show intermediate results. Explain intuition after math.`;callGroq(sys,`Category: ${cat}\n\nProblem: ${eq}\n\nSolve with ${fmt} format.`,'eq-result','eq-output','eq-spin','eq-status','eq-btn','Solving equation...');}
-function recommendModel(){const domain=getChip('domain-chips'),desc=document.getElementById('rec-desc').value,compute=document.getElementById('rec-compute').value,data=document.getElementById('rec-data').value,speed=document.getElementById('rec-speed').value,interp=document.getElementById('rec-interp').value;const sys=`You are an ML architect. Recommend models with precision.\nFormat:\nTOP RECOMMENDATION (confidence /10, pros, cons, when to use)\nALTERNATIVE 1 | ALTERNATIVE 2 (same format)\nMODELS TO AVOID (and why)\nQUICK START CODE (5-10 lines)`;const p=`Domain: ${domain}\nTask: ${desc||'General '+domain}\nCompute: ${compute}\nData: ${data}\nSpeed: ${speed}\nInterpretability: ${interp}`;callGroq(sys,p,'rec-result','rec-output','rec-spin','rec-status','rec-btn','Finding best models...');}
-function buildPipeline(){const goal=document.getElementById('pipe-goal').value;if(!goal.trim()){showToast('Please describe your pipeline goal.');return;}const lang=document.getElementById('pipe-lang').value,deploy=document.getElementById('pipe-deploy').value,stages=getChips('stage-chips').join(', '),detail=getChip('detail-chips');const sys=`You are a senior ML engineer. Build complete, production-quality ML pipelines.\nDetail: ${detail}. Include comments. Make code runnable. Structure: overview then each stage with code then how to run.`;const p=`Goal: ${goal}\nFramework: ${lang}\nDeployment: ${deploy}\nStages: ${stages}\nDetail: ${detail}\n\nGenerate the full pipeline.`;callGroq(sys,p,'pipe-result','pipe-output','pipe-spin','pipe-status','pipe-btn','Building your pipeline...');}
-</script> 
-  cat > inject_ruflo.py << 'PYEOF'
-with open("index.html", "r", encoding="utf-8") as f:
-    content = f.read()
 
-bubble_code = """
-<!-- ============================================ -->
-<!--         RUFLO AI AGENT BUBBLE               -->
-<!-- ============================================ -->
-<style>
-  #ruflo-bubble {
-    position: fixed; bottom: 28px; right: 28px;
-    width: 62px; height: 62px; border-radius: 50%;
-    background: linear-gradient(135deg, #0ea5e9, #6366f1);
-    box-shadow: 0 4px 20px rgba(14,165,233,0.5);
-    cursor: pointer; z-index: 99999;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; border: none;
-    transition: transform 0.2s, box-shadow 0.2s;
-    animation: rfpulse 2.5s infinite;
-  }
-  #ruflo-bubble:hover { transform: scale(1.12); }
-  @keyframes rfpulse {
-    0%,100%{ box-shadow: 0 4px 20px rgba(14,165,233,0.5); }
-    50%    { box-shadow: 0 4px 40px rgba(99,102,241,0.9); }
-  }
-  #ruflo-bubble::after {
-    content: "Ruflo AI Agent";
-    position: absolute; right: 70px; top: 50%;
-    transform: translateY(-50%);
-    background: #1e293b; color: #e2e8f0;
-    font-size: 12px; font-family: monospace;
-    white-space: nowrap; padding: 5px 10px;
-    border-radius: 6px; opacity: 0;
-    pointer-events: none; transition: opacity 0.2s;
-  }
-  #ruflo-bubble:hover::after { opacity: 1; }
+// ---- API KEY ----
+window.onload=()=>{
+  const k=localStorage.getItem('groq_key');
+  if(k) document.getElementById('apiKey').value=k;
+  const m=localStorage.getItem('groq_model');
+  if(m) document.getElementById('modelSel').value=m;
+  const ctx=localStorage.getItem('koudamki_ctx');
+  if(ctx){try{const o=JSON.parse(ctx);if(o.problem)document.getElementById('ctx-problem').value=o.problem;if(o.dataset)document.getElementById('ctx-dataset').value=o.dataset;if(o.model)document.getElementById('ctx-model').value=o.model;ctxChanged();}catch{}}
+};
+function saveKey(){
+  localStorage.setItem('groq_key',document.getElementById('apiKey').value);
+  localStorage.setItem('groq_model',document.getElementById('modelSel').value);
+  const s=document.getElementById('keySaved');s.classList.add('show');
+  setTimeout(()=>s.classList.remove('show'),2000);
+}
 
-  #ruflo-panel {
-    position: fixed; bottom: 105px; right: 28px;
-    width: 420px; max-width: calc(100vw - 40px);
-    height: 570px; max-height: calc(100vh - 140px);
-    background: #0f172a; border: 1px solid #334155;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    z-index: 99998; display: none; flex-direction: column;
-    overflow: hidden; animation: rfslide 0.3s ease;
+// ---- CONTEXT ----
+function toggleCtx(){
+  const t=document.getElementById('ctxToggle');
+  const p=document.getElementById('ctxPanel');
+  t.classList.toggle('open');
+  p.classList.toggle('open');
+  t.querySelector('.arrow').textContent=t.classList.contains('open')?'▼':'▶';
+}
+function ctxChanged(){
+  const p=document.getElementById('ctx-problem').value;
+  const d=document.getElementById('ctx-dataset').value;
+  const m=document.getElementById('ctx-model').value;
+  const badge=document.getElementById('ctxBadge');
+  const hint=document.getElementById('ctxHint');
+  if(p||d||m){
+    badge.style.display='inline';
+    hint.textContent='Context active — will auto-inject into all prompts (~50 token overhead vs ~300 tokens re-typing)';
+    localStorage.setItem('koudamki_ctx',JSON.stringify({problem:p,dataset:d,model:m}));
+  } else {
+    badge.style.display='none';
+    hint.textContent='Fill context above — all 7 tools will auto-inject it, saving you from retyping';
+    localStorage.removeItem('koudamki_ctx');
   }
-  #ruflo-panel.rf-open { display: flex; }
-  @keyframes rfslide {
-    from { opacity:0; transform: translateY(18px) scale(0.97); }
-    to   { opacity:1; transform: translateY(0) scale(1); }
+}
+function clearCtx(){
+  document.getElementById('ctx-problem').value='';
+  document.getElementById('ctx-dataset').value='';
+  document.getElementById('ctx-model').value='';
+  ctxChanged();
+}
+function getCtxString(){
+  const p=document.getElementById('ctx-problem').value.trim();
+  const d=document.getElementById('ctx-dataset').value.trim();
+  const m=document.getElementById('ctx-model').value.trim();
+  if(!p&&!d&&!m) return '';
+  let s='--- Project Context (auto-injected) ---\n';
+  if(p) s+=`Problem: ${p}\n`;
+  if(d) s+=`Dataset: ${d}\n`;
+  if(m) s+=`Model/Framework: ${m}\n`;
+  s+='---\n';
+  return s;
+}
+function saveCtxFromResult(bodyId){
+  const text=document.getElementById(bodyId).textContent.slice(0,300);
+  const cur=document.getElementById('ctx-model').value;
+  document.getElementById('ctx-model').value=(cur?cur+' | ':'')+text.slice(0,120)+'...';
+  ctxChanged();
+  // open ctx bar
+  const p=document.getElementById('ctxPanel');
+  if(!p.classList.contains('open')) toggleCtx();
+}
+
+// ---- CHIPS & STEPS ----
+function tc(el){el.classList.toggle('on')}
+function chips(parentId){return Array.from(document.querySelectorAll('#'+parentId+' .chip.on')).map(c=>c.textContent).join(', ')||'none'}
+function selectStep(el,groupId,hiddenId,val){
+  document.querySelectorAll('#'+groupId+' .dstep').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(hiddenId).value=val;
+}
+function insertCmd(taId,el){
+  const ta=document.getElementById(taId);
+  ta.value=(ta.value?ta.value+'\n':'')+el.textContent.trim();ta.focus();
+}
+
+// ---- PROMPTS ----
+function buildPrompt(page){
+  const ctx=getCtxString();
+  switch(page){
+    case 'p1': return ctx+`ML Problem Solver Request:
+Problem Type: ${v('p1-type')} | Experience: ${v('p1-exp')} | Priority: ${v('p1-pri')}
+Rows: ${v('p1-rows')||'?'} | Features: ${v('p1-feats')||'?'}
+Data Characteristics: ${chips('p1-chips')}
+Description: ${v('p1-desc')||'not provided'}
+
+Provide:
+1) Best algorithm(s) for this problem with reasoning
+2) Preprocessing steps
+3) Evaluation metrics to use
+4) Quick-start code snippet
+5) Common pitfalls to avoid`;
+
+    case 'p2': return ctx+`Math & ML Equation Solver:
+Category: ${v('p2-cat')} | Output Format: ${v('p2-fmt')} | Notation: ${v('p2-notation')}
+Equation/Problem: ${v('p2-eq')||'not provided'}
+
+Solve this completely.`;
+
+    case 'p3': return ctx+`Model Recommender:
+Domain: ${v('p3-domain')} | Compute: ${v('p3-compute')} | Data Size: ${v('p3-size')}
+Speed: ${v('p3-speed')} | Interpretability: ${v('p3-interp')}
+Use Case: ${v('p3-desc')||'not provided'}
+
+Provide:
+1) Top 3 ranked models with scores
+2) Pros/cons for each
+3) Quick-start code for the top pick
+4) Which to avoid and why`;
+
+    case 'p4': return ctx+`Pipeline Builder:
+Goal: ${v('p4-goal')||'not provided'}
+Framework: ${v('p4-fw')} | Deployment: ${v('p4-deploy')} | Detail: ${v('p4-detail')}
+Stages: ${chips('p4-chips')}
+
+Generate the complete ML pipeline code.`;
+
+    case 'p5': return ctx+`ML Diagnostics:
+Category: ${v('p5-cat')}
+Framework: ${v('p5-fw')} | Task: ${v('p5-task')}
+Error/Issue:
+${v('p5-input')||'not provided'}
+
+Provide:
+1) Root cause analysis
+2) Step-by-step fix with code
+3) How to verify the fix
+4) Prevention tips`;
+
+    case 'p6': return ctx+`Experiment Advisor:
+Model: ${v('p6-model')||'?'} | Current Metric: ${v('p6-metric')||'?'}
+Compute: ${v('p6-compute')} | Goal: ${v('p6-goal')}
+Current Config: ${v('p6-config')||'none'}
+Already Tried: ${v('p6-tried')||'nothing yet'}
+
+Provide:
+1) Specific hyperparameter values to try (with expected impact %)
+2) Priority order — what to try first
+3) Search strategy (grid/random/Bayesian)
+4) Early stopping and monitoring tips`;
+
+    case 'p7': return ctx+`Git + ML Problem:
+Category: ${v('p7-cat')}
+Hosting: ${v('p7-host')} | Project: ${v('p7-proj')}
+Error/Context:
+${v('p7-input')||'not provided'}
+
+Provide:
+1) Root cause
+2) Exact git commands to fix it step by step
+3) How to prevent this
+4) ML project best practice for this scenario`;
+
+    default: return '';
   }
-  #rfhdr {
-    display:flex; align-items:center; gap:10px;
-    padding:13px 16px;
-    background: linear-gradient(90deg,#0f172a,#1e293b);
-    border-bottom:1px solid #334155;
-  }
-  #rfhdr .rfdot {
-    width:8px; height:8px; border-radius:50%;
-    background:#22c55e; box-shadow:0 0 6px #22c55e;
-    animation: blink 1.5s infinite;
-  }
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-  #rfhdr span { color:#e2e8f0; font-family:monospace; font-size:14px; font-weight:bold; flex:1; }
-  #rfclose { background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer; }
-  #rfclose:hover { color:#f87171; }
+}
+function v(id){const el=document.getElementById(id);return el?el.value:''}
 
-  #rftabs { display:flex; background:#1e293b; border-bottom:1px solid #334155; }
-  .rftab {
-    flex:1; padding:10px 0; font-size:12px; font-family:monospace;
-    color:#64748b; background:none; border:none; cursor:pointer;
-    border-bottom:2px solid transparent; transition:all 0.2s;
-  }
-  .rftab.active { color:#0ea5e9; border-bottom-color:#0ea5e9; }
-  .rftab:hover { color:#e2e8f0; }
+// ---- STREAM GROQ ----
+async function streamGroq(messages,bodyId,statusId,tokenId){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('Enter your Groq API key in the top nav!');throw new Error('No key');}
+  const model=document.getElementById('modelSel').value;
+  const body=document.getElementById(bodyId);
+  const status=document.getElementById(statusId);
+  const tokenEl=document.getElementById(tokenId);
+  body.textContent='';
+  status.innerHTML='<span class="spin"></span> Streaming...';
 
-  #rfbody { flex:1; overflow-y:auto; padding:14px; font-family:monospace; }
-  #rfbody::-webkit-scrollbar{width:4px;}
-  #rfbody::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
-
-  .rfcard {
-    background:#1e293b; border:1px solid #334155;
-    border-radius:10px; padding:14px; margin-bottom:12px;
-  }
-  .rfcard h4 { color:#0ea5e9; margin:0 0 6px; font-size:13px; }
-  .rfcard p  { color:#94a3b8; margin:0; font-size:12px; line-height:1.6; }
-  .rfcard code {
-    display:block; margin-top:8px;
-    background:#0f172a; padding:8px 10px;
-    border-radius:6px; color:#86efac;
-    font-size:11px; line-height:1.7;
-    white-space:pre-wrap; overflow-x:auto;
-  }
-  .rfbtn {
-    display:block; width:100%; padding:12px; margin-top:4px;
-    background:linear-gradient(135deg,#0ea5e9,#6366f1);
-    color:white; border:none; border-radius:8px;
-    font-family:monospace; font-size:13px; font-weight:bold;
-    cursor:pointer; text-decoration:none; text-align:center;
-    transition:opacity 0.2s, transform 0.1s;
-  }
-  .rfbtn:hover{ opacity:0.88; transform:translateY(-1px); }
-</style>
-
-<button id="ruflo-bubble" onclick="rfToggle()" title="Ruflo AI Agent">🌊</button>
-
-<div id="ruflo-panel">
-  <div id="rfhdr">
-    <div class="rfdot"></div>
-    <span>🌊 Ruflo AI Agent Suite</span>
-    <button id="rfclose" onclick="rfToggle()">✕</button>
-  </div>
-  <div id="rftabs">
-    <button class="rftab active" onclick="rfTab(this,'overview')">Overview</button>
-    <button class="rftab" onclick="rfTab(this,'install')">Install</button>
-    <button class="rftab" onclick="rfTab(this,'commands')">Commands</button>
-  </div>
-  <div id="rfbody">
-
-    <div id="rftab-overview">
-      <div class="rfcard">
-        <h4>🌊 What is Ruflo?</h4>
-        <p>The leading agent orchestration platform for Claude. Deploy intelligent multi-agent swarms, coordinate autonomous workflows, and build conversational AI systems with 314 MCP tools.</p>
-      </div>
-      <div class="rfcard">
-        <h4>⚡ Key Features</h4>
-        <p>
-          🤖 100+ Specialized Agents<br>
-          🐝 Swarm Intelligence (hierarchical / mesh)<br>
-          🧠 Self-Learning Memory across sessions<br>
-          🔗 314 MCP Tools built-in<br>
-          🔐 Zero-trust Agent Federation<br>
-          🖥️ Web UI — no install needed to try
-        </p>
-      </div>
-      <a class="rfbtn" href="https://github.com/ruvnet/ruflo" target="_blank" rel="noopener">📖 View Full Docs on GitHub →</a>
-    </div>
-
-    <div id="rftab-install" style="display:none">
-      <div class="rfcard">
-        <h4>⚡ Quickest Way (npx)</h4>
-        <code>npx ruflo@latest init --wizard</code>
-      </div>
-      <div class="rfcard">
-        <h4>🌐 Global Install</h4>
-        <code>npm install -g ruflo@latest</code>
-      </div>
-      <div class="rfcard">
-        <h4>🔌 Add as MCP Server in Claude Code</h4>
-        <code>claude mcp add ruflo -- npx -y @claude-flow/cli@latest</code>
-      </div>
-      <div class="rfcard">
-        <h4>🐚 One-line curl Install</h4>
-        <code>curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/ruflo@main/scripts/install.sh | bash</code>
-      </div>
-    </div>
-
-    <div id="rftab-commands" style="display:none">
-      <div class="rfcard">
-        <h4>🚀 Spawn an Agent</h4>
-        <code>npx claude-flow agent spawn --type coder --name "my-coder"</code>
-      </div>
-      <div class="rfcard">
-        <h4>🐝 Init a Swarm</h4>
-        <code>npx claude-flow swarm init --topology hierarchical --max-agents 5</code>
-      </div>
-      <div class="rfcard">
-        <h4>🧠 Search Memory</h4>
-        <code>npx claude-flow memory search -q "your query"</code>
-      </div>
-      <div class="rfcard">
-        <h4>🩺 Health Check</h4>
-        <code>npx claude-flow doctor --fix</code>
-      </div>
-      <a class="rfbtn" href="https://github.com/ruvnet/ruflo/releases" target="_blank" rel="noopener">🌊 Get Latest Release →</a>
-    </div>
-
-  </div>
-</div>
-
-<script>
-  function rfToggle() {
-    document.getElementById('ruflo-panel').classList.toggle('rf-open');
-  }
-  function rfTab(btn, tab) {
-    document.querySelectorAll('.rftab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    ['overview','install','commands'].forEach(id => {
-      document.getElementById('rftab-'+id).style.display = (id===tab)?'block':'none';
-    });
-  }
-  document.addEventListener('click', function(e) {
-    const panel = document.getElementById('ruflo-panel');
-    const bubble = document.getElementById('ruflo-bubble');
-    if (panel.classList.contains('rf-open') && !panel.contains(e.target) && e.target !== bubble) {
-      panel.classList.remove('rf-open');
-    }
+  const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
+    body:JSON.stringify({model,messages,stream:true,max_tokens:2000,temperature:0.4})
   });
-</script>
-<!-- ============================================ -->
-<!--         END RUFLO BUBBLE                    -->
-<!-- ============================================ -->
-"""
+  if(!res.ok){
+    const err=await res.text();
+    body.textContent='API Error ('+res.status+'): '+err;
+    status.textContent='';return;
+  }
+  const reader=res.body.getReader();const dec=new TextDecoder();let buf='';let totalChars=0;
+  while(true){
+    const{done,value}=await reader.read();if(done)break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split('\n');buf=lines.pop();
+    for(const line of lines){
+      if(!line.startsWith('data: '))continue;
+      const d=line.slice(6).trim();if(d==='[DONE]')continue;
+      try{const j=JSON.parse(d);const t=j.choices?.[0]?.delta?.content;if(t){body.textContent+=t;totalChars+=t.length;body.parentElement.scrollTop=body.parentElement.scrollHeight;}}catch{}
+    }
+  }
+  const estTokens=Math.round(totalChars/4);
+  if(tokenEl) tokenEl.textContent=estTokens;
+  status.textContent='';
+}
 
-if "</body>" in content:
-    content = content.replace("</body>", bubble_code + "\n</body>", 1)
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(content)
-    print("SUCCESS: Ruflo bubble injected before </body>")
-else:
-    print("ERROR: Could not find </body> tag in index.html")
-PYEOF
+// ---- MAIN RUN ----
+async function run(page){
+  const btn=document.getElementById(page+'-btn');
+  const statusId=page+'-status';
+  const bodyId=page+'-body';
+  const resEl=document.getElementById(page+'-result');
+  const ctxStatusEl=document.getElementById(page+'-ctx-status');
+
+  btn.disabled=true;
+  const origText=btn.textContent;
+  btn.innerHTML='<span class="spin"></span> Analyzing...';
+  resEl.style.display='block';
+
+  const ctx=getCtxString();
+  if(ctxStatusEl) ctxStatusEl.textContent=ctx?'Yes (saved ~200 tokens)':'No context set';
+
+  const prompt=buildPrompt(page);
+  const messages=[{role:'system',content:SYSPROMPT},{role:'user',content:prompt}];
+  hist[page]=[...messages];
+
+  try{
+    await streamGroq(messages,bodyId,statusId,page+'-tokens');
+    const assistantReply=document.getElementById(bodyId).textContent;
+    hist[page].push({role:'assistant',content:assistantReply});
+  }catch(e){document.getElementById(statusId).textContent='Error: '+e.message;}
+
+  btn.disabled=false;
+  btn.textContent=origText;
+}
+
+// ---- FOLLOW-UP ----
+async function followUp(page){
+  const input=document.getElementById(page+'-fu-input');
+  const q=input.value.trim();if(!q)return;
+  const histDiv=document.getElementById(page+'-fu-hist');
+  const btn=document.getElementById(page+'-fu-btn');
+
+  // add user message to UI
+  const uDiv=document.createElement('div');
+  uDiv.className='fu-msg user';
+  uDiv.innerHTML='<div class="fu-msg-label">You</div>'+q;
+  histDiv.appendChild(uDiv);
+  histDiv.scrollTop=histDiv.scrollHeight;
+  input.value='';
+
+  // add to history
+  hist[page].push({role:'user',content:q});
+  btn.disabled=true;btn.textContent='...';
+
+  // create assistant reply div
+  const aDiv=document.createElement('div');
+  aDiv.className='fu-msg assistant';
+  aDiv.innerHTML='<div class="fu-msg-label">Assistant</div><span id="fu-stream-'+page+'"></span>';
+  histDiv.appendChild(aDiv);
+  histDiv.scrollTop=histDiv.scrollHeight;
+
+  // stream into that div
+  const key=document.getElementById('apiKey').value.trim();
+  const model=document.getElementById('modelSel').value;
+  const streamTarget=document.getElementById('fu-stream-'+page);
+  streamTarget.textContent='';
+
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
+      body:JSON.stringify({model,messages:hist[page],stream:true,max_tokens:1000,temperature:0.4})
+    });
+    const reader=res.body.getReader();const dec=new TextDecoder();let buf='';let full='';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data: '))continue;
+        const d=line.slice(6).trim();if(d==='[DONE]')continue;
+        try{const j=JSON.parse(d);const t=j.choices?.[0]?.delta?.content;if(t){streamTarget.textContent+=t;full+=t;histDiv.scrollTop=histDiv.scrollHeight;}}catch{}
+      }
+    }
+    hist[page].push({role:'assistant',content:full});
+  }catch(e){streamTarget.textContent='Error: '+e.message;}
+
+  btn.disabled=false;btn.textContent='Send';
+}
+function fuKey(e,page){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();followUp(page);}}
+
+// ---- CROSS-LINK ----
+function linkTo(page,note){
+  goPage(page,null);
+  // pre-fill note into the page's textarea if applicable
+  const hints={p1:'p1-desc',p2:'p2-eq',p3:'p3-desc',p4:'p4-goal',p5:'p5-input',p6:'p6-config',p7:'p7-input'};
+  const ta=document.getElementById(hints[page]);
+  if(ta&&note){
+    ta.value=(ta.value?ta.value+'\n\n[From previous tool] ':'')+note;
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ---- COPY ----
+function copyRes(id,btn){
+  const text=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+  });
+}
+</script>
 </body>
 </html>
