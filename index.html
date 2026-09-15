@@ -42,6 +42,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .nav-save:hover{border-color:var(--green);color:var(--green)}
 .nav-saved{color:var(--green);font-size:10px;display:none}
 .nav-saved.show{display:block}
+.nav-export{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 10px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
+.nav-export:hover{border-color:var(--blue);color:var(--blue)}
 
 /* CONTEXT BAR */
 .ctx-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px}
@@ -57,10 +59,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .ctx-field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .ctx-field input,.ctx-field textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:none}
 .ctx-field input:focus,.ctx-field textarea:focus{border-color:var(--green)}
-.ctx-actions{display:flex;gap:8px;margin-top:10px;align-items:center}
+.ctx-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
 .ctx-hint{font-size:10px;color:var(--muted);margin-left:auto}
 .ctx-clear{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer}
 .ctx-clear:hover{border-color:var(--red);color:var(--red)}
+.ctx-proj-select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:5px 10px;font-family:var(--font);font-size:11px;color:var(--text);outline:none;cursor:pointer;max-width:160px}
+.ctx-proj-btn{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer}
+.ctx-proj-btn:hover{border-color:var(--green);color:var(--green)}
+.ctx-upload-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.ctx-upload-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.ctx-upload-btn{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);border-radius:var(--r);padding:5px 12px;font-family:var(--font);font-size:11px;color:var(--green);cursor:pointer}
+.ctx-upload-btn:hover{background:rgba(0,255,136,.14)}
+.ctx-upload-status{font-size:10px;color:var(--muted)}
 
 /* LAYOUT */
 .layout{display:flex;min-height:calc(100vh - 52px)}
@@ -213,15 +223,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
   <div class="nav-live">Live</div>
   <div class="nav-spacer"></div>
   <div class="nav-key-wrap">
-    <span class="nav-key-label">Groq Key</span>
-    <input class="nav-key" type="password" id="apiKey" placeholder="gsk_...">
+    <span class="nav-key-label">Model</span>
     <select class="nav-model" id="modelSel">
       <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
       <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
-      <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
       <option value="gemma2-9b-it">Gemma2 9B</option>
       <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
     </select>
+    <button class="nav-export" onclick="exportSession()">⬇ Export Session</button>
     <button class="nav-save" onclick="saveKey()">💾 Save</button>
     <span class="nav-saved" id="keySaved">✓ Saved</span>
   </div>
@@ -251,8 +260,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
       </div>
     </div>
     <div class="ctx-actions">
+      <select class="ctx-proj-select" id="ctxProjSelect" onchange="loadProject()">
+        <option value="">— Load project —</option>
+      </select>
+      <button class="ctx-proj-btn" onclick="saveProject()">💾 Save as project</button>
+      <button class="ctx-proj-btn" onclick="deleteProject()">🗑 Delete</button>
       <span class="ctx-hint" id="ctxHint">Fill context above — all 7 tools will auto-inject it, saving you from retyping</span>
       <button class="ctx-clear" onclick="clearCtx()">Clear context</button>
+    </div>
+    <div class="ctx-upload-row">
+      <span class="ctx-upload-label">Upload dataset</span>
+      <label class="ctx-upload-btn">
+        📄 Choose CSV
+        <input type="file" id="csvUpload" accept=".csv" style="display:none" onchange="handleCsvUpload(event)">
+      </label>
+      <span class="ctx-upload-status" id="csvStatus">No file profiled yet — auto-fills Dataset info above</span>
     </div>
   </div>
 </div>
@@ -802,9 +824,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 </div><!-- /main -->
 </div><!-- /layout -->
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
 // ---- STATE ----
 const hist = {p1:[],p2:[],p3:[],p4:[],p5:[],p6:[],p7:[]};
+const TOOL_NAMES = {p1:'ML Solver',p2:'Equation Solver',p3:'Model Recommender',p4:'Pipeline Builder',p5:'ML Diagnostics',p6:'Experiment Advisor',p7:'Git + ML'};
 const SYSPROMPT = `You are an expert ML/AI engineer, data scientist, and Git power user. Give precise, actionable answers with exact code, commands, and numbered steps where appropriate. Be thorough but concise. Use plain text output — no markdown headers or excessive formatting. Prioritize working code and practical solutions.`;
 
 // ---- NAV ----
@@ -816,17 +840,15 @@ function goPage(id,el){
   else document.getElementById('nav-'+id).classList.add('active');
 }
 
-// ---- API KEY ----
+// ---- MODEL PREFERENCE (no API key needed — server holds it) ----
 window.onload=()=>{
-  const k=localStorage.getItem('groq_key');
-  if(k) document.getElementById('apiKey').value=k;
   const m=localStorage.getItem('groq_model');
   if(m) document.getElementById('modelSel').value=m;
   const ctx=localStorage.getItem('koudamki_ctx');
   if(ctx){try{const o=JSON.parse(ctx);if(o.problem)document.getElementById('ctx-problem').value=o.problem;if(o.dataset)document.getElementById('ctx-dataset').value=o.dataset;if(o.model)document.getElementById('ctx-model').value=o.model;ctxChanged();}catch{}}
+  refreshProjectList();
 };
 function saveKey(){
-  localStorage.setItem('groq_key',document.getElementById('apiKey').value);
   localStorage.setItem('groq_model',document.getElementById('modelSel').value);
   const s=document.getElementById('keySaved');s.classList.add('show');
   setTimeout(()=>s.classList.remove('show'),2000);
@@ -879,9 +901,127 @@ function saveCtxFromResult(bodyId){
   const cur=document.getElementById('ctx-model').value;
   document.getElementById('ctx-model').value=(cur?cur+' | ':'')+text.slice(0,120)+'...';
   ctxChanged();
-  // open ctx bar
   const p=document.getElementById('ctxPanel');
   if(!p.classList.contains('open')) toggleCtx();
+}
+
+// ---- NAMED PROJECTS ----
+function getProjects(){
+  try{return JSON.parse(localStorage.getItem('koudamki_projects')||'{}');}catch{return {};}
+}
+function refreshProjectList(){
+  const projects=getProjects();
+  const sel=document.getElementById('ctxProjSelect');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Load project —</option>';
+  Object.keys(projects).forEach(name=>{
+    const opt=document.createElement('option');
+    opt.value=name;opt.textContent=name;
+    sel.appendChild(opt);
+  });
+  if(projects[cur]) sel.value=cur;
+}
+function saveProject(){
+  const name=prompt('Name this project:');
+  if(!name) return;
+  const projects=getProjects();
+  projects[name]={
+    problem:document.getElementById('ctx-problem').value,
+    dataset:document.getElementById('ctx-dataset').value,
+    model:document.getElementById('ctx-model').value,
+    savedAt:new Date().toISOString()
+  };
+  localStorage.setItem('koudamki_projects',JSON.stringify(projects));
+  refreshProjectList();
+  document.getElementById('ctxProjSelect').value=name;
+}
+function loadProject(){
+  const name=document.getElementById('ctxProjSelect').value;
+  if(!name) return;
+  const projects=getProjects();
+  const p=projects[name];
+  if(!p) return;
+  document.getElementById('ctx-problem').value=p.problem||'';
+  document.getElementById('ctx-dataset').value=p.dataset||'';
+  document.getElementById('ctx-model').value=p.model||'';
+  ctxChanged();
+}
+function deleteProject(){
+  const name=document.getElementById('ctxProjSelect').value;
+  if(!name) return;
+  if(!confirm('Delete project "'+name+'"?')) return;
+  const projects=getProjects();
+  delete projects[name];
+  localStorage.setItem('koudamki_projects',JSON.stringify(projects));
+  refreshProjectList();
+}
+
+// ---- CSV UPLOAD & AUTO-PROFILE ----
+function handleCsvUpload(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const statusEl=document.getElementById('csvStatus');
+  statusEl.textContent='Profiling '+file.name+'...';
+  Papa.parse(file,{
+    header:true,
+    dynamicTyping:true,
+    skipEmptyLines:true,
+    complete:function(results){
+      const rows=results.data;
+      const fields=results.meta.fields||[];
+      const rowCount=rows.length;
+      const colCount=fields.length;
+      const profile=fields.map(f=>{
+        let nullCount=0,numericCount=0,sample=null;
+        for(const r of rows){
+          const v=r[f];
+          if(v===null||v===undefined||v==='') nullCount++;
+          else{
+            if(sample===null) sample=v;
+            if(typeof v==='number') numericCount++;
+          }
+        }
+        const nonNull=rowCount-nullCount;
+        const dtype=nonNull>0 && numericCount===nonNull ? 'numeric' : 'categorical/text';
+        const nullPct=rowCount?((nullCount/rowCount)*100).toFixed(1):'0.0';
+        return `${f} (${dtype}, ${nullPct}% missing)`;
+      });
+      const missingCols=profile.filter(p=>!p.includes('0.0% missing'));
+      const summary=`Uploaded CSV "${file.name}": ${rowCount} rows, ${colCount} columns.\nColumns: ${profile.slice(0,20).join('; ')}${profile.length>20?'; ...':''}${missingCols.length?'\nColumns with missing values: '+missingCols.length:''}`;
+      document.getElementById('ctx-dataset').value=summary;
+      document.getElementById('p1-rows').value=rowCount;
+      document.getElementById('p1-feats').value=colCount;
+      ctxChanged();
+      statusEl.textContent=`Profiled: ${rowCount} rows × ${colCount} cols — filled into Dataset info`;
+    },
+    error:function(err){
+      statusEl.textContent='Error parsing CSV: '+err.message;
+    }
+  });
+}
+
+// ---- SESSION EXPORT ----
+function exportSession(){
+  const ctx=getCtxString();
+  let md=`# Koudamki ML Solver — Session Export\n\nExported: ${new Date().toLocaleString()}\n\n`;
+  if(ctx) md+=`## Project Context\n\n\`\`\`\n${ctx}\`\`\`\n\n`;
+  let any=false;
+  for(const page of Object.keys(hist)){
+    const msgs=hist[page].filter(m=>m.role!=='system');
+    if(!msgs.length) continue;
+    any=true;
+    md+=`## ${TOOL_NAMES[page]}\n\n`;
+    msgs.forEach(m=>{
+      md+=`**${m.role==='user'?'Input':'Output'}:**\n\n${m.content}\n\n---\n\n`;
+    });
+  }
+  if(!any){ alert('Nothing to export yet — run a tool first.'); return; }
+  const blob=new Blob([md],{type:'text/markdown'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='koudamki-session-'+Date.now()+'.md';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ---- CHIPS & STEPS ----
@@ -979,10 +1119,8 @@ Provide:
 }
 function v(id){const el=document.getElementById(id);return el?el.value:''}
 
-// ---- STREAM GROQ ----
-async function streamGroq(messages,bodyId,statusId,tokenId){
-  const key=document.getElementById('apiKey').value.trim();
-  if(!key){alert('Enter your Groq API key in the top nav!');throw new Error('No key');}
+// ---- STREAM VIA SERVER PROXY (/api/chat) ----
+async function streamViaProxy(messages,bodyId,statusId,tokenId){
   const model=document.getElementById('modelSel').value;
   const body=document.getElementById(bodyId);
   const status=document.getElementById(statusId);
@@ -990,14 +1128,15 @@ async function streamGroq(messages,bodyId,statusId,tokenId){
   body.textContent='';
   status.innerHTML='<span class="spin"></span> Streaming...';
 
-  const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+  const res=await fetch('/api/chat',{
     method:'POST',
-    headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,messages,stream:true,max_tokens:2000,temperature:0.4})
   });
   if(!res.ok){
-    const err=await res.text();
-    body.textContent='API Error ('+res.status+'): '+err;
+    let errMsg=res.statusText;
+    try{const j=await res.json();errMsg=j.error||errMsg;}catch{}
+    body.textContent='API Error ('+res.status+'): '+errMsg;
     status.textContent='';return;
   }
   const reader=res.body.getReader();const dec=new TextDecoder();let buf='';let totalChars=0;
@@ -1037,7 +1176,7 @@ async function run(page){
   hist[page]=[...messages];
 
   try{
-    await streamGroq(messages,bodyId,statusId,page+'-tokens');
+    await streamViaProxy(messages,bodyId,statusId,page+'-tokens');
     const assistantReply=document.getElementById(bodyId).textContent;
     hist[page].push({role:'assistant',content:assistantReply});
   }catch(e){document.getElementById(statusId).textContent='Error: '+e.message;}
@@ -1053,7 +1192,6 @@ async function followUp(page){
   const histDiv=document.getElementById(page+'-fu-hist');
   const btn=document.getElementById(page+'-fu-btn');
 
-  // add user message to UI
   const uDiv=document.createElement('div');
   uDiv.className='fu-msg user';
   uDiv.innerHTML='<div class="fu-msg-label">You</div>'+q;
@@ -1061,29 +1199,32 @@ async function followUp(page){
   histDiv.scrollTop=histDiv.scrollHeight;
   input.value='';
 
-  // add to history
   hist[page].push({role:'user',content:q});
   btn.disabled=true;btn.textContent='...';
 
-  // create assistant reply div
   const aDiv=document.createElement('div');
   aDiv.className='fu-msg assistant';
   aDiv.innerHTML='<div class="fu-msg-label">Assistant</div><span id="fu-stream-'+page+'"></span>';
   histDiv.appendChild(aDiv);
   histDiv.scrollTop=histDiv.scrollHeight;
 
-  // stream into that div
-  const key=document.getElementById('apiKey').value.trim();
   const model=document.getElementById('modelSel').value;
   const streamTarget=document.getElementById('fu-stream-'+page);
   streamTarget.textContent='';
 
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    const res=await fetch('/api/chat',{
       method:'POST',
-      headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model,messages:hist[page],stream:true,max_tokens:1000,temperature:0.4})
     });
+    if(!res.ok){
+      let errMsg=res.statusText;
+      try{const j=await res.json();errMsg=j.error||errMsg;}catch{}
+      streamTarget.textContent='API Error: '+errMsg;
+      btn.disabled=false;btn.textContent='Send';
+      return;
+    }
     const reader=res.body.getReader();const dec=new TextDecoder();let buf='';let full='';
     while(true){
       const{done,value}=await reader.read();if(done)break;
@@ -1105,7 +1246,6 @@ function fuKey(e,page){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();follo
 // ---- CROSS-LINK ----
 function linkTo(page,note){
   goPage(page,null);
-  // pre-fill note into the page's textarea if applicable
   const hints={p1:'p1-desc',p2:'p2-eq',p3:'p3-desc',p4:'p4-goal',p5:'p5-input',p6:'p6-config',p7:'p7-input'};
   const ta=document.getElementById(hints[page]);
   if(ta&&note){
