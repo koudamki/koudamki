@@ -6,11 +6,6 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY is not configured on the server.' });
-  }
-
   let body = req.body;
   if (typeof body === 'string') {
     try {
@@ -21,16 +16,22 @@ module.exports = async function handler(req, res) {
   }
 
   body = body || {};
+  const apiKey = typeof body.apiKey === 'string' ? body.apiKey.trim() : '';
+
+  if (!apiKey) {
+    return res.status(400).json({ error: 'No Groq API key provided.' });
+  }
+
   const messages = Array.isArray(body.messages) ? body.messages : [];
+  if (!messages.length) {
+    return res.status(400).json({ error: 'No messages provided.' });
+  }
+
   const model = typeof body.model === 'string' ? body.model : 'llama-3.3-70b-versatile';
   const system = typeof body.system === 'string' ? body.system : undefined;
   const stream = body.stream === true;
   const max_tokens = Number.isFinite(body.max_tokens) ? body.max_tokens : 4096;
   const temperature = Number.isFinite(body.temperature) ? body.temperature : 0.7;
-
-  if (!messages.length) {
-    return res.status(400).json({ error: 'No messages provided.' });
-  }
 
   const groqMessages = system ? [{ role: 'system', content: system }, ...messages] : messages;
 
@@ -78,7 +79,7 @@ module.exports = async function handler(req, res) {
           res.write(decoder.decode(value, { stream: true }));
         }
       } catch {
-        // client disconnected
+        // ignored
       } finally {
         res.end();
       }

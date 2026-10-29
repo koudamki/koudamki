@@ -260,6 +260,30 @@
       line-height: 1.6;
       margin-top: 10px;
     }
+    .api-box {
+      margin-bottom: 12px;
+      padding: 12px;
+      background: rgba(99,217,255,0.04);
+      border: 1px solid rgba(99,217,255,0.18);
+      border-radius: 10px;
+    }
+    .api-box label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .api-box input {
+      width: 100%;
+      background: #0c1b23;
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+    }
     @media (max-width: 640px) {
       nav { padding: 14px 16px; }
       .container { padding: 16px; }
@@ -273,7 +297,7 @@
     <div class="brand">KOUDAMKI <span>/ VAPT SUITE</span></div>
     <div class="nav-actions">
       <span class="live"></span>
-      <span style="color: var(--muted); font-size: 12px; letter-spacing: 0.06em;">SECURE MODE</span>
+      <span style="color: var(--muted); font-size: 12px; letter-spacing: 0.06em;">USER KEY MODE</span>
     </div>
   </nav>
 
@@ -324,9 +348,15 @@ const rows = db.query(query, [email]);</pre>
 
     <section id="chat" class="panel">
       <div class="chat">
-        <div class="messages" id="messages">
-          <div class="message assistant">Hi! Ask security questions, summarize risks, or explain fixes. The key stays on the server.</div>
+        <div class="api-box">
+          <label for="groqApiKey">Your Groq API Key</label>
+          <input id="groqApiKey" type="password" placeholder="Paste your own Groq API key here" />
         </div>
+
+        <div class="messages" id="messages">
+          <div class="message assistant">Hi! Ask security questions, summarize risks, or explain fixes. Your own Groq key is used for this chat request only.</div>
+        </div>
+
         <div class="chat-input">
           <input id="chatInput" type="text" placeholder="Ask about XSS, SQLi, VAPT, or secure coding..." />
           <button class="primary" onclick="sendChat()">Send</button>
@@ -454,12 +484,22 @@ The highest-priority issues are web input validation and authorization checks. T
 
     async function sendChat() {
       const input = document.getElementById('chatInput');
+      const keyInput = document.getElementById('groqApiKey');
       const value = input.value.trim();
-      if (!value) return;
+      const apiKey = keyInput.value.trim();
+
+      if (!value) {
+        appendMessage('Type a question before sending.', 'assistant');
+        return;
+      }
+
+      if (!apiKey) {
+        appendMessage('Please enter your own Groq API key first.', 'assistant');
+        return;
+      }
 
       input.value = '';
       appendMessage(value, 'user');
-
       const loading = appendMessage('Thinking...', 'assistant');
 
       try {
@@ -467,6 +507,7 @@ The highest-priority issues are web input validation and authorization checks. T
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            apiKey,
             model: 'llama-3.3-70b-versatile',
             stream: false,
             messages: [{ role: 'user', content: value }]
