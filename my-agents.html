@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Agents</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #101a2d;
+      --panel-2: #121e33;
+      --panel-3: #0d172a;
+      --border: rgba(255,255,255,0.08);
+      --text: #edf3ff;
+      --muted: #9bb0d3;
+      --green: #5ee7a3;
+      --green-soft: rgba(94, 231, 163, 0.12);
+      --blue: #60a5fa;
+      --danger: #ff7b7b;
+      --shadow: rgba(0,0,0,0.25);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 18px 14px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--green);
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .nav-section {
+      margin-top: 24px;
+    }
+
+    .nav-title {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .agent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .agent-card {
+      background: #17253d;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .agent-card:hover {
+      border-color: rgba(96,165,250,0.35);
+    }
+
+    .agent-card.active {
+      border-color: var(--green);
+      box-shadow: 0 0 0 1px rgba(94,231,163,0.2);
+      background: rgba(94,231,163,0.04);
+    }
+
+    .agent-name {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .agent-role {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .main {
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .primary-btn {
+      border: none;
+      background: var(--green);
+      color: #07131d;
+      font-weight: 700;
+      border-radius: 9px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+
+    .user-box {
+      background: rgba(94,231,163,0.08);
+      border: 1px solid rgba(94,231,163,0.32);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .user-box h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .user-box p {
+      margin: 0 0 12px;
+      color: #dbe8ff;
+      line-height: 1.5;
+    }
+
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      background: #0f1830;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card h4 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .mini-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #dfeaff;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(94,231,163,0.12);
+      border: 1px solid rgba(94,231,163,0.25);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .chat-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .chat-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .chat-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .small-btn {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #1c2a41;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    .chat-output {
+      min-height: 150px;
+      background: #091524;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 14px;
+      color: #dfeaff;
+      line-height: 1.6;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .input-row input {
+      flex: 1;
+      background: #0d1629;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+
+    .rightbar {
+      background: var(--panel-3);
+      border-left: 1px solid var(--border);
+      padding: 18px 14px;
+    }
+
+    .right-panel {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .right-panel h4 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .tool-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tool-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #e3edff;
+      font-size: 14px;
+    }
+
+    .status {
+      border-radius: 999px;
+      font-size: 11px;
+      padding: 5px 8px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .enabled {
+      background: rgba(94,231,163,0.12);
+      color: var(--green);
+      border-color: rgba(94,231,163,0.25);
+    }
+
+    .disabled {
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .danger {
+      background: rgba(255,123,123,0.12);
+      color: var(--danger);
+      border-color: rgba(255,123,123,0.25);
+    }
+
+    @media (max-width: 1000px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      .sidebar,
+      .rightbar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">KOUDAMKI <span>/ AGENTS</span></div>
+
+      <div class="nav-section">
+        <div class="nav-title">Agents</div>
+        <div class="agent-list">
+          <div class="agent-card active">
+            <div class="agent-name">Research Agent</div>
+            <div class="agent-role">Web + fact checking</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-name">Coding Agent</div>
+            <div class="agent-role">Code generation</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-name">Writer Agent</div>
+            <div class="agent-role">Draft + rewrite</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-name">Reviewer Agent</div>
+            <div class="agent-role">QA + validation</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="page-title">My Agents</div>
+        <button class="primary-btn">Create New Agent</button>
+      </div>
+
+      <div class="user-box">
+        <h3>This workspace is running in your browser/system, not on the app owner’s machine.</h3>
+        <p>Your API keys, data, tools, and agent memory belong to your personal workspace. The app does not own your environment.</p>
+
+        <div class="provider-grid">
+          <div class="field">
+            <label>AI Provider</label>
+            <select>
+              <option>Groq</option>
+              <option>OpenAI</option>
+              <option>Anthropic</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>API Key</label>
+            <input type="password" placeholder="Paste your own key here" />
+          </div>
+
+          <div class="field">
+            <label>Model</label>
+            <select>
+              <option>llama-3.3-70b-versatile</option>
+              <option>gpt-4o-mini</option>
+              <option>claude-3-5-sonnet</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Session</label>
+            <select>
+              <option>Current browser session</option>
+              <option>Save in account</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="workspace-grid">
+        <div class="card">
+          <h4>Current Agent</h4>
+          <div class="mini-list">
+            <div><strong>Research Agent</strong></div>
+            <div>Role: Fact finding</div>
+            <div>Mode: Deep research</div>
+            <div>Memory: Project memory</div>
+          </div>
+          <span class="badge">Deep mode active</span>
+        </div>
+
+        <div class="card">
+          <h4>Memory</h4>
+          <div class="mini-list">
+            <div>Short-term memory: enabled</div>
+            <div>Long-term memory: enabled</div>
+            <div>Private workspace: yes</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Tools</h4>
+          <div class="mini-list">
+            <div>Search: enabled</div>
+            <div>Browser: disabled</div>
+            <div>Code runner: enabled</div>
+            <div>Files: read-only</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-box">
+        <div class="chat-header">
+          <div class="chat-title">Agent Chat</div>
+          <div class="chat-controls">
+            <button class="small-btn">Research mode</button>
+            <button class="small-btn">Call Agent</button>
+          </div>
+        </div>
+
+        <div class="chat-output">
+          Research Agent: I am focused on facts, evidence, and accurate summaries. I will use your browser session and the provider key you selected.
+        </div>
+
+        <div class="input-row">
+          <input type="text" placeholder="Ask the agent to do something..." />
+          <button class="primary-btn">Send</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="rightbar">
+      <div class="right-panel">
+        <h4>Tool Access</h4>
+        <div class="tool-list">
+          <div class="tool-item">
+            <span>Web Search</span>
+            <span class="status enabled">Enabled</span>
+          </div>
+          <div class="tool-item">
+            <span>Browser</span>
+            <span class="status disabled">Disabled</span>
+          </div>
+          <div class="tool-item">
+            <span>Code Runner</span>
+            <span class="status enabled">Enabled</span>
+          </div>
+          <div class="tool-item">
+            <span>File Access</span>
+            <span class="status enabled">Enabled</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <h4>Safety</h4>
+        <div class="tool-list">
+          <div class="tool-item">
+            <span>Approval required</span>
+            <span class="status enabled">Yes</span>
+          </div>
+          <div class="tool-item">
+            <span>Private memory</span>
+            <span class="status enabled">Yes</span>
+          </div>
+          <div class="tool-item">
+            <span>Shared key</span>
+            <span class="status disabled">No</span>
+          </div>
+          <div class="tool-item">
+            <span>App owner access</span>
+            <span class="status danger">None</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
