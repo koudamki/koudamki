@@ -1,464 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>VAPT Suite — Koudamki.ai</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Courier New',monospace;background:#080c10;color:#e2e8f0;min-height:100vh;font-size:13px}
-nav{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;border-bottom:1px solid rgba(255,255,255,0.07);background:#0a0f14;position:sticky;top:0;z-index:100}
-.logo{font-size:14px;font-weight:700;color:#00ffb4;letter-spacing:0.08em;text-decoration:none;display:flex;align-items:center;gap:8px}
-.logo span{color:rgba(255,255,255,0.25);font-weight:400}
-.nav-right{display:flex;align-items:center;gap:10px}
-.back-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;font-family:inherit;text-decoration:none;transition:all 0.15s}
-.back-btn:hover{border-color:rgba(0,255,180,0.3);color:#00ffb4}
-.live-dot{width:7px;height:7px;border-radius:50%;background:#00ffb4;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.module-tabs{display:flex;gap:2px;padding:0 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);background:#0a0f14;overflow-x:auto}
-.mtab{padding:10px 16px;border-radius:0;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:0.05em;background:transparent;color:rgba(255,255,255,0.35);font-family:inherit;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap}
-.mtab.active{color:#00ffb4;border-bottom:2px solid #00ffb4}
-.mtab:hover{color:rgba(255,255,255,0.6)}
-main{padding:1.5rem}
-.mod{display:none}
-.mod.active{display:block}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
-.stat-card{border-radius:10px;padding:1rem 1.25rem;background:#0a0f14}
-.stat-num{font-size:30px;font-weight:700;line-height:1}
-.stat-lbl{font-size:10px;color:rgba(255,255,255,0.3);margin-top:5px;letter-spacing:0.06em}
-.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.kcol{background:#0a0f14;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem;min-height:300px}
-.kcol-header{display:flex;align-items:center;margin-bottom:14px}
-.kcol-title{font-size:10px;font-weight:700;letter-spacing:0.1em;color:rgba(255,255,255,0.3);text-transform:uppercase}
-.kcol-count{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(0,255,180,0.1);color:#00ffb4;font-size:11px;font-weight:700;margin-left:8px}
-.vcard{background:#0d1117;border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:0.85rem;margin-bottom:8px}
-.vcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.vid{font-size:10px;color:rgba(255,255,255,0.2)}
-.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:0.05em}
-.vtitle{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:3px;line-height:1.4}
-.vtarget{font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:8px}
-.vfoot{display:flex;justify-content:space-between;align-items:center}
-.cvss-val{font-size:11px;color:#00e5ff;font-weight:700}
-.vdate{font-size:10px;color:rgba(255,255,255,0.2)}
-.move-btns{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
-.mbtn{padding:2px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.3);font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.15s}
-.mbtn:hover{border-color:rgba(0,255,180,0.4);color:#00ffb4}
-.empty-col{color:rgba(255,255,255,0.12);font-size:11px;text-align:center;padding:2rem 0}
-.report-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-.hint{font-size:12px;color:rgba(255,255,255,0.3)}
-.btn-primary{padding:8px 18px;border-radius:8px;border:1px solid rgba(0,255,180,0.3);background:rgba(0,255,180,0.08);color:#00ffb4;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.05em;transition:all 0.15s}
-.btn-primary:hover{background:rgba(0,255,180,0.15)}
-.btn-sec{padding:6px 14px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;font-family:inherit;transition:all 0.15s}
-.btn-sec:hover{background:rgba(255,255,255,0.05);color:#fff}
-.report-pre{background:#070b0f;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:1.5rem;font-family:'Courier New',monospace;font-size:12px;line-height:1.9;color:#a8c0d6;overflow-y:auto;max-height:500px;white-space:pre-wrap;word-break:break-word}
-.report-placeholder{background:#0a0f14;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:4rem;text-align:center;color:rgba(255,255,255,0.15);font-size:12px}
-.scanner-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem}
-.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.diff-col{background:#0a0f14;border-radius:10px;padding:1rem}
-.diff-col-title{font-size:10px;font-weight:700;letter-spacing:0.08em;margin-bottom:12px;text-transform:uppercase}
-.diff-item{padding:9px 11px;border-radius:8px;margin-bottom:7px;border-left:3px solid transparent}
-.diff-item-title{font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:4px}
-.diff-meta{display:flex;gap:8px;align-items:center}
-.diff-tag{font-size:10px;color:rgba(255,255,255,0.3)}
-.vuln-sel{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
-.vsel-btn{padding:6px 14px;border-radius:7px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.35);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s}
-.vsel-btn.active{background:rgba(0,255,180,0.08);color:#00ffb4;border-color:rgba(0,255,180,0.3)}
-.code-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem}
-.code-label{font-size:10px;font-weight:700;letter-spacing:0.07em;margin-bottom:7px}
-.cblock{background:#070b0f;border-radius:8px;padding:1rem;font-family:'Courier New',monospace;font-size:11px;line-height:1.7;color:#a8c0d6;overflow-x:auto;white-space:pre;display:block}
-.practices{background:#0a0f14;border:1px solid rgba(0,255,180,0.1);border-radius:10px;padding:1.25rem}
-.practices-title{font-size:10px;font-weight:700;color:#00ffb4;letter-spacing:0.08em;margin-bottom:12px;text-transform:uppercase}
-.prac{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:12px;color:rgba(255,255,255,0.6);border-bottom:1px solid rgba(255,255,255,0.04)}
-.prac:last-child{border-bottom:none}
-.prac-arrow{color:#00ffb4;font-size:10px;margin-top:2px;flex-shrink:0}
-.info-tabs{display:flex;gap:2px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:1.25rem}
-.itab{padding:8px 14px;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:0.05em;background:transparent;color:rgba(255,255,255,0.35);font-family:inherit;border-bottom:2px solid transparent;transition:all 0.15s}
-.itab.active{color:#00ffb4;border-bottom:2px solid #00ffb4}
-.icontent{display:none;flex-direction:column;gap:14px}
-.icontent.active{display:flex}
-.sec-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
-.info-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
-.icard{background:#0d1117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:0.85rem 1rem}
-.icard.hl{border-color:rgba(0,255,180,0.2);background:rgba(0,255,180,0.03)}
-.icard-title{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:4px}
-.icard.hl .icard-title{color:#00ffb4}
-.icard-body{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6}
-.icard.hl .icard-body{color:rgba(0,255,180,0.6)}
-.pills{display:flex;flex-wrap:wrap;gap:6px}
-.pill{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);background:#0d1117}
-.banner{border-radius:10px;padding:0.85rem 1rem;display:flex;align-items:flex-start;gap:10px}
-.banner.warn{background:rgba(255,170,0,0.06);border:1px solid rgba(255,170,0,0.2)}
-.banner.info-b{background:rgba(0,180,255,0.06);border:1px solid rgba(0,180,255,0.2)}
-.btext{font-size:12px;line-height:1.6}
-.banner.warn .btext{color:rgba(255,170,0,0.85)}
-.banner.warn .btext strong{color:#ffaa00}
-.banner.info-b .btext{color:rgba(0,180,255,0.85)}
-.banner.info-b .btext strong{color:#00b4ff}
-.agentic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px}
-.acard{background:#0d1117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:0.85rem 1rem}
-.acard-num{font-size:10px;color:rgba(0,255,180,0.5);font-weight:700;letter-spacing:0.1em;margin-bottom:4px}
-.acard-title{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:3px}
-.acard-body{font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5}
-.api-row{display:flex;gap:8px;margin-bottom:8px}
-.api-row input{flex:1;padding:0.5rem 0.75rem;font-size:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0d1117;color:#fff;font-family:inherit}
-.api-save{padding:0.5rem 0.9rem;font-size:11px;border-radius:8px;border:1px solid rgba(0,255,180,0.3);background:rgba(0,255,180,0.06);color:#00ffb4;cursor:pointer;font-family:inherit;font-weight:700}
-.api-hint{font-size:11px;color:rgba(0,255,180,0.6);margin-bottom:10px;padding:6px 10px;background:rgba(0,255,180,0.04);border-radius:6px;border:1px solid rgba(0,255,180,0.12);display:none}
-.quick-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.qbtn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.08);background:#0d1117;color:rgba(255,255,255,0.38);cursor:pointer;font-family:inherit;transition:all 0.15s}
-.qbtn:hover{border-color:rgba(0,255,180,0.3);color:#00ffb4}
-.messages{display:flex;flex-direction:column;gap:8px;padding:12px;background:#070b0f;border:1px solid rgba(255,255,255,0.06);border-radius:10px;min-height:240px;max-height:360px;overflow-y:auto;margin-bottom:10px}
-.msg{padding:0.6rem 0.9rem;border-radius:9px;font-size:12px;line-height:1.6;max-width:88%}
-.msg.user{background:rgba(0,255,180,0.08);border:1px solid rgba(0,255,180,0.2);color:#00ffb4;align-self:flex-end}
-.msg.ai{background:#0d1117;border:1px solid rgba(255,255,255,0.07);color:rgba(255,255,255,0.75);align-self:flex-start}
-.msg.loading{color:rgba(255,255,255,0.3);font-style:italic}
-.chat-input-row{display:flex;gap:8px}
-.chat-input-row input{flex:1;padding:0.5rem 0.85rem;font-size:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0d1117;color:#fff;font-family:inherit}
-.send-btn{padding:0.5rem 1.1rem;font-size:11px;border-radius:8px;border:1px solid rgba(0,255,180,0.3);background:rgba(0,255,180,0.08);color:#00ffb4;cursor:pointer;font-weight:700;font-family:inherit;transition:all 0.15s}
-.send-btn:hover{background:rgba(0,255,180,0.16)}
-@media(max-width:900px){.kanban{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.kanban{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.code-grid{grid-template-columns:1fr}.diff-grid{grid-template-columns:1fr}.scanner-stats{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Koudamki VAPT Suite</title>
+  <style>
+    :root {
+      --bg: #071018;
+      --panel: #0d1b24;
+      --panel-2: #122730;
+      --line: #1f3845;
+      --text: #e7f2f9;
+      --muted: #9fb5c1;
+      --green: #59f0a6;
+      --blue: #63d9ff;
+      --amber: #ffcb66;
+      --red: #ff7686;
+      --shadow: rgba(0,0,0,0.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    a { color: inherit; text-decoration: none; }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: rgba(7,16,24,0.9);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--green);
+    }
+    .brand span { color: var(--muted); font-weight: 400; }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .live {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(89,240,166,0.9);
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 24px 0;
+    }
+    .tab {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .tab.active {
+      background: rgba(89,240,166,0.08);
+      color: var(--green);
+      border-color: rgba(89,240,166,0.4);
+    }
+    .container {
+      padding: 20px 24px 40px;
+    }
+    .panel {
+      display: none;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 12px 28px var(--shadow);
+      padding: 18px;
+    }
+    .panel.active { display: block; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .stat {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .column {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .column-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 5px 8px;
+      border: 1px solid transparent;
+      margin-left: auto;
+    }
+    .ticket {
+      background: #0d1720;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--green);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .ticket h4 {
+      font-size: 14px;
+      margin: 0 0 6px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .mini-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .report-box {
+      background: #08161c;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      white-space: pre-wrap;
+      color: #dfeff9;
+      line-height: 1.7;
+      min-height: 250px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .snippet {
+      background: #07141a;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      line-height: 1.6;
+      color: #d5ebf5;
+      font-size: 12px;
+    }
+    .chat {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 420px;
+    }
+    .messages {
+      background: #08141a;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      max-width: 88%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .message.user {
+      background: rgba(89,240,166,0.08);
+      border: 1px solid rgba(89,240,166,0.2);
+      color: var(--green);
+      align-self: flex-end;
+    }
+    .message.assistant {
+      background: rgba(99,217,255,0.05);
+      border: 1px solid rgba(99,217,255,0.2);
+      color: var(--text);
+      align-self: flex-start;
+    }
+    .chat-input {
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input input {
+      flex: 1;
+      background: #0c1b23;
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+    button.primary {
+      background: rgba(89,240,166,0.08);
+      color: var(--green);
+      border: 1px solid rgba(89,240,166,0.4);
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .muted-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+    @media (max-width: 640px) {
+      nav { padding: 14px 16px; }
+      .container { padding: 16px; }
+      .tabs { padding-left: 16px; padding-right: 16px; }
+      .chat-input { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-
-<nav>
-  <a href="/" class="logo">&#9670; KOUDAMKI <span>/ VAPT SUITE</span></a>
-  <div class="nav-right">
-    <div class="live-dot"></div>
-    <span style="font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:0.05em" id="finding-count">7 FINDINGS</span>
-    <a href="/" class="back-btn">&larr; Back to App</a>
-  </div>
-</nav>
-
-<div class="module-tabs">
-  <button class="mtab active" onclick="showModule('kanban',this)">&#11041; Kanban</button>
-  <button class="mtab" onclick="showModule('report',this)">&#128196; Report</button>
-  <button class="mtab" onclick="showModule('scanner',this)">&#128269; Scanner Diff</button>
-  <button class="mtab" onclick="showModule('defensive',this)">&#128737; Defensive Lib</button>
-  <button class="mtab" onclick="showModule('vapt-info',this)">&#128218; VAPT Info</button>
-</div>
-
-<main>
-  <div id="mod-kanban" class="mod active"></div>
-
-  <div id="mod-report" class="mod">
-    <div class="report-bar">
-      <span class="hint">Compile all tracked findings into a structured stakeholder report.</span>
-      <button class="btn-primary" onclick="genReport()">&#9889; Generate Report</button>
+  <nav>
+    <div class="brand">KOUDAMKI <span>/ VAPT SUITE</span></div>
+    <div class="nav-actions">
+      <span class="live"></span>
+      <span style="color: var(--muted); font-size: 12px; letter-spacing: 0.06em;">SECURE MODE</span>
     </div>
-    <div id="report-out" class="report-placeholder">Click "Generate Report" to compile findings into a professional Markdown report.</div>
+  </nav>
+
+  <div class="tabs">
+    <button class="tab active" data-panel="kanban">Kanban</button>
+    <button class="tab" data-panel="report">Report</button>
+    <button class="tab" data-panel="snippets">Defensive Code</button>
+    <button class="tab" data-panel="chat">AI Chat</button>
   </div>
 
-  <div id="mod-scanner" class="mod"></div>
-  <div id="mod-defensive" class="mod"></div>
+  <div class="container">
+    <section id="kanban" class="panel active">
+      <div class="stats" id="stats"></div>
+      <div class="board" id="board"></div>
+    </section>
 
-  <div id="mod-vapt-info" class="mod">
-    <div class="info-tabs">
-      <button class="itab active" onclick="iTab('ref',this)">Reference</button>
-      <button class="itab" onclick="iTab('mythos',this)">Claude Mythos</button>
-      <button class="itab" onclick="iTab('agentic',this)">Agentic</button>
-      <button class="itab" onclick="iTab('chat',this)">AI Chat</button>
-    </div>
+    <section id="report" class="panel">
+      <button class="primary" onclick="generateReport()">Generate Security Report</button>
+      <div class="muted-note">This produces a quick executive summary for stakeholders and engineering teams.</div>
+      <div id="reportOutput" class="report-box" style="margin-top: 14px;">Click generate to build a report.</div>
+    </section>
 
-    <div id="it-ref" class="icontent active">
-      <div><div class="sec-label">Roles</div>
-        <div class="info-cards">
-          <div class="icard"><div class="icard-title">Ethical / White Hat Hacker</div><div class="icard-body">Authorized hacking to find gaps before attackers do.</div></div>
-          <div class="icard"><div class="icard-title">Penetration Tester</div><div class="icard-body">Actively exploits vulnerabilities to assess real-world impact.</div></div>
-          <div class="icard"><div class="icard-title">Vulnerability Analyst</div><div class="icard-body">Identifies, analyzes, and prioritizes security vulnerabilities.</div></div>
-          <div class="icard"><div class="icard-title">DevSecOps Engineer</div><div class="icard-body">Integrates security scanning into the SDLC pipeline.</div></div>
-          <div class="icard"><div class="icard-title">Security Engineer</div><div class="icard-body">Runs scanners, analyzes reports, and applies patches.</div></div>
-          <div class="icard"><div class="icard-title">Third-Party Auditor</div><div class="icard-body">External firms hired for assessments and compliance audits.</div></div>
+    <section id="snippets" class="panel">
+      <div class="row">
+        <div class="snippet">
+          <h3 style="margin-top:0;">Insecure Example</h3>
+          <pre>const query = "SELECT * FROM users WHERE email = '" + email + "'";
+const rows = db.query(query);</pre>
+        </div>
+        <div class="snippet">
+          <h3 style="margin-top:0;">Secure Example</h3>
+          <pre>const query = "SELECT * FROM users WHERE email = $1";
+const rows = db.query(query, [email]);</pre>
         </div>
       </div>
-      <div><div class="sec-label">Tools &amp; Scanners</div>
-        <div class="info-cards">
-          <div class="icard"><div class="icard-title">Vulnerability Scanner</div><div class="icard-body">Crawls systems for unpatched software &amp; misconfigurations.</div></div>
-          <div class="icard"><div class="icard-title">DAST / Web App Scanners</div><div class="icard-body">Burp Suite, Acunetix &mdash; SQLi, XSS, CSRF detection.</div></div>
-          <div class="icard"><div class="icard-title">Network Scanners</div><div class="icard-body">Nmap, Nessus &mdash; open ports and vulnerable services.</div></div>
-          <div class="icard"><div class="icard-title">SAST Tools</div><div class="icard-body">Static source code analysis without executing the program.</div></div>
-          <div class="icard"><div class="icard-title">SCA Tools</div><div class="icard-body">Scan open-source dependencies for known CVEs.</div></div>
-        </div>
-      </div>
-      <div><div class="sec-label">Key Processes</div>
-        <div class="pills"><span class="pill">Vulnerability Assessment (VA)</span><span class="pill">Penetration Testing (PT)</span><span class="pill">VAPT</span><span class="pill">Vulnerability Management</span><span class="pill">Ethical Hacking</span><span class="pill">Threat Modeling</span><span class="pill">SCA</span></div>
-      </div>
-      <div><div class="sec-label">Popular Tools</div>
-        <div class="pills"><span class="pill">Tenable Nessus</span><span class="pill">Qualys</span><span class="pill">Rapid7 InsightVM</span><span class="pill">OpenVAS</span><span class="pill">Burp Suite</span><span class="pill">Nmap</span><span class="pill">Metasploit</span></div>
-      </div>
-    </div>
 
-    <div id="it-mythos" class="icontent">
-      <div class="banner warn"><span style="font-size:16px;flex-shrink:0">&#9888;&#65039;</span><div class="btext"><strong>Claude Mythos Preview</strong> &mdash; Anthropic's most powerful model, not publicly released due to its unprecedented offensive cybersecurity capabilities. Available only to Project Glasswing partners.</div></div>
-      <div><div class="sec-label">Core Capabilities</div>
-        <div class="info-cards">
-          <div class="icard hl"><div class="icard-title">Zero-Day Discovery</div><div class="icard-body">Automatically finds novel vulnerabilities in mature software missed by tools and researchers for years.</div></div>
-          <div class="icard hl"><div class="icard-title">Deep Codebase Reasoning</div><div class="icard-body">Analyzes large codebases like OpenBSD and FFmpeg &mdash; understanding system-level behavior.</div></div>
-          <div class="icard hl"><div class="icard-title">Defensive Optimization</div><div class="icard-body">Shifts security from reactive to proactive. Designed for "AI vs AI" defense at scale.</div></div>
-          <div class="icard hl"><div class="icard-title">Exploit Reproduction</div><div class="icard-body">Accurately reproduces known vulnerabilities to validate patches and understand exploit chains.</div></div>
+      <div class="row" style="margin-top: 18px;">
+        <div class="snippet">
+          <h3 style="margin-top:0;">XSS</h3>
+          <pre>document.getElementById('out').innerHTML = userInput;</pre>
+        </div>
+        <div class="snippet">
+          <h3 style="margin-top:0;">Safer</h3>
+          <pre>document.getElementById('out').textContent = userInput;</pre>
         </div>
       </div>
-      <div><div class="sec-label">Project Glasswing</div>
-        <div class="info-cards">
-          <div class="icard"><div class="icard-title">$100M credits committed</div><div class="icard-body">Anthropic's investment for partners securing critical global infrastructure.</div></div>
-          <div class="icard"><div class="icard-title">Thousands of zero-days</div><div class="icard-body">High/critical vulnerabilities surviving decades of human review already found.</div></div>
-          <div class="icard"><div class="icard-title">89% accuracy</div><div class="icard-body">Expert contractors agreed with Mythos severity assessments in 89% of reviewed reports.</div></div>
-          <div class="icard"><div class="icard-title">Available on</div><div class="icard-body">Claude API &middot; Amazon Bedrock &middot; Google Vertex AI &middot; Microsoft Foundry (partners only).</div></div>
-        </div>
-      </div>
-      <div><div class="sec-label">Why It's Restricted</div>
-        <div class="pills"><span class="pill">Broke containment during testing</span><span class="pill">Too capable at offensive hacking</span><span class="pill">National security implications</span><span class="pill">Dual-use risk</span><span class="pill">Unprecedented exploit generation</span></div>
-      </div>
-    </div>
+    </section>
 
-    <div id="it-agentic" class="icontent">
-      <div class="banner info-b"><span style="font-size:16px;flex-shrink:0">&#129302;</span><div class="btext"><strong>Agentic framework</strong> &mdash; Mythos doesn't just generate text. It interacts with software, navigates codebases, runs tools, and iterates autonomously within isolated containers.</div></div>
-      <div><div class="sec-label">What It Can Do Autonomously</div>
-        <div class="agentic-grid">
-          <div class="acard"><div class="acard-num">01</div><div class="acard-title">Security Scan &amp; Audit</div><div class="acard-body">Deep automated auditing for buffer overflows, logic errors, and misconfigurations.</div></div>
-          <div class="acard"><div class="acard-num">02</div><div class="acard-title">PoC Generation</div><div class="acard-body">Creates functional exploits to prove a vulnerability is real &mdash; not just theoretical.</div></div>
-          <div class="acard"><div class="acard-num">03</div><div class="acard-title">Automated Patch Generation</div><div class="acard-body">Suggests and tests code-level fixes for discovered bugs.</div></div>
-          <div class="acard"><div class="acard-num">04</div><div class="acard-title">Codebase Navigation</div><div class="acard-body">Navigates large, multi-file software projects &mdash; not just isolated snippets.</div></div>
-          <div class="acard"><div class="acard-num">05</div><div class="acard-title">Hypothesis &amp; Validation</div><div class="acard-body">Reads code to hypothesize, runs software to confirm, adds debug logic as needed.</div></div>
-          <div class="acard"><div class="acard-num">06</div><div class="acard-title">Parallel Execution</div><div class="acard-body">Multiple agents run simultaneously, each focused on different files.</div></div>
-          <div class="acard"><div class="acard-num">07</div><div class="acard-title">Severity Triage</div><div class="acard-body">Ranks files by vulnerability likelihood (1&ndash;5) and auto-filters low-impact findings.</div></div>
-          <div class="acard"><div class="acard-num">08</div><div class="acard-title">Bug Report Validation</div><div class="acard-body">A final agent validates all reports ensuring only high-quality findings are disclosed.</div></div>
+    <section id="chat" class="panel">
+      <div class="chat">
+        <div class="messages" id="messages">
+          <div class="message assistant">Hi! Ask security questions, summarize risks, or explain fixes. The key stays on the server.</div>
+        </div>
+        <div class="chat-input">
+          <input id="chatInput" type="text" placeholder="Ask about XSS, SQLi, VAPT, or secure coding..." />
+          <button class="primary" onclick="sendChat()">Send</button>
         </div>
       </div>
-      <div><div class="sec-label">How It Works</div>
-        <div class="pills"><span class="pill">Isolated container execution</span><span class="pill">Internet-sandboxed</span><span class="pill">Claude Code powered</span><span class="pill">Iterative experimentation</span><span class="pill">Multi-agent parallelism</span><span class="pill">Responsible disclosure</span></div>
-      </div>
-    </div>
-
-    <div id="it-chat" class="icontent">
-      <div class="api-row">
-        <input type="password" id="chat-api-key" placeholder="Groq API key"/>
-        <button class="api-save" onclick="saveApiKey()">Save</button>
-      </div>
-      <div class="api-hint" id="api-hint">&#10003; Groq key loaded from your saved session &mdash; ready to chat</div>
-      <div class="quick-btns">
-        <button class="qbtn" onclick="quickAsk('What is VAPT and why is it important?')">What is VAPT?</button>
-        <button class="qbtn" onclick="quickAsk('Which scanner should I use for a web app?')">Best scanner?</button>
-        <button class="qbtn" onclick="quickAsk('What makes Claude Mythos different from traditional security tools?')">Mythos vs traditional</button>
-        <button class="qbtn" onclick="quickAsk('How does agentic security testing work?')">Agentic testing?</button>
-        <button class="qbtn" onclick="quickAsk('Difference between VA and penetration testing?')">VA vs PT</button>
-      </div>
-      <div class="messages" id="chat-messages">
-        <div class="msg ai">Hi! Ask me anything about cybersecurity, VAPT, tools, roles, Claude Mythos, or how to secure your systems.</div>
-      </div>
-      <div class="chat-input-row">
-        <input type="text" id="chat-input" placeholder="Ask a security question..." onkeydown="if(event.key==='Enter')sendChat()"/>
-        <button class="send-btn" onclick="sendChat()">Send &rarr;</button>
-      </div>
-    </div>
+    </section>
   </div>
-</main>
 
-<script>
-var SEV={Critical:{c:"#ff2d55",bg:"rgba(255,45,85,0.12)",b:"rgba(255,45,85,0.35)"},High:{c:"#ff6b00",bg:"rgba(255,107,0,0.12)",b:"rgba(255,107,0,0.35)"},Medium:{c:"#ffd60a",bg:"rgba(255,214,10,0.1)",b:"rgba(255,214,10,0.3)"},Low:{c:"#30d158",bg:"rgba(48,209,88,0.1)",b:"rgba(48,209,88,0.3)"}};
-var STAGES=["Discovered","In Progress","Remediation","Resolved"];
-var vulns=[
-  {id:"V001",title:"SQL Injection in Login",severity:"Critical",cvss:9.8,stage:"Discovered",cve:"CVE-2024-1234",target:"auth.api/login",discovered:"2025-04-01",desc:"Unsanitised user input passed directly to SQL query in authentication handler."},
-  {id:"V002",title:"Reflected XSS - Search",severity:"High",cvss:7.4,stage:"In Progress",cve:"CVE-2024-5678",target:"web/search",discovered:"2025-04-03",desc:"User-controlled q param reflected without encoding in search results page."},
-  {id:"V003",title:"IDOR on Profile API",severity:"High",cvss:7.1,stage:"In Progress",cve:"N/A",target:"api/v2/profile",discovered:"2025-04-04",desc:"Numeric user IDs in REST endpoint allow horizontal privilege escalation."},
-  {id:"V004",title:"Outdated OpenSSL 1.0.2",severity:"Medium",cvss:5.9,stage:"Remediation",cve:"CVE-2023-0286",target:"server/tls",discovered:"2025-03-28",desc:"Server running end-of-life OpenSSL with known memory corruption flaws."},
-  {id:"V005",title:"Missing HSTS Header",severity:"Low",cvss:3.1,stage:"Resolved",cve:"N/A",target:"nginx config",discovered:"2025-03-20",desc:"HTTP Strict-Transport-Security header absent, enabling SSL-stripping attacks."},
-  {id:"V006",title:"Stored XSS in Comments",severity:"Critical",cvss:9.0,stage:"Discovered",cve:"N/A",target:"blog/comments",discovered:"2025-04-08",desc:"HTML content in comment body persisted to DB without sanitisation."},
-  {id:"V007",title:"Weak JWT Secret",severity:"High",cvss:8.1,stage:"Remediation",cve:"N/A",target:"auth/jwt",discovered:"2025-04-02",desc:"JWT signed with short, predictable secret susceptible to brute-force."}
-];
-var SA=[
-  {id:"S-001",title:"SQL Injection - /login",severity:"Critical",cvss:9.8,source:"SQLMap"},
-  {id:"S-002",title:"Open Port 8080",severity:"Low",cvss:2.1,source:"Nmap"},
-  {id:"S-003",title:"Reflected XSS /search",severity:"High",cvss:7.4,source:"OWASP ZAP"},
-  {id:"S-004",title:"Directory Listing",severity:"Medium",cvss:5.3,source:"Nikto"},
-  {id:"S-005",title:"SSL/TLS BEAST Attack",severity:"Medium",cvss:5.9,source:"SSLyze"}
-];
-var SB=[
-  {id:"M-001",title:"SQL Injection - /login",severity:"Critical",cvss:9.8,source:"Manual"},
-  {id:"M-002",title:"IDOR on /api/v2/profile",severity:"High",cvss:7.1,source:"Manual"},
-  {id:"M-003",title:"Reflected XSS /search",severity:"High",cvss:7.4,source:"Manual"},
-  {id:"M-004",title:"Weak JWT Secret",severity:"High",cvss:8.1,source:"Manual"},
-  {id:"M-005",title:"Missing HSTS Header",severity:"Low",cvss:3.1,source:"Manual"}
-];
-var DLIB={
-  SQLi:{label:"SQL Injection",
-    bad:"// INSECURE\nconst q = \"SELECT * FROM users WHERE email = '\" + email + \"'\";\ndb.query(q);\n// Attacker: ' OR '1'='1 -> full table dump",
-    good:"// SECURE - Parameterised Query\nconst q = \"SELECT * FROM users WHERE email = $1\";\ndb.query(q, [email]);\n// Input never interpolated into SQL",
-    practices:["Always use parameterised queries or prepared statements","Never concatenate user input into SQL strings","Apply allowlist input validation on all fields","Use a WAF as a secondary defence layer","Restrict DB user to minimum required permissions","Log and alert on SQL error responses"]},
-  XSS:{label:"Cross-Site Scripting",
-    bad:"// INSECURE\ndocument.getElementById('out').innerHTML =\n  'Hello, ' + req.query.name;\n// ?name=<script>stealCookies()</script>",
-    good:"// SECURE\nimport DOMPurify from 'dompurify';\nconst safe = DOMPurify.sanitize(req.query.name);\ndocument.getElementById('out').textContent =\n  'Hello, ' + safe;\n// Also set strict Content-Security-Policy",
-    practices:["Use textContent over innerHTML wherever possible","Sanitise all HTML with DOMPurify before DOM insertion","Implement a strict Content-Security-Policy header","Encode output in context: HTML, JS, or URL","Set HttpOnly + Secure flags on all cookies","Enable X-XSS-Protection and X-Content-Type-Options"]},
-  IDOR:{label:"Insecure Direct Object Ref",
-    bad:"// INSECURE - No ownership check\napp.get('/api/doc/:id', async (req, res) => {\n  const doc = await db.find({ id: req.params.id });\n  res.json(doc); // Returns ANY user's document\n});",
-    good:"// SECURE - Ownership enforced\napp.get('/api/doc/:id', authenticate, async (req, res) => {\n  const doc = await db.find({\n    id: req.params.id,\n    ownerId: req.user.id\n  });\n  if (!doc) return res.status(404).end();\n  res.json(doc);\n});",
-    practices:["Verify resource ownership server-side on every request","Use UUIDs instead of sequential integer IDs in URLs","Implement RBAC/ABAC for all resource access","Never expose internal DB IDs in public APIs","Centralise authorisation into a single middleware","Audit all API endpoints for missing ownership checks"]},
-  BufferOverflow:{label:"Buffer Overflow",
-    bad:"// INSECURE - C: No bounds check\nchar buf[64];\ngets(buf);\n// reads unlimited input -> stack smash\n// Result: arbitrary code execution",
-    good:"// SECURE - Bounded read\nfgets(buf, sizeof(buf), stdin);\n\n// Rust (memory-safe by design):\nlet mut input = String::new();\nio::stdin().read_line(&mut input).unwrap();\n// Rust ownership prevents overflow entirely",
-    practices:["Use memory-safe languages (Rust, Go) for new systems","Replace gets() with fgets(), strcpy() with strlcpy()","Enable stack canaries, ASLR, and NX bit flags","Use static analysis: CodeQL, Coverity, Semgrep","Fuzz test all input-handling functions regularly","Apply AddressSanitizer during development builds"]}
-};
+  <script>
+    const vulnerabilities = [
+      { id: 'V-001', title: 'SQL Injection in Login', severity: 'Critical', stage: 'Discovered', target: 'auth/login', cvss: 9.8 },
+      { id: 'V-002', title: 'Reflected XSS in Search', severity: 'High', stage: 'In Progress', target: '/search', cvss: 7.4 },
+      { id: 'V-003', title: 'IDOR in Profile API', severity: 'High', stage: 'Remediation', target: '/api/profile/:id', cvss: 7.1 },
+      { id: 'V-004', title: 'Weak JWT Secret', severity: 'Medium', stage: 'Resolved', target: 'auth/jwt', cvss: 5.9 },
+      { id: 'V-005', title: 'Missing HSTS Header', severity: 'Low', stage: 'Resolved', target: 'nginx config', cvss: 3.1 }
+    ];
 
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function badge(sev){var s=SEV[sev];return '<span class="badge" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+sev+'</span>';}
-function norm(t){return t.toLowerCase().replace(/[^a-z0-9]/g,"");}
+    const stages = ['Discovered', 'In Progress', 'Remediation', 'Resolved'];
 
-function showModule(name,el){
-  ["kanban","report","scanner","defensive","vapt-info"].forEach(function(m){
-    document.getElementById("mod-"+m).style.display=(m===name)?"block":"none";
-  });
-  document.querySelectorAll(".mtab").forEach(function(t){t.classList.remove("active");});
-  el.classList.add("active");
-}
+    function getSeverityColor(severity) {
+      const map = {
+        Critical: '#ff7686',
+        High: '#ffb866',
+        Medium: '#ffd166',
+        Low: '#59f0a6'
+      };
+      return map[severity] || '#ffffff';
+    }
 
-function renderKanban(){
-  var counts={Critical:0,High:0,Medium:0,Low:0};
-  vulns.forEach(function(v){counts[v.severity]++;});
-  document.getElementById("finding-count").textContent=vulns.length+" FINDINGS";
-  var h='<div class="stats-row">';
-  Object.keys(counts).forEach(function(sev){
-    var s=SEV[sev];
-    h+='<div class="stat-card" style="border:1px solid '+s.b+'"><div class="stat-num" style="color:'+s.c+'">'+counts[sev]+'</div><div class="stat-lbl">'+sev.toUpperCase()+'</div></div>';
-  });
-  h+='</div><div class="kanban">';
-  STAGES.forEach(function(stage){
-    var sv=vulns.filter(function(v){return v.stage===stage;});
-    h+='<div class="kcol"><div class="kcol-header"><span class="kcol-title">'+stage+'</span><span class="kcol-count">'+sv.length+'</span></div>';
-    if(!sv.length)h+='<div class="empty-col">No items</div>';
-    sv.forEach(function(v){
-      var s=SEV[v.severity];
-      var others=STAGES.filter(function(st){return st!==stage;});
-      h+='<div class="vcard" style="border-left:3px solid '+s.c+'">';
-      h+='<div class="vcard-top"><span class="vid">'+v.id+'</span>'+badge(v.severity)+'</div>';
-      h+='<div class="vtitle">'+esc(v.title)+'</div>';
-      h+='<div class="vtarget">'+esc(v.target)+'</div>';
-      h+='<div class="vfoot"><span class="cvss-val">CVSS '+v.cvss+'</span><span class="vdate">'+v.discovered+'</span></div>';
-      h+='<div class="move-btns">';
-      others.forEach(function(o){h+='<button class="mbtn" onclick="moveVuln(\''+v.id+'\',\''+o.replace(/'/g,"\\'")+'\')">&rarr; '+esc(o)+'</button>';});
-      h+='</div></div>';
+    function renderBoard() {
+      const statsEl = document.getElementById('stats');
+      const boardEl = document.getElementById('board');
+      const counts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+
+      vulnerabilities.forEach(item => {
+        counts[item.severity] += 1;
+      });
+
+      statsEl.innerHTML = Object.entries(counts).map(([level, count]) => `
+        <div class="stat">
+          <strong style="color:${getSeverityColor(level)};">${count}</strong>
+          <span style="color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: 11px;">${level}</span>
+        </div>
+      `).join('');
+
+      boardEl.innerHTML = stages.map(stage => {
+        const items = vulnerabilities.filter(v => v.stage === stage);
+        return `
+          <div class="column">
+            <div class="column-head">
+              <span>${stage}</span>
+              <span>${items.length}</span>
+            </div>
+            ${items.length ? items.map(item => `
+              <div class="ticket" style="border-left-color:${getSeverityColor(item.severity)};">
+                <h4>${item.title}</h4>
+                <div class="meta">${item.id} • ${item.target}</div>
+                <span class="badge" style="background: rgba(255,255,255,0.03); border-color:${getSeverityColor(item.severity)}; color:${getSeverityColor(item.severity)};">${item.severity}</span>
+                <div class="meta" style="margin-top: 8px;">CVSS ${item.cvss}</div>
+                <div class="actions">
+                  ${stages.filter(s => s !== stage).map(s => `<button class="mini-btn" onclick="moveTicket('${item.id}', '${s}')">Move → ${s}</button>`).join('')}
+                </div>
+              </div>
+            `).join('') : '<div class="meta">No items</div>'}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function moveTicket(id, nextStage) {
+      const item = vulnerabilities.find(v => v.id === id);
+      if (item) item.stage = nextStage;
+      renderBoard();
+    }
+
+    function generateReport() {
+      const critical = vulnerabilities.filter(v => v.severity === 'Critical').length;
+      const high = vulnerabilities.filter(v => v.severity === 'High').length;
+      const medium = vulnerabilities.filter(v => v.severity === 'Medium').length;
+      const low = vulnerabilities.filter(v => v.severity === 'Low').length;
+
+      const report = `# VAPT Assessment Summary
+
+Date: ${new Date().toLocaleDateString()}
+
+## Executive Summary
+- Critical: ${critical}
+- High: ${high}
+- Medium: ${medium}
+- Low: ${low}
+
+## Key Findings
+${vulnerabilities.map(v => `- ${v.id}: ${v.title} (${v.severity}) at ${v.target} — CVSS ${v.cvss}`).join('\n')}
+
+## Recommended Actions
+1. Patch SQL injection and XSS issues before release.
+2. Enforce owner checks for IDOR vulnerabilities.
+3. Rotate JWT secrets and verify secure headers.
+4. Review deployment configuration and enable HSTS.
+
+## Final Note
+The highest-priority issues are web input validation and authorization checks. These should be fixed before public exposure.`;
+
+      document.getElementById('reportOutput').textContent = report;
+    }
+
+    document.querySelectorAll('.tab').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(button.dataset.panel).classList.add('active');
+      });
     });
-    h+='</div>';
-  });
-  h+='</div>';
-  document.getElementById("mod-kanban").innerHTML=h;
-}
 
-function moveVuln(id,stage){
-  vulns=vulns.map(function(v){return v.id===id?Object.assign({},v,{stage:stage}):v;});
-  renderKanban();
-}
+    function appendMessage(text, role) {
+      const messages = document.getElementById('messages');
+      const node = document.createElement('div');
+      node.className = `message ${role}`;
+      node.textContent = text;
+      messages.appendChild(node);
+      messages.scrollTop = messages.scrollHeight;
+      return node;
+    }
 
-function genReport(){
-  var counts={Critical:0,High:0,Medium:0,Low:0};
-  vulns.forEach(function(v){counts[v.severity]++;});
-  var rs=((counts.Critical*10+counts.High*7+counts.Medium*4+counts.Low)/(vulns.length||1)).toFixed(1);
-  var resolved=vulns.filter(function(v){return v.stage==="Resolved";}).length;
-  var date=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
-  var critHigh=vulns.filter(function(v){return v.severity==="Critical"||v.severity==="High";});
-  var findings=critHigh.map(function(v,i){
-    return (i+1)+". "+v.title+"\n   ID: "+v.id+" | CVE: "+v.cve+"\n   Severity: "+v.severity+" | CVSS: "+v.cvss+"\n   Target: "+v.target+" | Status: "+v.stage+"\n   Description: "+v.desc;
-  }).join("\n\n");
-  var remSteps=vulns.map(function(v,i){return (i+1)+". ["+v.severity+"] "+v.title+" -- Apply vendor patch or implement input validation.";}).join("\n");
-  var report="# VAPT Assessment Report\nPrepared by: Koudamki Security Suite\nDate: "+date+"\nClassification: CONFIDENTIAL\n\n---\n\n## Executive Summary\n\nTotal vulnerabilities: "+vulns.length+"\n\nSeverity   | Count\n-----------|------\nCritical   | "+counts.Critical+"\nHigh       | "+counts.High+"\nMedium     | "+counts.Medium+"\nLow        | "+counts.Low+"\n\nRisk Score: "+rs+"/10\nResolved: "+resolved+"/"+vulns.length+" ("+Math.round(resolved/vulns.length*100)+"%)\nImmediate Action: "+(counts.Critical+counts.High)+" findings\n\n---\n\n## Technical Findings (Critical & High)\n\n"+findings+"\n\n---\n\n## Remediation Steps\n\n"+remSteps+"\n\n---\nReport generated by Koudamki VAPT Suite.";
-  window._report=report;
-  document.getElementById("report-out").innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="hint">Markdown preview</span><button class="btn-sec" id="cbtn" onclick="copyReport()">&#128203; Copy</button></div><pre class="report-pre" id="rtext">'+esc(report)+'</pre>';
-}
-function copyReport(){
-  if(window._report){navigator.clipboard.writeText(window._report).then(function(){var b=document.getElementById("cbtn");b.textContent="Copied!";setTimeout(function(){b.textContent="Copy";},2000);});}
-}
+    async function sendChat() {
+      const input = document.getElementById('chatInput');
+      const value = input.value.trim();
+      if (!value) return;
 
-function renderScanner(){
-  var confirmed=[],fp=[],missed=[];
-  SA.forEach(function(a){
-    var m=SB.find(function(b){return norm(b.title).indexOf(norm(a.title).slice(0,7))>-1||norm(a.title).indexOf(norm(b.title).slice(0,7))>-1;});
-    if(m)confirmed.push({s:a,m:m});else fp.push(a);
-  });
-  SB.forEach(function(b){
-    var inA=SA.some(function(a){return norm(a.title).indexOf(norm(b.title).slice(0,7))>-1||norm(b.title).indexOf(norm(a.title).slice(0,7))>-1;});
-    if(!inA)missed.push(b);
-  });
-  var h='<div class="scanner-stats"><div class="stat-card" style="border:1px solid rgba(48,209,88,0.3)"><div class="stat-num" style="color:#30d158">'+confirmed.length+'</div><div class="stat-lbl">CONFIRMED</div></div><div class="stat-card" style="border:1px solid rgba(255,214,10,0.3)"><div class="stat-num" style="color:#ffd60a">'+fp.length+'</div><div class="stat-lbl">POTENTIAL FALSE POSITIVES</div></div><div class="stat-card" style="border:1px solid rgba(255,45,85,0.3)"><div class="stat-num" style="color:#ff2d55">'+missed.length+'</div><div class="stat-lbl">MISSED BY SCANNER</div></div></div><div class="diff-grid">';
-  h+='<div class="diff-col" style="border:1px solid rgba(0,229,255,0.12)"><div class="diff-col-title" style="color:rgba(0,229,255,0.6)">Scanner A &mdash; Nmap / ZAP ('+SA.length+')</div>';
-  SA.forEach(function(f){
-    var isC=confirmed.some(function(c){return c.s.id===f.id;});
-    var isFP=fp.some(function(x){return x.id===f.id;});
-    var bg=isC?"rgba(48,209,88,0.07)":isFP?"rgba(255,214,10,0.07)":"rgba(255,255,255,0.02)";
-    var bl=isC?"#30d158":isFP?"#ffd60a":"rgba(255,255,255,0.08)";
-    h+='<div class="diff-item" style="background:'+bg+';border-left-color:'+bl+'"><div class="diff-item-title">'+esc(f.title)+'</div><div class="diff-meta">'+badge(f.severity)+'<span class="diff-tag">'+(isC?"&#10003; Confirmed":isFP?"&#9888; Potential FP":"")+'</span></div></div>';
-  });
-  h+='</div><div class="diff-col" style="border:1px solid rgba(255,165,0,0.12)"><div class="diff-col-title" style="color:rgba(255,165,0,0.6)">Manual Audit ('+SB.length+')</div>';
-  SB.forEach(function(f){
-    var isC=confirmed.some(function(c){return c.m.id===f.id;});
-    var isMissed=missed.some(function(x){return x.id===f.id;});
-    var bg=isC?"rgba(48,209,88,0.07)":isMissed?"rgba(255,45,85,0.07)":"rgba(255,255,255,0.02)";
-    var bl=isC?"#30d158":isMissed?"#ff2d55":"rgba(255,255,255,0.08)";
-    h+='<div class="diff-item" style="background:'+bg+';border-left-color:'+bl+'"><div class="diff-item-title">'+esc(f.title)+'</div><div class="diff-meta">'+badge(f.severity)+'<span class="diff-tag">'+(isC?"&#10003; Confirmed":isMissed?"&#10007; Missed":"")+'</span></div></div>';
-  });
-  h+='</div></div>';
-  document.getElementById("mod-scanner").innerHTML=h;
-}
+      input.value = '';
+      appendMessage(value, 'user');
 
-var activeLib="SQLi";
-function renderDefensive(key){
-  activeLib=key||activeLib;
-  var lib=DLIB[activeLib];
-  var h='<div class="vuln-sel">';
-  Object.keys(DLIB).forEach(function(k){h+='<button class="vsel-btn'+(k===activeLib?" active":"")+'" onclick="renderDefensive(\''+k+'\')">'+DLIB[k].label+'</button>';});
-  h+='</div><div class="code-grid"><div><div class="code-label" style="color:#ff2d55">&#10060; INSECURE PATTERN</div><code class="cblock" style="border:1px solid rgba(255,45,85,0.2)">'+esc(lib.bad)+'</code></div><div><div class="code-label" style="color:#30d158">&#10003; SECURE PATTERN</div><code class="cblock" style="border:1px solid rgba(48,209,88,0.2)">'+esc(lib.good)+'</code></div></div>';
-  h+='<div class="practices"><div class="practices-title">Defensive best practices &mdash; '+lib.label+'</div>';
-  lib.practices.forEach(function(p){h+='<div class="prac"><span class="prac-arrow">&#9658;</span><span>'+esc(p)+'</span></div>';});
-  h+='</div>';
-  document.getElementById("mod-defensive").innerHTML=h;
-}
+      const loading = appendMessage('Thinking...', 'assistant');
 
-function iTab(name,el){
-  document.querySelectorAll(".itab").forEach(function(t){t.classList.remove("active");});
-  document.querySelectorAll(".icontent").forEach(function(t){t.classList.remove("active");});
-  document.getElementById("it-"+name).classList.add("active");
-  el.classList.add("active");
-}
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            stream: false,
+            messages: [{ role: 'user', content: value }]
+          })
+        });
 
-function saveApiKey(){
-  var k=document.getElementById("chat-api-key").value.trim();
-  if(k){localStorage.setItem("groq_key",k);document.getElementById("chat-api-key").placeholder="Key saved!";document.getElementById("api-hint").style.display="block";}
-}
-function quickAsk(q){
-  iTab("chat",document.querySelectorAll(".itab")[3]);
-  setTimeout(function(){document.getElementById("chat-input").value=q;sendChat();},150);
-}
-function addMsg(text,cls){
-  var div=document.createElement("div");
-  div.className="msg "+cls;
-  div.textContent=text;
-  var msgs=document.getElementById("chat-messages");
-  msgs.appendChild(div);
-  msgs.scrollTop=msgs.scrollHeight;
-  return div;
-}
-async function sendChat(){
-  var input=document.getElementById("chat-input");
-  var msg=input.value.trim();
-  if(!msg)return;
-  input.value="";
-  addMsg(msg,"user");
-  var loading=addMsg("Thinking...","ai loading");
-  var apiKey=document.getElementById("chat-api-key").value.trim()||localStorage.getItem("groq_key")||"";
-  if(!apiKey){loading.textContent="No Groq API key found. Enter your key above and click Save.";loading.classList.remove("loading");return;}
-  try{
-    var res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},body:JSON.stringify({model:"llama-3.3-70b-versatile",max_tokens:500,messages:[{role:"system",content:"You are a cybersecurity and VAPT expert. Answer concisely and practically."},{role:"user",content:msg}]})});
-    var data=await res.json();
-    if(data.error){loading.textContent="API Error: "+data.error.message;}
-    else{loading.textContent=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||"No response received.";}
-    loading.classList.remove("loading");
-  }catch(e){loading.textContent="Network error: "+e.message;loading.classList.remove("loading");}
-}
+        const data = await response.json();
+        if (!response.ok) {
+          loading.textContent = data.error || 'The server returned an error.';
+          return;
+        }
 
-(function(){
-  if(localStorage.getItem("groq_key")){document.getElementById("api-hint").style.display="block";}
-  renderKanban();
-  renderScanner();
-  renderDefensive();
-})();
-</script>
+        const text = data.choices?.[0]?.message?.content || 'No response received.';
+        loading.textContent = text;
+      } catch (error) {
+        loading.textContent = 'Unable to reach the server. Please check the backend configuration.';
+      }
+    }
+
+    document.getElementById('chatInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        sendChat();
+      }
+    });
+
+    renderBoard();
+  </script>
 </body>
 </html>

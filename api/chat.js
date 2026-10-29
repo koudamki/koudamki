@@ -1,5 +1,4 @@
 module.exports = async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -8,29 +7,39 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY not configured in environment variables.' });
+  if (!apiKey) {
+    return res.status(500).json({ error: 'GROQ_API_KEY is not configured on the server.' });
+  }
 
-  const {
-    messages = [],
-    model = 'llama-3.3-70b-versatile',
-    system,
-    stream = true,
-    max_tokens = 4096,
-    temperature = 0.7
-  } = req.body || {};
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      body = {};
+    }
+  }
 
-  if (!messages.length) return res.status(400).json({ error: 'No messages provided.' });
+  body = body || {};
+  const messages = Array.isArray(body.messages) ? body.messages : [];
+  const model = typeof body.model === 'string' ? body.model : 'llama-3.3-70b-versatile';
+  const system = typeof body.system === 'string' ? body.system : undefined;
+  const stream = body.stream === true;
+  const max_tokens = Number.isFinite(body.max_tokens) ? body.max_tokens : 4096;
+  const temperature = Number.isFinite(body.temperature) ? body.temperature : 0.7;
 
-  const groqMessages = system
-    ? [{ role: 'system', content: system }, ...messages]
-    : messages;
+  if (!messages.length) {
+    return res.status(400).json({ error: 'No messages provided.' });
+  }
+
+  const groqMessages = system ? [{ role: 'system', content: system }, ...messages] : messages;
 
   try {
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        Authorization: `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model,
@@ -42,9 +51,15 @@ module.exports = async function handler(req, res) {
     });
 
     if (!groqRes.ok) {
-      let errBody = {};
-      try { errBody = await groqRes.json(); } catch(e) {}
-      return res.status(groqRes.status).json({ error: errBody?.error?.message || groqRes.statusText });
+      let errorBody = {};
+      try {
+        errorBody = await groqRes.json();
+      } catch {
+        // ignore invalid JSON
+      }
+      return res.status(groqRes.status).json({
+        error: errorBody?.error?.message || groqRes.statusText || 'Groq request failed.'
+      });
     }
 
     if (stream) {
@@ -62,17 +77,17 @@ module.exports = async function handler(req, res) {
           if (done) break;
           res.write(decoder.decode(value, { stream: true }));
         }
-      } catch(e) {
-        // Client disconnected
+      } catch {
+        // client disconnected
       } finally {
         res.end();
       }
-    } else {
-      const data = await groqRes.json();
-      res.status(200).json(data);
+      return;
     }
 
-  } catch(e) {
-    res.status(500).json({ error: e.message });
+    const data = await groqRes.json();
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message || 'Unexpected server error.' });
   }
 };
