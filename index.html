@@ -1,1267 +1,703 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Koudamki ML Solver</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#050507;--surface:#0d0d12;--surface2:#13131a;--surface3:#1a1a24;
-  --border:#1e1e2a;--border2:#2a2a38;
-  --green:#00ff88;--green2:#00cc6a;--green-dim:#003322;
-  --blue:#4da6ff;--purple:#9b6dff;--amber:#ffb347;--red:#ff6b6b;
-  --text:#d4d4e0;--muted:#5a5a70;--dim:#3a3a50;
-  --font:'JetBrains Mono',monospace;
-  --r:8px;--r2:12px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;line-height:1.6;min-height:100vh;overflow-x:hidden}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:var(--surface)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-
-/* NAV */
-.nav{position:sticky;top:0;z-index:200;background:rgba(5,5,7,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:16px}
-.nav-logo{font-size:16px;font-weight:600;color:var(--green);letter-spacing:-0.5px;margin-right:8px}
-.nav-logo span{color:var(--muted);font-weight:300}
-.nav-live{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:1px}
-.nav-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.nav-spacer{flex:1}
-.nav-key-wrap{display:flex;align-items:center;gap:8px}
-.nav-key-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.nav-key{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-family:var(--font);font-size:11px;color:var(--text);width:220px;outline:none}
-.nav-key:focus{border-color:var(--green)}
-.nav-model{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-family:var(--font);font-size:11px;color:var(--text);outline:none;cursor:pointer}
-.nav-model:focus{border-color:var(--green)}
-.nav-save{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 10px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
-.nav-save:hover{border-color:var(--green);color:var(--green)}
-.nav-saved{color:var(--green);font-size:10px;display:none}
-.nav-saved.show{display:block}
-.nav-export{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 10px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
-.nav-export:hover{border-color:var(--blue);color:var(--blue)}
-
-/* CONTEXT BAR */
-.ctx-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px}
-.ctx-toggle{display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;user-select:none}
-.ctx-toggle:hover{color:var(--text)}
-.ctx-badge{background:var(--green-dim);color:var(--green);border-radius:4px;padding:1px 6px;font-size:10px}
-.ctx-toggle .arrow{transition:transform .2s}
-.ctx-toggle.open .arrow{transform:rotate(90deg)}
-.ctx-panel{display:none;padding:0 0 12px;border-top:1px solid var(--border)}
-.ctx-panel.open{display:block}
-.ctx-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
-.ctx-field{display:flex;flex-direction:column;gap:4px}
-.ctx-field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.ctx-field input,.ctx-field textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:none}
-.ctx-field input:focus,.ctx-field textarea:focus{border-color:var(--green)}
-.ctx-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
-.ctx-hint{font-size:10px;color:var(--muted);margin-left:auto}
-.ctx-clear{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer}
-.ctx-clear:hover{border-color:var(--red);color:var(--red)}
-.ctx-proj-select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:5px 10px;font-family:var(--font);font-size:11px;color:var(--text);outline:none;cursor:pointer;max-width:160px}
-.ctx-proj-btn{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer}
-.ctx-proj-btn:hover{border-color:var(--green);color:var(--green)}
-.ctx-upload-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.ctx-upload-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.ctx-upload-btn{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);border-radius:var(--r);padding:5px 12px;font-family:var(--font);font-size:11px;color:var(--green);cursor:pointer}
-.ctx-upload-btn:hover{background:rgba(0,255,136,.14)}
-.ctx-upload-status{font-size:10px;color:var(--muted)}
-
-/* LAYOUT */
-.layout{display:flex;min-height:calc(100vh - 52px)}
-
-/* SIDEBAR */
-.sidebar{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto}
-.sidebar-section{padding:4px 12px 8px;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:8px}
-.sidebar-section:first-child{margin-top:0}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:12px;color:var(--muted)}
-.nav-item:hover{color:var(--text);background:var(--surface2)}
-.nav-item.active{color:var(--green);border-left-color:var(--green);background:var(--green-dim)}
-.nav-item .num{font-size:9px;color:var(--dim);min-width:16px}
-.nav-item.active .num{color:var(--green2)}
-.nav-item .ico{font-size:14px;width:18px;text-align:center}
-
-/* MAIN */
-.main{flex:1;padding:24px;min-width:0;overflow-y:auto}
-.page{display:none}
-.page.active{display:block}
-
-/* PAGE HEADER */
-.pg-head{margin-bottom:20px}
-.pg-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:4px}
-.pg-sub{font-size:11px;color:var(--muted);line-height:1.7}
-.pg-crumbs{display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:10px;color:var(--dim)}
-.pg-crumbs span{color:var(--muted)}
-
-/* FORM */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.form-grid.three{grid-template-columns:1fr 1fr 1fr}
-.fld{display:flex;flex-direction:column;gap:5px}
-.fld.full{grid-column:1/-1}
-.fld label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.fld input,.fld select,.fld textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 12px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:vertical;transition:border .2s;-webkit-appearance:none;appearance:none}
-.fld select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235a5a70' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer}
-.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--green)}
-.fld textarea{line-height:1.65}
-
-/* CHIPS */
-.chip-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
-.chip{padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border2);cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;font-family:var(--font)}
-.chip.on{background:rgba(0,255,136,.1);color:var(--green);border-color:var(--green)}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;font-family:var(--font);font-size:12px;font-weight:500;border-radius:var(--r);cursor:pointer;transition:all .2s;border:1px solid transparent;text-decoration:none}
-.btn-primary{background:var(--green);color:#000;border-color:var(--green)}
-.btn-primary:hover{background:var(--green2)}
-.btn-primary:active{transform:scale(.98)}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-ghost{background:transparent;border-color:var(--border2);color:var(--muted)}
-.btn-ghost:hover{border-color:var(--green);color:var(--green)}
-.btn-link{background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.2);color:var(--green);font-size:11px;padding:6px 12px}
-.btn-link:hover{background:rgba(0,255,136,.14)}
-.btn-blue{background:rgba(77,166,255,.1);border-color:rgba(77,166,255,.3);color:var(--blue);font-size:11px;padding:6px 12px}
-.btn-blue:hover{background:rgba(77,166,255,.18)}
-.btn-amber{background:rgba(255,179,71,.08);border-color:rgba(255,179,71,.25);color:var(--amber);font-size:11px;padding:6px 12px}
-.btn-amber:hover{background:rgba(255,179,71,.15)}
-.btn-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
-
-/* RESULT */
-.result{margin-top:16px;border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden}
-.result-head{background:var(--surface2);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-.result-head-left{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.result-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-.result-head-right{display:flex;gap:6px}
-.result-body{background:var(--surface);padding:16px;font-size:13px;line-height:1.85;white-space:pre-wrap;min-height:80px;max-height:500px;overflow-y:auto;color:var(--text)}
-.result-placeholder{color:var(--muted);font-size:12px;font-style:italic}
-.result-actions{background:var(--surface2);border-top:1px solid var(--border);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.result-actions-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
-
-/* COPY BTN */
-.copy-btn{background:transparent;border:1px solid var(--border2);border-radius:var(--r);padding:4px 10px;font-family:var(--font);font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s}
-.copy-btn:hover{border-color:var(--green);color:var(--green)}
-.copy-btn.copied{color:var(--green);border-color:var(--green)}
-
-/* FOLLOW-UP */
-.followup{border-top:1px solid var(--border);background:var(--surface2)}
-.followup-head{padding:8px 16px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
-.followup-input-row{display:flex;gap:0;padding:8px 12px;gap:8px;align-items:flex-end}
-.followup-input{flex:1;background:var(--surface3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 12px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:none;min-height:36px;max-height:120px;line-height:1.5}
-.followup-input:focus{border-color:var(--green)}
-.followup-send{background:var(--green);border:none;border-radius:var(--r);padding:8px 14px;font-family:var(--font);font-size:11px;color:#000;cursor:pointer;font-weight:500;transition:all .15s;flex-shrink:0}
-.followup-send:hover{background:var(--green2)}
-.followup-send:disabled{opacity:.4;cursor:not-allowed}
-.followup-history{padding:0 16px 8px;display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto}
-.fu-msg{padding:8px 12px;border-radius:var(--r);font-size:12px;line-height:1.7;white-space:pre-wrap}
-.fu-msg.user{background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.1);color:var(--text)}
-.fu-msg.assistant{background:var(--surface3);border:1px solid var(--border);color:var(--text)}
-.fu-msg-label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.fu-msg.user .fu-msg-label{color:var(--green)}
-.fu-msg.assistant .fu-msg-label{color:var(--muted)}
-
-/* SPINNER */
-.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,255,136,.2);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* STATUS */
-.status{font-size:10px;color:var(--muted);margin-top:6px;min-height:14px;display:flex;align-items:center;gap:6px}
-
-/* DEBUG STEPS */
-.dsteps{display:flex;flex-direction:column;gap:5px;margin-top:4px}
-.dstep{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px}
-.dstep:hover,.dstep.active{border-color:var(--green);background:rgba(0,255,136,.04)}
-.dicon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;background:var(--green-dim);color:var(--green)}
-.dicon.git{background:rgba(255,179,71,.08);color:var(--amber)}
-.dstep-info .t{font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px}
-.dstep-info .s{font-size:11px;color:var(--muted)}
-
-/* QUICK CMDS */
-.qcmds{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px}
-.qcmd{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-family:var(--font);font-size:11px;color:var(--muted);cursor:pointer;text-align:left;transition:all .15s}
-.qcmd:hover{border-color:var(--green);color:var(--green)}
-
-/* TOKEN COUNTER */
-.token-bar{display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--surface2);border-top:1px solid var(--border);font-size:10px;color:var(--muted)}
-.token-val{color:var(--text)}
-.token-saved{color:var(--green)}
-
-/* HERO */
-.hero{text-align:center;padding:40px 20px 32px;border-bottom:1px solid var(--border);margin-bottom:24px}
-.hero-label{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
-.hero h1{font-size:clamp(22px,3vw,34px);font-weight:600;color:var(--text);line-height:1.2;margin-bottom:10px}
-.hero h1 span{color:var(--green)}
-.hero p{font-size:12px;color:var(--muted);max-width:480px;margin:0 auto 20px;line-height:1.7}
-.hero-cards{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
-.hero-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.hero-card span{color:var(--green)}
-
-/* DIVIDER */
-.divider{height:1px;background:var(--border);margin:20px 0}
-
-/* SECTION LABEL */
-.sec-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
-
-@media(max-width:768px){
-  .sidebar{display:none}
-  .form-grid{grid-template-columns:1fr}
-  .form-grid.three{grid-template-columns:1fr}
-  .ctx-fields{grid-template-columns:1fr}
-  .nav-key{width:140px}
-}
-</style>
-</head>
-<body>
-
-<!-- NAV -->
-<nav class="nav">
-  <div class="nav-logo">Koudamki<span>.ai</span></div>
-  <div class="nav-live">Live</div>
-  <div class="nav-spacer"></div>
-  <div class="nav-key-wrap">
-    <span class="nav-key-label">Model</span>
-    <select class="nav-model" id="modelSel">
-      <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
-      <option value="gemma2-9b-it">Gemma2 9B</option>
-      <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
-    </select>
-    <button class="nav-export" onclick="exportSession()">⬇ Export Session</button>
-    <button class="nav-save" onclick="saveKey()">💾 Save</button>
-    <span class="nav-saved" id="keySaved">✓ Saved</span>
-  </div>
-</nav>
-
-<!-- CONTEXT BAR -->
-<div class="ctx-bar">
-  <div class="ctx-toggle" id="ctxToggle" onclick="toggleCtx()">
-    <span>▶</span>
-    <span style="margin-left:2px">Project Context</span>
-    <span class="ctx-badge" id="ctxBadge" style="display:none">Active</span>
-    <span style="margin-left:6px;font-size:10px;color:var(--dim)">— describe once, reused across all tools to save tokens</span>
-  </div>
-  <div class="ctx-panel" id="ctxPanel">
-    <div class="ctx-fields">
-      <div class="ctx-field">
-        <label>Problem description</label>
-        <textarea id="ctx-problem" rows="2" placeholder="e.g. Predict customer churn for a SaaS product..." oninput="ctxChanged()"></textarea>
-      </div>
-      <div class="ctx-field">
-        <label>Dataset info</label>
-        <textarea id="ctx-dataset" rows="2" placeholder="e.g. 50k rows, 40 features, tabular, 5% churn rate, missing values in login_date..." oninput="ctxChanged()"></textarea>
-      </div>
-      <div class="ctx-field">
-        <label>Model / framework</label>
-        <textarea id="ctx-model" rows="2" placeholder="e.g. XGBoost, PyTorch, scikit-learn, currently at F1=0.72..." oninput="ctxChanged()"></textarea>
-      </div>
-    </div>
-    <div class="ctx-actions">
-      <select class="ctx-proj-select" id="ctxProjSelect" onchange="loadProject()">
-        <option value="">— Load project —</option>
-      </select>
-      <button class="ctx-proj-btn" onclick="saveProject()">💾 Save as project</button>
-      <button class="ctx-proj-btn" onclick="deleteProject()">🗑 Delete</button>
-      <span class="ctx-hint" id="ctxHint">Fill context above — all 7 tools will auto-inject it, saving you from retyping</span>
-      <button class="ctx-clear" onclick="clearCtx()">Clear context</button>
-    </div>
-    <div class="ctx-upload-row">
-      <span class="ctx-upload-label">Upload dataset</span>
-      <label class="ctx-upload-btn">
-        📄 Choose CSV
-        <input type="file" id="csvUpload" accept=".csv" style="display:none" onchange="handleCsvUpload(event)">
-      </label>
-      <span class="ctx-upload-status" id="csvStatus">No file profiled yet — auto-fills Dataset info above</span>
-    </div>
-  </div>
-</div>
-
-<!-- LAYOUT -->
-<div class="layout">
-
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sidebar-section">Core Tools</div>
-  <div class="nav-item active" onclick="goPage('home',this)" id="nav-home"><span class="num">00</span><span class="ico">⌂</span>Overview</div>
-  <div class="nav-item" onclick="goPage('p1',this)" id="nav-p1"><span class="num">01</span><span class="ico">⚙</span>ML Solver</div>
-  <div class="nav-item" onclick="goPage('p2',this)" id="nav-p2"><span class="num">02</span><span class="ico">∫</span>Equations</div>
-  <div class="nav-item" onclick="goPage('p3',this)" id="nav-p3"><span class="num">03</span><span class="ico">🎯</span>Recommender</div>
-  <div class="nav-item" onclick="goPage('p4',this)" id="nav-p4"><span class="num">04</span><span class="ico">🔬</span>Pipeline</div>
-  <div class="sidebar-section">New Tools</div>
-  <div class="nav-item" onclick="goPage('p5',this)" id="nav-p5"><span class="num">05</span><span class="ico">🩺</span>Diagnostics</div>
-  <div class="nav-item" onclick="goPage('p6',this)" id="nav-p6"><span class="num">06</span><span class="ico">📈</span>Experiments</div>
-  <div class="nav-item" onclick="goPage('p7',this)" id="nav-p7"><span class="num">07</span><span class="ico">⑂</span>Git + ML</div>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-<!-- HOME -->
-<div id="home" class="page active">
-  <div class="hero">
-    <div class="hero-label">// machine learning intelligence</div>
-    <h1>Your ML Problem Solver<br><span>Built for Every Stage</span></h1>
-    <p>Solve ML problems · Decode equations · Recommend models · Build pipelines · Diagnose errors · Tune experiments · Fix Git — all linked together.</p>
-    <div class="hero-cards">
-      <div class="hero-card"><span>⚙</span> ML Solver 01</div>
-      <div class="hero-card"><span>∫</span> Equations 02</div>
-      <div class="hero-card"><span>🎯</span> Recommender 03</div>
-      <div class="hero-card"><span>🔬</span> Pipeline 04</div>
-      <div class="hero-card"><span>🩺</span> Diagnostics 05</div>
-      <div class="hero-card"><span>📈</span> Experiments 06</div>
-      <div class="hero-card"><span>⑂</span> Git + ML 07</div>
-    </div>
-  </div>
-  <div class="sec-label">How to save tokens with cross-linking</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px">
-    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);padding:14px">
-      <div style="color:var(--green);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Step 1</div>
-      <div style="font-size:12px;color:var(--text);margin-bottom:4px">Fill Project Context</div>
-      <div style="font-size:11px;color:var(--muted)">Describe your problem, dataset, and model once in the Context bar above.</div>
-    </div>
-    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);padding:14px">
-      <div style="color:var(--green);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Step 2</div>
-      <div style="font-size:12px;color:var(--text);margin-bottom:4px">Run any tool</div>
-      <div style="font-size:11px;color:var(--muted)">Context auto-injects into every prompt — no re-typing your dataset on each page.</div>
-    </div>
-    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);padding:14px">
-      <div style="color:var(--green);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Step 3</div>
-      <div style="font-size:12px;color:var(--text);margin-bottom:4px">Cross-link results</div>
-      <div style="font-size:11px;color:var(--muted)">Use "→ Continue in [Tool]" buttons to flow output into the next tool instantly.</div>
-    </div>
-  </div>
-  <div class="sec-label">Suggested workflow</div>
-  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--muted)">
-    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">01 ML Solver</span>
-    <span style="color:var(--green)">→</span>
-    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">03 Recommender</span>
-    <span style="color:var(--green)">→</span>
-    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">04 Pipeline</span>
-    <span style="color:var(--green)">→</span>
-    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">05 Diagnostics</span>
-    <span style="color:var(--green)">→</span>
-    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">06 Experiments</span>
-    <span style="color:var(--green)">→</span>
-    <span style="background:var(--surface2);border:1px solid var(--border2);padding:5px 10px;border-radius:var(--r)">07 Git + ML</span>
-  </div>
-</div>
-
-<!-- PAGE 1: ML SOLVER -->
-<div id="p1" class="page">
-  <div class="pg-head">
-    <div class="pg-crumbs"><span>01</span> / ML Problem Solver</div>
-    <div class="pg-title">⚙ ML Problem Solver</div>
-    <div class="pg-sub">Describe your dataset and goal. Get algorithm selection, preprocessing steps, evaluation metrics, and code.</div>
-  </div>
-  <div class="form-grid">
-    <div class="fld">
-      <label>Problem Type</label>
-      <select id="p1-type">
-        <option>Classification</option><option>Regression</option><option>Clustering</option>
-        <option>Dimensionality Reduction</option><option>Time Series</option>
-        <option>Anomaly Detection</option><option>NLP</option><option>Recommendation</option>
-      </select>
-    </div>
-    <div class="fld">
-      <label>Experience Level</label>
-      <select id="p1-exp"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
-    </div>
-    <div class="fld">
-      <label>Dataset Rows</label>
-      <input type="number" id="p1-rows" placeholder="e.g. 50000">
-    </div>
-    <div class="fld">
-      <label>Number of Features</label>
-      <input type="number" id="p1-feats" placeholder="e.g. 42">
-    </div>
-    <div class="fld full">
-      <label>Data Characteristics</label>
-      <div class="chip-wrap" id="p1-chips">
-        <button class="chip" onclick="tc(this)">Missing Values</button>
-        <button class="chip" onclick="tc(this)">Imbalanced Classes</button>
-        <button class="chip" onclick="tc(this)">Categorical Features</button>
-        <button class="chip" onclick="tc(this)">High Dimensionality</button>
-        <button class="chip" onclick="tc(this)">Noisy Data</button>
-        <button class="chip" onclick="tc(this)">Structured/Tabular</button>
-      </div>
-    </div>
-    <div class="fld full">
-      <label>Describe Your Problem</label>
-      <textarea id="p1-desc" rows="4" placeholder="e.g. Predict customer churn. Binary classification. 3 months of user activity data..."></textarea>
-    </div>
-    <div class="fld">
-      <label>Priority</label>
-      <select id="p1-pri"><option>Accuracy</option><option>Speed / Low Latency</option><option>Interpretability</option><option>Scalability</option></select>
-    </div>
-  </div>
-  <div class="btn-row">
-    <button class="btn btn-primary" id="p1-btn" onclick="run('p1')">⚡ Solve My ML Problem</button>
-  </div>
-  <div class="status" id="p1-status"></div>
-  <div class="result" id="p1-result" style="display:none">
-    <div class="result-head">
-      <div class="result-head-left"><span class="result-dot"></span> Output — ML Solver</div>
-      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p1-body',this)">Copy</button></div>
-    </div>
-    <div class="result-body" id="p1-body"><span class="result-placeholder">Running analysis...</span></div>
-    <div class="result-actions">
-      <span class="result-actions-label">Continue →</span>
-      <button class="btn btn-link" onclick="linkTo('p3','From ML Solver: use the recommended approach from the analysis above as my use case.')">→ Recommend Models</button>
-      <button class="btn btn-link" onclick="linkTo('p4','From ML Solver: build a pipeline for the approach recommended above.')">→ Build Pipeline</button>
-      <button class="btn btn-blue" onclick="saveCtxFromResult('p1-body')">💾 Save to Context</button>
-    </div>
-    <div class="followup">
-      <div class="followup-head">Follow-up (continues conversation, saves tokens)</div>
-      <div class="followup-history" id="p1-fu-hist"></div>
-      <div class="followup-input-row">
-        <textarea class="followup-input" id="p1-fu-input" placeholder="Ask a follow-up about the result above..." rows="1" onkeydown="fuKey(event,'p1')"></textarea>
-        <button class="followup-send" onclick="followUp('p1')" id="p1-fu-btn">Send</button>
-      </div>
-    </div>
-    <div class="token-bar">
-      <span>Est. tokens used: <span class="token-val" id="p1-tokens">—</span></span>
-      <span>Context injected: <span class="token-saved" id="p1-ctx-status">—</span></span>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE 2: EQUATIONS -->
-<div id="p2" class="page">
-  <div class="pg-head">
-    <div class="pg-crumbs"><span>02</span> / Equation Solver</div>
-    <div class="pg-title">∫ Math & ML Equation Solver</div>
-    <div class="pg-sub">Solve calculus, linear algebra, statistics, or ML equations with full step-by-step derivations.</div>
-  </div>
-  <div class="form-grid">
-    <div class="fld">
-      <label>Category</label>
-      <select id="p2-cat">
-        <option>Linear Algebra</option><option>Calculus / Gradient</option>
-        <option>Probability / Bayes</option><option>Loss Functions</option>
-        <option>Optimization</option><option>Statistics</option><option>Neural Networks</option>
-      </select>
-    </div>
-    <div class="fld">
-      <label>Output Format</label>
-      <select id="p2-fmt"><option>Step-by-Step Derivation</option><option>Proof + Intuition</option><option>Quick Solution</option><option>Code Implementation</option></select>
-    </div>
-    <div class="fld">
-      <label>Notation Style</label>
-      <select id="p2-notation"><option>Plain Text</option><option>LaTeX-like</option><option>Python / NumPy</option></select>
-    </div>
-    <div class="fld full">
-      <label>Enter Your Equation or Problem</label>
-      <textarea id="p2-eq" rows="5" placeholder="e.g. Derive the gradient of cross-entropy loss with respect to softmax output..."></textarea>
-    </div>
-  </div>
-  <button class="btn btn-primary" id="p2-btn" onclick="run('p2')">∇ Solve Equation</button>
-  <div class="status" id="p2-status"></div>
-  <div class="result" id="p2-result" style="display:none">
-    <div class="result-head">
-      <div class="result-head-left"><span class="result-dot"></span> Output — Equation Solver</div>
-      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p2-body',this)">Copy</button></div>
-    </div>
-    <div class="result-body" id="p2-body"></div>
-    <div class="result-actions">
-      <span class="result-actions-label">Continue →</span>
-      <button class="btn btn-link" onclick="linkTo('p1','Apply the equation solution above to my ML problem.')">→ Apply to ML Solver</button>
-      <button class="btn btn-link" onclick="linkTo('p6','Use this equation result in an experiment.')">→ Use in Experiments</button>
-    </div>
-    <div class="followup">
-      <div class="followup-head">Follow-up</div>
-      <div class="followup-history" id="p2-fu-hist"></div>
-      <div class="followup-input-row">
-        <textarea class="followup-input" id="p2-fu-input" placeholder="Ask a follow-up..." rows="1" onkeydown="fuKey(event,'p2')"></textarea>
-        <button class="followup-send" onclick="followUp('p2')" id="p2-fu-btn">Send</button>
-      </div>
-    </div>
-    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p2-tokens">—</span></span><span>Context: <span class="token-saved" id="p2-ctx-status">—</span></span></div>
-  </div>
-</div>
-
-<!-- PAGE 3: MODEL RECOMMENDER -->
-<div id="p3" class="page">
-  <div class="pg-head">
-    <div class="pg-crumbs"><span>03</span> / Model Recommender</div>
-    <div class="pg-title">🎯 AI-Powered Model Recommender</div>
-    <div class="pg-sub">Describe your task and constraints. Get ranked recommendations with pros, cons, and quick-start code.</div>
-  </div>
-  <div class="form-grid">
-    <div class="fld">
-      <label>Task Domain</label>
-      <select id="p3-domain">
-        <option>Tabular / Structured</option><option>Computer Vision</option><option>NLP / Text</option>
-        <option>Audio / Speech</option><option>Time Series</option><option>Reinforcement Learning</option><option>Multimodal</option>
-      </select>
-    </div>
-    <div class="fld">
-      <label>Compute Budget</label>
-      <select id="p3-compute"><option>CPU Only</option><option>Single GPU</option><option>Multi-GPU / Cloud</option><option>Edge Device</option></select>
-    </div>
-    <div class="fld">
-      <label>Training Data Size</label>
-      <select id="p3-size"><option>Very Small (&lt;1k)</option><option>Small (1k–10k)</option><option>Medium (10k–100k)</option><option>Large (&gt;100k)</option></select>
-    </div>
-    <div class="fld">
-      <label>Inference Speed</label>
-      <select id="p3-speed"><option>Real-time (&lt;10ms)</option><option>Fast (&lt;100ms)</option><option>Batch OK</option></select>
-    </div>
-    <div class="fld">
-      <label>Interpretability</label>
-      <select id="p3-interp"><option>Yes — Must Explain</option><option>Partial</option><option>No — Black Box OK</option></select>
-    </div>
-    <div class="fld full">
-      <label>Describe Your Use Case</label>
-      <textarea id="p3-desc" rows="4" placeholder="e.g. Fraud detection on transaction data. Need high recall. Imbalanced 1% fraud rate..."></textarea>
-    </div>
-  </div>
-  <button class="btn btn-primary" id="p3-btn" onclick="run('p3')">🎯 Get Recommendations</button>
-  <div class="status" id="p3-status"></div>
-  <div class="result" id="p3-result" style="display:none">
-    <div class="result-head">
-      <div class="result-head-left"><span class="result-dot"></span> Output — Model Recommender</div>
-      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p3-body',this)">Copy</button></div>
-    </div>
-    <div class="result-body" id="p3-body"></div>
-    <div class="result-actions">
-      <span class="result-actions-label">Continue →</span>
-      <button class="btn btn-link" onclick="linkTo('p4','Build a pipeline using the top recommended model above.')">→ Build Pipeline</button>
-      <button class="btn btn-link" onclick="linkTo('p6','Tune the top recommended model above.')">→ Tune in Experiments</button>
-      <button class="btn btn-blue" onclick="saveCtxFromResult('p3-body')">💾 Save to Context</button>
-    </div>
-    <div class="followup">
-      <div class="followup-head">Follow-up</div>
-      <div class="followup-history" id="p3-fu-hist"></div>
-      <div class="followup-input-row">
-        <textarea class="followup-input" id="p3-fu-input" placeholder="Ask a follow-up..." rows="1" onkeydown="fuKey(event,'p3')"></textarea>
-        <button class="followup-send" onclick="followUp('p3')" id="p3-fu-btn">Send</button>
-      </div>
-    </div>
-    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p3-tokens">—</span></span><span>Context: <span class="token-saved" id="p3-ctx-status">—</span></span></div>
-  </div>
-</div>
-
-<!-- PAGE 4: PIPELINE BUILDER -->
-<div id="p4" class="page">
-  <div class="pg-head">
-    <div class="pg-crumbs"><span>04</span> / Pipeline Builder</div>
-    <div class="pg-title">🔬 Full ML Pipeline Builder</div>
-    <div class="pg-sub">Generate a complete end-to-end pipeline with data ingestion, preprocessing, training, evaluation, and deployment code.</div>
-  </div>
-  <div class="form-grid">
-    <div class="fld full">
-      <label>Pipeline Goal</label>
-      <textarea id="p4-goal" rows="3" placeholder="e.g. End-to-end churn prediction pipeline with XGBoost, SMOTE, and FastAPI deployment..."></textarea>
-    </div>
-    <div class="fld">
-      <label>Framework</label>
-      <select id="p4-fw"><option>Python (scikit-learn)</option><option>Python (PyTorch)</option><option>Python (TensorFlow/Keras)</option><option>Python (XGBoost/LightGBM)</option><option>R</option></select>
-    </div>
-    <div class="fld">
-      <label>Deployment Target</label>
-      <select id="p4-deploy"><option>Local Script</option><option>FastAPI / Flask REST</option><option>Docker Container</option><option>Streamlit App</option><option>Cloud (AWS/GCP/Azure)</option></select>
-    </div>
-    <div class="fld full">
-      <label>Pipeline Stages</label>
-      <div class="chip-wrap" id="p4-chips">
-        <button class="chip on" onclick="tc(this)">Data Loading</button>
-        <button class="chip on" onclick="tc(this)">EDA</button>
-        <button class="chip on" onclick="tc(this)">Preprocessing</button>
-        <button class="chip" onclick="tc(this)">Feature Engineering</button>
-        <button class="chip on" onclick="tc(this)">Model Training</button>
-        <button class="chip" onclick="tc(this)">Hyperparameter Tuning</button>
-        <button class="chip on" onclick="tc(this)">Evaluation</button>
-        <button class="chip" onclick="tc(this)">MLflow Tracking</button>
-        <button class="chip" onclick="tc(this)">Deployment Code</button>
-        <button class="chip" onclick="tc(this)">CI/CD</button>
-      </div>
-    </div>
-    <div class="fld">
-      <label>Code Detail</label>
-      <select id="p4-detail"><option>Outline Only</option><option>Full Code + Comments</option><option>Production-Ready</option></select>
-    </div>
-  </div>
-  <button class="btn btn-primary" id="p4-btn" onclick="run('p4')">🔬 Build My Pipeline</button>
-  <div class="status" id="p4-status"></div>
-  <div class="result" id="p4-result" style="display:none">
-    <div class="result-head">
-      <div class="result-head-left"><span class="result-dot"></span> Output — Pipeline Builder</div>
-      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p4-body',this)">Copy</button></div>
-    </div>
-    <div class="result-body" id="p4-body"></div>
-    <div class="result-actions">
-      <span class="result-actions-label">Continue →</span>
-      <button class="btn btn-link" onclick="linkTo('p5','Debug issues with the pipeline code generated above.')">→ Debug Pipeline</button>
-      <button class="btn btn-link" onclick="linkTo('p7','Set up Git / CI/CD for the pipeline above.')">→ Git + CI/CD Setup</button>
-      <button class="btn btn-amber" onclick="linkTo('p6','Tune the model in the pipeline above.')">→ Tune Experiments</button>
-    </div>
-    <div class="followup">
-      <div class="followup-head">Follow-up</div>
-      <div class="followup-history" id="p4-fu-hist"></div>
-      <div class="followup-input-row">
-        <textarea class="followup-input" id="p4-fu-input" placeholder="Ask a follow-up about the pipeline..." rows="1" onkeydown="fuKey(event,'p4')"></textarea>
-        <button class="followup-send" onclick="followUp('p4')" id="p4-fu-btn">Send</button>
-      </div>
-    </div>
-    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p4-tokens">—</span></span><span>Context: <span class="token-saved" id="p4-ctx-status">—</span></span></div>
-  </div>
-</div>
-
-<!-- PAGE 5: DIAGNOSTICS -->
-<div id="p5" class="page">
-  <div class="pg-head">
-    <div class="pg-crumbs"><span>05</span> / ML Diagnostics</div>
-    <div class="pg-title">🩺 ML Diagnostics Assistant</div>
-    <div class="pg-sub">Paste an error, metric output, or model behavior — get root cause analysis and a step-by-step fix.</div>
-  </div>
-  <div class="fld" style="margin-bottom:14px">
-    <label>Bug / Problem Category</label>
-    <div class="dsteps" id="p5-steps">
-      <div class="dstep active" onclick="selectStep(this,'p5-steps','p5-cat','Overfitting or underfitting — generalization gap between train and validation')">
-        <div class="dicon">1</div><div class="dstep-info"><div class="t">Overfitting / underfitting</div><div class="s">Train/val gap, generalization issues</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Shape mismatch or tensor dimension error — wrong dimensions or broadcasting failure')">
-        <div class="dicon">2</div><div class="dstep-info"><div class="t">Shape / tensor mismatch</div><div class="s">Wrong dimensions, broadcasting errors</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','NaN or Inf in loss or gradients — exploding or vanishing gradients')">
-        <div class="dicon">3</div><div class="dstep-info"><div class="t">NaN / Inf in loss or gradients</div><div class="s">Exploding gradients, bad initialization</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Model not learning — flat loss curve or stuck at random baseline accuracy')">
-        <div class="dicon">4</div><div class="dstep-info"><div class="t">Model not learning</div><div class="s">Flat loss, random accuracy plateau</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Data pipeline bug — wrong dtype, slow loading, or data leakage in CV splits')">
-        <div class="dicon">5</div><div class="dstep-info"><div class="t">Data pipeline bug</div><div class="s">Wrong dtype, leakage, slow loading</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p5-steps','p5-cat','Deployment or inference bug — latency, memory, or wrong predictions in production')">
-        <div class="dicon">6</div><div class="dstep-info"><div class="t">Deployment / inference bug</div><div class="s">Latency, memory issues, wrong output</div></div>
-      </div>
-    </div>
-  </div>
-  <input type="hidden" id="p5-cat" value="Overfitting or underfitting — generalization gap between train and validation">
-  <div class="form-grid">
-    <div class="fld">
-      <label>Framework</label>
-      <select id="p5-fw"><option>PyTorch</option><option>TensorFlow/Keras</option><option>Scikit-learn</option><option>XGBoost/LightGBM</option><option>Other</option></select>
-    </div>
-    <div class="fld">
-      <label>Task</label>
-      <select id="p5-task"><option>Classification</option><option>Regression</option><option>NLP</option><option>Computer Vision</option><option>Time Series</option></select>
-    </div>
-    <div class="fld full">
-      <label>Paste error, metrics, or describe the issue</label>
-      <textarea id="p5-input" rows="6" placeholder="Paste stack trace, metrics output, or describe what you're observing...&#10;e.g. Train acc: 98%, Val acc: 61%. Loss flat after epoch 3..."></textarea>
-    </div>
-  </div>
-  <button class="btn btn-primary" id="p5-btn" onclick="run('p5')">🩺 Diagnose</button>
-  <div class="status" id="p5-status"></div>
-  <div class="result" id="p5-result" style="display:none">
-    <div class="result-head">
-      <div class="result-head-left"><span class="result-dot"></span> Output — Diagnostics</div>
-      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p5-body',this)">Copy</button></div>
-    </div>
-    <div class="result-body" id="p5-body"></div>
-    <div class="result-actions">
-      <span class="result-actions-label">Continue →</span>
-      <button class="btn btn-link" onclick="linkTo('p6','Tune experiments to fix the issue diagnosed above.')">→ Tune to Fix</button>
-      <button class="btn btn-link" onclick="linkTo('p3','Re-recommend models based on the diagnostic findings above.')">→ Re-recommend Models</button>
-      <button class="btn btn-blue" onclick="linkTo('p4','Update the pipeline to fix the issue diagnosed above.')">→ Update Pipeline</button>
-    </div>
-    <div class="followup">
-      <div class="followup-head">Follow-up</div>
-      <div class="followup-history" id="p5-fu-hist"></div>
-      <div class="followup-input-row">
-        <textarea class="followup-input" id="p5-fu-input" placeholder="Ask a follow-up..." rows="1" onkeydown="fuKey(event,'p5')"></textarea>
-        <button class="followup-send" onclick="followUp('p5')" id="p5-fu-btn">Send</button>
-      </div>
-    </div>
-    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p5-tokens">—</span></span><span>Context: <span class="token-saved" id="p5-ctx-status">—</span></span></div>
-  </div>
-</div>
-
-<!-- PAGE 6: EXPERIMENT ADVISOR -->
-<div id="p6" class="page">
-  <div class="pg-head">
-    <div class="pg-crumbs"><span>06</span> / Experiment Advisor</div>
-    <div class="pg-title">📈 Experiment Advisor</div>
-    <div class="pg-sub">Describe your model setup and current metrics — get prioritized hyperparameter tuning recommendations.</div>
-  </div>
-  <div class="form-grid">
-    <div class="fld">
-      <label>Model / Architecture</label>
-      <input type="text" id="p6-model" placeholder="e.g. ResNet-50, LSTM, XGBoost">
-    </div>
-    <div class="fld">
-      <label>Current Metric</label>
-      <input type="text" id="p6-metric" placeholder="e.g. F1=0.72, RMSE=0.34, AUC=0.81">
-    </div>
-    <div class="fld">
-      <label>Compute Budget</label>
-      <select id="p6-compute"><option>Low (CPU / single GPU)</option><option>Medium (1-4 GPUs)</option><option>High (cluster / cloud)</option></select>
-    </div>
-    <div class="fld">
-      <label>Optimization Goal</label>
-      <select id="p6-goal"><option>Improve accuracy / metric</option><option>Reduce overfitting</option><option>Speed up training</option><option>Reduce model size</option><option>Improve generalization</option></select>
-    </div>
-    <div class="fld full">
-      <label>Current Hyperparameters & Config</label>
-      <textarea id="p6-config" rows="4" placeholder="e.g. lr=0.001, batch_size=32, epochs=50, dropout=0.3, optimizer=Adam, no scheduler..."></textarea>
-    </div>
-    <div class="fld full">
-      <label>What have you already tried?</label>
-      <textarea id="p6-tried" rows="2" placeholder="e.g. Tried lr=0.01 (diverged), dropout=0.5 (slight improvement)..."></textarea>
-    </div>
-  </div>
-  <button class="btn btn-primary" id="p6-btn" onclick="run('p6')">📈 Get Recommendations</button>
-  <div class="status" id="p6-status"></div>
-  <div class="result" id="p6-result" style="display:none">
-    <div class="result-head">
-      <div class="result-head-left"><span class="result-dot"></span> Output — Experiment Advisor</div>
-      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p6-body',this)">Copy</button></div>
-    </div>
-    <div class="result-body" id="p6-body"></div>
-    <div class="result-actions">
-      <span class="result-actions-label">Continue →</span>
-      <button class="btn btn-link" onclick="linkTo('p4','Update the pipeline with the experiment recommendations above.')">→ Update Pipeline</button>
-      <button class="btn btn-link" onclick="linkTo('p5','Diagnose why the current config isnt working based on experiments above.')">→ Diagnose Issues</button>
-      <button class="btn btn-blue" onclick="saveCtxFromResult('p6-body')">💾 Save to Context</button>
-    </div>
-    <div class="followup">
-      <div class="followup-head">Follow-up</div>
-      <div class="followup-history" id="p6-fu-hist"></div>
-      <div class="followup-input-row">
-        <textarea class="followup-input" id="p6-fu-input" placeholder="Ask about specific hyperparameters..." rows="1" onkeydown="fuKey(event,'p6')"></textarea>
-        <button class="followup-send" onclick="followUp('p6')" id="p6-fu-btn">Send</button>
-      </div>
-    </div>
-    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p6-tokens">—</span></span><span>Context: <span class="token-saved" id="p6-ctx-status">—</span></span></div>
-  </div>
-</div>
-
-<!-- PAGE 7: GIT + ML -->
-<div id="p7" class="page">
-  <div class="pg-head">
-    <div class="pg-crumbs"><span>07</span> / Git + ML</div>
-    <div class="pg-title">⑂ Git + ML Assistant</div>
-    <div class="pg-sub">Fix Git issues in your ML projects — merge conflicts, large files, experiment branching, CI/CD, and history debugging.</div>
-  </div>
-  <div class="fld" style="margin-bottom:14px">
-    <label>Git Problem Category</label>
-    <div class="dsteps" id="p7-steps">
-      <div class="dstep active" onclick="selectStep(this,'p7-steps','p7-cat','Merge conflict in Jupyter notebook or Python ML script — .ipynb JSON conflicts')">
-        <div class="dicon git">NB</div><div class="dstep-info"><div class="t">Notebook / script merge conflict</div><div class="s">Jupyter .ipynb conflicts, diff hell</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','Large model files or datasets in Git — need Git LFS, .gitignore setup, or repo cleanup')">
-        <div class="dicon git">LF</div><div class="dstep-info"><div class="t">Large files / Git LFS</div><div class="s">Model weights, datasets, bloated repo</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','ML experiment branching strategy — managing multiple experiment runs, reproducibility, tagging')">
-        <div class="dicon git">BR</div><div class="dstep-info"><div class="t">Experiment branching strategy</div><div class="s">Branch-per-run, tags, reproducibility</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','CI/CD pipeline for ML — GitHub Actions, automated testing, model validation on push')">
-        <div class="dicon git">CI</div><div class="dstep-info"><div class="t">CI/CD for ML pipelines</div><div class="s">GitHub Actions, auto test, model gate</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','Git history issue — finding when model accuracy dropped, git bisect, reverting changes')">
-        <div class="dicon git">HX</div><div class="dstep-info"><div class="t">Git history / reverting changes</div><div class="s">Bisect, revert regression, git blame</div></div>
-      </div>
-      <div class="dstep" onclick="selectStep(this,'p7-steps','p7-cat','General Git error or command question for an ML project')">
-        <div class="dicon git">?</div><div class="dstep-info"><div class="t">Other Git error or command</div><div class="s">Any git issue or workflow question</div></div>
-      </div>
-    </div>
-  </div>
-  <input type="hidden" id="p7-cat" value="Merge conflict in Jupyter notebook or Python ML script — .ipynb JSON conflicts">
-  <div class="fld" style="margin-bottom:14px">
-    <label>Quick commands — click to insert</label>
-    <div class="qcmds">
-      <button class="qcmd" onclick="insertCmd('p7-input',this)">git log --oneline --graph --all</button>
-      <button class="qcmd" onclick="insertCmd('p7-input',this)">git lfs track "*.pt" "*.h5" "*.pkl"</button>
-      <button class="qcmd" onclick="insertCmd('p7-input',this)">git stash list</button>
-      <button class="qcmd" onclick="insertCmd('p7-input',this)">git bisect start</button>
-      <button class="qcmd" onclick="insertCmd('p7-input',this)">git diff HEAD~1 HEAD -- train.py</button>
-      <button class="qcmd" onclick="insertCmd('p7-input',this)">git tag -a v1.0-baseline -m "baseline"</button>
-    </div>
-  </div>
-  <div class="form-grid">
-    <div class="fld">
-      <label>Git Hosting</label>
-      <select id="p7-host"><option>GitHub</option><option>GitLab</option><option>Bitbucket</option><option>Self-hosted</option></select>
-    </div>
-    <div class="fld">
-      <label>Project Type</label>
-      <select id="p7-proj"><option>Jupyter notebooks</option><option>Python scripts</option><option>Mixed notebooks + scripts</option><option>MLOps / pipeline repo</option></select>
-    </div>
-    <div class="fld full">
-      <label>Paste Git error, command output, or describe the problem</label>
-      <textarea id="p7-input" rows="6" placeholder="e.g. CONFLICT (content): Merge conflict in notebook.ipynb&#10;Auto-merging failed. Fix conflicts and then commit the result..."></textarea>
-    </div>
-  </div>
-  <button class="btn btn-primary" id="p7-btn" onclick="run('p7')">⑂ Solve Git Issue</button>
-  <div class="status" id="p7-status"></div>
-  <div class="result" id="p7-result" style="display:none">
-    <div class="result-head">
-      <div class="result-head-left"><span class="result-dot"></span> Output — Git + ML</div>
-      <div class="result-head-right"><button class="copy-btn" onclick="copyRes('p7-body',this)">Copy</button></div>
-    </div>
-    <div class="result-body" id="p7-body"></div>
-    <div class="result-actions">
-      <span class="result-actions-label">Continue →</span>
-      <button class="btn btn-link" onclick="linkTo('p4','Update the pipeline with the CI/CD or Git workflow described above.')">→ Update Pipeline</button>
-      <button class="btn btn-link" onclick="linkTo('p5','Diagnose any ML issues related to the Git problem above.')">→ Diagnose ML Issues</button>
-    </div>
-    <div class="followup">
-      <div class="followup-head">Follow-up</div>
-      <div class="followup-history" id="p7-fu-hist"></div>
-      <div class="followup-input-row">
-        <textarea class="followup-input" id="p7-fu-input" placeholder="Ask a follow-up about the Git issue..." rows="1" onkeydown="fuKey(event,'p7')"></textarea>
-        <button class="followup-send" onclick="followUp('p7')" id="p7-fu-btn">Send</button>
-      </div>
-    </div>
-    <div class="token-bar"><span>Est. tokens: <span class="token-val" id="p7-tokens">—</span></span><span>Context: <span class="token-saved" id="p7-ctx-status">—</span></span></div>
-  </div>
-</div>
-
-</div><!-- /main -->
-</div><!-- /layout -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script>
-// ---- STATE ----
-const hist = {p1:[],p2:[],p3:[],p4:[],p5:[],p6:[],p7:[]};
-const TOOL_NAMES = {p1:'ML Solver',p2:'Equation Solver',p3:'Model Recommender',p4:'Pipeline Builder',p5:'ML Diagnostics',p6:'Experiment Advisor',p7:'Git + ML'};
-const SYSPROMPT = `You are an expert ML/AI engineer, data scientist, and Git power user. Give precise, actionable answers with exact code, commands, and numbered steps where appropriate. Be thorough but concise. Use plain text output — no markdown headers or excessive formatting. Prioritize working code and practical solutions.`;
-
-// ---- NAV ----
-function goPage(id,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(el) el.classList.add('active');
-  else document.getElementById('nav-'+id).classList.add('active');
-}
-
-// ---- MODEL PREFERENCE (no API key needed — server holds it) ----
-window.onload=()=>{
-  const m=localStorage.getItem('groq_model');
-  if(m) document.getElementById('modelSel').value=m;
-  const ctx=localStorage.getItem('koudamki_ctx');
-  if(ctx){try{const o=JSON.parse(ctx);if(o.problem)document.getElementById('ctx-problem').value=o.problem;if(o.dataset)document.getElementById('ctx-dataset').value=o.dataset;if(o.model)document.getElementById('ctx-model').value=o.model;ctxChanged();}catch{}}
-  refreshProjectList();
-};
-function saveKey(){
-  localStorage.setItem('groq_model',document.getElementById('modelSel').value);
-  const s=document.getElementById('keySaved');s.classList.add('show');
-  setTimeout(()=>s.classList.remove('show'),2000);
-}
-
-// ---- CONTEXT ----
-function toggleCtx(){
-  const t=document.getElementById('ctxToggle');
-  const p=document.getElementById('ctxPanel');
-  t.classList.toggle('open');
-  p.classList.toggle('open');
-  t.querySelector('.arrow').textContent=t.classList.contains('open')?'▼':'▶';
-}
-function ctxChanged(){
-  const p=document.getElementById('ctx-problem').value;
-  const d=document.getElementById('ctx-dataset').value;
-  const m=document.getElementById('ctx-model').value;
-  const badge=document.getElementById('ctxBadge');
-  const hint=document.getElementById('ctxHint');
-  if(p||d||m){
-    badge.style.display='inline';
-    hint.textContent='Context active — will auto-inject into all prompts (~50 token overhead vs ~300 tokens re-typing)';
-    localStorage.setItem('koudamki_ctx',JSON.stringify({problem:p,dataset:d,model:m}));
-  } else {
-    badge.style.display='none';
-    hint.textContent='Fill context above — all 7 tools will auto-inject it, saving you from retyping';
-    localStorage.removeItem('koudamki_ctx');
-  }
-}
-function clearCtx(){
-  document.getElementById('ctx-problem').value='';
-  document.getElementById('ctx-dataset').value='';
-  document.getElementById('ctx-model').value='';
-  ctxChanged();
-}
-function getCtxString(){
-  const p=document.getElementById('ctx-problem').value.trim();
-  const d=document.getElementById('ctx-dataset').value.trim();
-  const m=document.getElementById('ctx-model').value.trim();
-  if(!p&&!d&&!m) return '';
-  let s='--- Project Context (auto-injected) ---\n';
-  if(p) s+=`Problem: ${p}\n`;
-  if(d) s+=`Dataset: ${d}\n`;
-  if(m) s+=`Model/Framework: ${m}\n`;
-  s+='---\n';
-  return s;
-}
-function saveCtxFromResult(bodyId){
-  const text=document.getElementById(bodyId).textContent.slice(0,300);
-  const cur=document.getElementById('ctx-model').value;
-  document.getElementById('ctx-model').value=(cur?cur+' | ':'')+text.slice(0,120)+'...';
-  ctxChanged();
-  const p=document.getElementById('ctxPanel');
-  if(!p.classList.contains('open')) toggleCtx();
-}
-
-// ---- NAMED PROJECTS ----
-function getProjects(){
-  try{return JSON.parse(localStorage.getItem('koudamki_projects')||'{}');}catch{return {};}
-}
-function refreshProjectList(){
-  const projects=getProjects();
-  const sel=document.getElementById('ctxProjSelect');
-  const cur=sel.value;
-  sel.innerHTML='<option value="">— Load project —</option>';
-  Object.keys(projects).forEach(name=>{
-    const opt=document.createElement('option');
-    opt.value=name;opt.textContent=name;
-    sel.appendChild(opt);
-  });
-  if(projects[cur]) sel.value=cur;
-}
-function saveProject(){
-  const name=prompt('Name this project:');
-  if(!name) return;
-  const projects=getProjects();
-  projects[name]={
-    problem:document.getElementById('ctx-problem').value,
-    dataset:document.getElementById('ctx-dataset').value,
-    model:document.getElementById('ctx-model').value,
-    savedAt:new Date().toISOString()
-  };
-  localStorage.setItem('koudamki_projects',JSON.stringify(projects));
-  refreshProjectList();
-  document.getElementById('ctxProjSelect').value=name;
-}
-function loadProject(){
-  const name=document.getElementById('ctxProjSelect').value;
-  if(!name) return;
-  const projects=getProjects();
-  const p=projects[name];
-  if(!p) return;
-  document.getElementById('ctx-problem').value=p.problem||'';
-  document.getElementById('ctx-dataset').value=p.dataset||'';
-  document.getElementById('ctx-model').value=p.model||'';
-  ctxChanged();
-}
-function deleteProject(){
-  const name=document.getElementById('ctxProjSelect').value;
-  if(!name) return;
-  if(!confirm('Delete project "'+name+'"?')) return;
-  const projects=getProjects();
-  delete projects[name];
-  localStorage.setItem('koudamki_projects',JSON.stringify(projects));
-  refreshProjectList();
-}
-
-// ---- CSV UPLOAD & AUTO-PROFILE ----
-function handleCsvUpload(e){
-  const file=e.target.files[0];
-  if(!file) return;
-  const statusEl=document.getElementById('csvStatus');
-  statusEl.textContent='Profiling '+file.name+'...';
-  Papa.parse(file,{
-    header:true,
-    dynamicTyping:true,
-    skipEmptyLines:true,
-    complete:function(results){
-      const rows=results.data;
-      const fields=results.meta.fields||[];
-      const rowCount=rows.length;
-      const colCount=fields.length;
-      const profile=fields.map(f=>{
-        let nullCount=0,numericCount=0,sample=null;
-        for(const r of rows){
-          const v=r[f];
-          if(v===null||v===undefined||v==='') nullCount++;
-          else{
-            if(sample===null) sample=v;
-            if(typeof v==='number') numericCount++;
-          }
-        }
-        const nonNull=rowCount-nullCount;
-        const dtype=nonNull>0 && numericCount===nonNull ? 'numeric' : 'categorical/text';
-        const nullPct=rowCount?((nullCount/rowCount)*100).toFixed(1):'0.0';
-        return `${f} (${dtype}, ${nullPct}% missing)`;
-      });
-      const missingCols=profile.filter(p=>!p.includes('0.0% missing'));
-      const summary=`Uploaded CSV "${file.name}": ${rowCount} rows, ${colCount} columns.\nColumns: ${profile.slice(0,20).join('; ')}${profile.length>20?'; ...':''}${missingCols.length?'\nColumns with missing values: '+missingCols.length:''}`;
-      document.getElementById('ctx-dataset').value=summary;
-      document.getElementById('p1-rows').value=rowCount;
-      document.getElementById('p1-feats').value=colCount;
-      ctxChanged();
-      statusEl.textContent=`Profiled: ${rowCount} rows × ${colCount} cols — filled into Dataset info`;
-    },
-    error:function(err){
-      statusEl.textContent='Error parsing CSV: '+err.message;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Command Console</title>
+  <style>
+    :root {
+      --bg: #040d16;
+      --bg-2: #0a1522;
+      --panel: rgba(12, 24, 35, 0.9);
+      --panel-2: rgba(18, 31, 48, 0.94);
+      --panel-3: rgba(8, 17, 28, 0.96);
+      --line: rgba(162, 195, 255, 0.12);
+      --text: #edf6ff;
+      --muted: #9bb4d7;
+      --green: #7ef7bf;
+      --green-2: #52e0a5;
+      --cyan: #7fe4ff;
+      --blue: #7dbdff;
+      --red: #ff7d7d;
+      --shadow: rgba(0,0,0,0.35);
     }
-  });
-}
 
-// ---- SESSION EXPORT ----
-function exportSession(){
-  const ctx=getCtxString();
-  let md=`# Koudamki ML Solver — Session Export\n\nExported: ${new Date().toLocaleString()}\n\n`;
-  if(ctx) md+=`## Project Context\n\n\`\`\`\n${ctx}\`\`\`\n\n`;
-  let any=false;
-  for(const page of Object.keys(hist)){
-    const msgs=hist[page].filter(m=>m.role!=='system');
-    if(!msgs.length) continue;
-    any=true;
-    md+=`## ${TOOL_NAMES[page]}\n\n`;
-    msgs.forEach(m=>{
-      md+=`**${m.role==='user'?'Input':'Output'}:**\n\n${m.content}\n\n---\n\n`;
-    });
-  }
-  if(!any){ alert('Nothing to export yet — run a tool first.'); return; }
-  const blob=new Blob([md],{type:'text/markdown'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download='koudamki-session-'+Date.now()+'.md';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
+    * { box-sizing: border-box; }
 
-// ---- CHIPS & STEPS ----
-function tc(el){el.classList.toggle('on')}
-function chips(parentId){return Array.from(document.querySelectorAll('#'+parentId+' .chip.on')).map(c=>c.textContent).join(', ')||'none'}
-function selectStep(el,groupId,hiddenId,val){
-  document.querySelectorAll('#'+groupId+' .dstep').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById(hiddenId).value=val;
-}
-function insertCmd(taId,el){
-  const ta=document.getElementById(taId);
-  ta.value=(ta.value?ta.value+'\n':'')+el.textContent.trim();ta.focus();
-}
-
-// ---- PROMPTS ----
-function buildPrompt(page){
-  const ctx=getCtxString();
-  switch(page){
-    case 'p1': return ctx+`ML Problem Solver Request:
-Problem Type: ${v('p1-type')} | Experience: ${v('p1-exp')} | Priority: ${v('p1-pri')}
-Rows: ${v('p1-rows')||'?'} | Features: ${v('p1-feats')||'?'}
-Data Characteristics: ${chips('p1-chips')}
-Description: ${v('p1-desc')||'not provided'}
-
-Provide:
-1) Best algorithm(s) for this problem with reasoning
-2) Preprocessing steps
-3) Evaluation metrics to use
-4) Quick-start code snippet
-5) Common pitfalls to avoid`;
-
-    case 'p2': return ctx+`Math & ML Equation Solver:
-Category: ${v('p2-cat')} | Output Format: ${v('p2-fmt')} | Notation: ${v('p2-notation')}
-Equation/Problem: ${v('p2-eq')||'not provided'}
-
-Solve this completely.`;
-
-    case 'p3': return ctx+`Model Recommender:
-Domain: ${v('p3-domain')} | Compute: ${v('p3-compute')} | Data Size: ${v('p3-size')}
-Speed: ${v('p3-speed')} | Interpretability: ${v('p3-interp')}
-Use Case: ${v('p3-desc')||'not provided'}
-
-Provide:
-1) Top 3 ranked models with scores
-2) Pros/cons for each
-3) Quick-start code for the top pick
-4) Which to avoid and why`;
-
-    case 'p4': return ctx+`Pipeline Builder:
-Goal: ${v('p4-goal')||'not provided'}
-Framework: ${v('p4-fw')} | Deployment: ${v('p4-deploy')} | Detail: ${v('p4-detail')}
-Stages: ${chips('p4-chips')}
-
-Generate the complete ML pipeline code.`;
-
-    case 'p5': return ctx+`ML Diagnostics:
-Category: ${v('p5-cat')}
-Framework: ${v('p5-fw')} | Task: ${v('p5-task')}
-Error/Issue:
-${v('p5-input')||'not provided'}
-
-Provide:
-1) Root cause analysis
-2) Step-by-step fix with code
-3) How to verify the fix
-4) Prevention tips`;
-
-    case 'p6': return ctx+`Experiment Advisor:
-Model: ${v('p6-model')||'?'} | Current Metric: ${v('p6-metric')||'?'}
-Compute: ${v('p6-compute')} | Goal: ${v('p6-goal')}
-Current Config: ${v('p6-config')||'none'}
-Already Tried: ${v('p6-tried')||'nothing yet'}
-
-Provide:
-1) Specific hyperparameter values to try (with expected impact %)
-2) Priority order — what to try first
-3) Search strategy (grid/random/Bayesian)
-4) Early stopping and monitoring tips`;
-
-    case 'p7': return ctx+`Git + ML Problem:
-Category: ${v('p7-cat')}
-Hosting: ${v('p7-host')} | Project: ${v('p7-proj')}
-Error/Context:
-${v('p7-input')||'not provided'}
-
-Provide:
-1) Root cause
-2) Exact git commands to fix it step by step
-3) How to prevent this
-4) ML project best practice for this scenario`;
-
-    default: return '';
-  }
-}
-function v(id){const el=document.getElementById(id);return el?el.value:''}
-
-// ---- STREAM VIA SERVER PROXY (/api/chat) ----
-async function streamViaProxy(messages,bodyId,statusId,tokenId){
-  const model=document.getElementById('modelSel').value;
-  const body=document.getElementById(bodyId);
-  const status=document.getElementById(statusId);
-  const tokenEl=document.getElementById(tokenId);
-  body.textContent='';
-  status.innerHTML='<span class="spin"></span> Streaming...';
-
-  const res=await fetch('/api/chat',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model,messages,stream:true,max_tokens:2000,temperature:0.4})
-  });
-  if(!res.ok){
-    let errMsg=res.statusText;
-    try{const j=await res.json();errMsg=j.error||errMsg;}catch{}
-    body.textContent='API Error ('+res.status+'): '+errMsg;
-    status.textContent='';return;
-  }
-  const reader=res.body.getReader();const dec=new TextDecoder();let buf='';let totalChars=0;
-  while(true){
-    const{done,value}=await reader.read();if(done)break;
-    buf+=dec.decode(value,{stream:true});
-    const lines=buf.split('\n');buf=lines.pop();
-    for(const line of lines){
-      if(!line.startsWith('data: '))continue;
-      const d=line.slice(6).trim();if(d==='[DONE]')continue;
-      try{const j=JSON.parse(d);const t=j.choices?.[0]?.delta?.content;if(t){body.textContent+=t;totalChars+=t.length;body.parentElement.scrollTop=body.parentElement.scrollHeight;}}catch{}
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(127,228,255,0.14), transparent 22%),
+        radial-gradient(circle at 80% 78%, rgba(126,247,191,0.08), transparent 24%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
-  }
-  const estTokens=Math.round(totalChars/4);
-  if(tokenEl) tokenEl.textContent=estTokens;
-  status.textContent='';
-}
 
-// ---- MAIN RUN ----
-async function run(page){
-  const btn=document.getElementById(page+'-btn');
-  const statusId=page+'-status';
-  const bodyId=page+'-body';
-  const resEl=document.getElementById(page+'-result');
-  const ctxStatusEl=document.getElementById(page+'-ctx-status');
+    body { min-height: 100vh; }
 
-  btn.disabled=true;
-  const origText=btn.textContent;
-  btn.innerHTML='<span class="spin"></span> Analyzing...';
-  resEl.style.display='block';
-
-  const ctx=getCtxString();
-  if(ctxStatusEl) ctxStatusEl.textContent=ctx?'Yes (saved ~200 tokens)':'No context set';
-
-  const prompt=buildPrompt(page);
-  const messages=[{role:'system',content:SYSPROMPT},{role:'user',content:prompt}];
-  hist[page]=[...messages];
-
-  try{
-    await streamViaProxy(messages,bodyId,statusId,page+'-tokens');
-    const assistantReply=document.getElementById(bodyId).textContent;
-    hist[page].push({role:'assistant',content:assistantReply});
-  }catch(e){document.getElementById(statusId).textContent='Error: '+e.message;}
-
-  btn.disabled=false;
-  btn.textContent=origText;
-}
-
-// ---- FOLLOW-UP ----
-async function followUp(page){
-  const input=document.getElementById(page+'-fu-input');
-  const q=input.value.trim();if(!q)return;
-  const histDiv=document.getElementById(page+'-fu-hist');
-  const btn=document.getElementById(page+'-fu-btn');
-
-  const uDiv=document.createElement('div');
-  uDiv.className='fu-msg user';
-  uDiv.innerHTML='<div class="fu-msg-label">You</div>'+q;
-  histDiv.appendChild(uDiv);
-  histDiv.scrollTop=histDiv.scrollHeight;
-  input.value='';
-
-  hist[page].push({role:'user',content:q});
-  btn.disabled=true;btn.textContent='...';
-
-  const aDiv=document.createElement('div');
-  aDiv.className='fu-msg assistant';
-  aDiv.innerHTML='<div class="fu-msg-label">Assistant</div><span id="fu-stream-'+page+'"></span>';
-  histDiv.appendChild(aDiv);
-  histDiv.scrollTop=histDiv.scrollHeight;
-
-  const model=document.getElementById('modelSel').value;
-  const streamTarget=document.getElementById('fu-stream-'+page);
-  streamTarget.textContent='';
-
-  try{
-    const res=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model,messages:hist[page],stream:true,max_tokens:1000,temperature:0.4})
-    });
-    if(!res.ok){
-      let errMsg=res.statusText;
-      try{const j=await res.json();errMsg=j.error||errMsg;}catch{}
-      streamTarget.textContent='API Error: '+errMsg;
-      btn.disabled=false;btn.textContent='Send';
-      return;
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) 300px;
+      min-height: 100vh;
+      position: relative;
     }
-    const reader=res.body.getReader();const dec=new TextDecoder();let buf='';let full='';
-    while(true){
-      const{done,value}=await reader.read();if(done)break;
-      buf+=dec.decode(value,{stream:true});
-      const lines=buf.split('\n');buf=lines.pop();
-      for(const line of lines){
-        if(!line.startsWith('data: '))continue;
-        const d=line.slice(6).trim();if(d==='[DONE]')continue;
-        try{const j=JSON.parse(d);const t=j.choices?.[0]?.delta?.content;if(t){streamTarget.textContent+=t;full+=t;histDiv.scrollTop=histDiv.scrollHeight;}}catch{}
+
+    .layout::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, rgba(126,247,191,0.02), transparent 35%, rgba(127,228,255,0.03), transparent 70%),
+        repeating-linear-gradient(
+          180deg,
+          rgba(255,255,255,0.015),
+          rgba(255,255,255,0.015) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+    }
+
+    .sidebar, .rightbar {
+      position: relative;
+      z-index: 1;
+      background: rgba(8, 17, 28, 0.8);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid var(--line);
+      padding: 18px 14px;
+    }
+
+    .rightbar {
+      border-right: none;
+      border-left: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 8px 16px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 20px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 29px;
+      height: 29px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: #071521;
+      font-weight: 900;
+      box-shadow: 0 0 18px rgba(126,247,191,0.36);
+    }
+
+    .brand-text {
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .live-pill {
+      background: rgba(126,247,191,0.08);
+      border: 1px solid rgba(126,247,191,0.35);
+      border-radius: 999px;
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 9px;
+    }
+
+    .nav-title {
+      margin-bottom: 12px;
+      padding-left: 8px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 11px;
+    }
+
+    .agent-card {
+      background: linear-gradient(180deg, rgba(17, 29, 44, 0.95), rgba(12, 21, 31, 0.98));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 12px 10px;
+      margin-bottom: 10px;
+      box-shadow: inset 0 1px rgba(255,255,255,0.04);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .agent-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(126, 199, 255, 0.35);
+    }
+
+    .agent-card.active {
+      background: linear-gradient(180deg, rgba(126,247,191,0.07), rgba(12, 21, 31, 0.98));
+      border-color: rgba(126,247,191,0.36);
+      box-shadow: 0 0 0 1px rgba(126,247,191,0.06), inset 0 1px rgba(255,255,255,0.04);
+    }
+
+    .agent-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .agent-role {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .main {
+      position: relative;
+      z-index: 1;
+      padding: 22px 20px 20px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #07131d;
+      box-shadow: 0 12px 26px rgba(82,224,165,0.25);
+    }
+
+    .btn.ghost {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(15,24,38,0.95), rgba(8,16,27,0.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 18px 38px var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(127,228,255,0.04), transparent);
+      pointer-events: none;
+      animation: sweep 6s linear infinite;
+    }
+
+    @keyframes sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .hero-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-copy h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .hero-copy p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(126,247,191,0.08);
+      border: 1px solid rgba(126,247,191,0.35);
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .settings {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .field input, .field select {
+      background: rgba(7, 16, 28, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: rgba(126,199,255,0.45);
+      box-shadow: 0 0 0 3px rgba(126,199,255,0.08);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(21,33,52,0.95), rgba(11,18,29,0.9));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.18);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(126,199,255,0.25);
+    }
+
+    .card h4 {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .metric {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .metric small {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 6px;
+      font-weight: 600;
+    }
+
+    .mini-list {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 14px;
+      color: #dfeaff;
+    }
+
+    .chatbox {
+      margin-top: 20px;
+      background: rgba(10,18,31,0.9);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px 16px;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.18);
+    }
+
+    .chat-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .chat-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tiny-btn {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .output {
+      min-height: 170px;
+      background: rgba(7,14,24,0.94);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      color: #dfeaff;
+      line-height: 1.7;
+      box-shadow: inset 0 1px rgba(255,255,255,0.04);
+    }
+
+    .output strong {
+      color: var(--green);
+    }
+
+    .composer {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .composer input {
+      flex: 1;
+      min-width: 0;
+      background: rgba(7, 16, 28, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+
+    .rightbar {
+      position: relative;
+      z-index: 1;
+      padding: 18px 14px;
+    }
+
+    .panel {
+      background: rgba(16, 29, 45, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+    }
+
+    .panel h4 {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .tool-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      margin-bottom: 8px;
+    }
+
+    .tool-label {
+      font-size: 13px;
+    }
+
+    .status {
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+
+    .status.on {
+      background: rgba(126,247,191,0.09);
+      border-color: rgba(126,247,191,0.35);
+      color: var(--green);
+    }
+
+    .status.off {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+      color: var(--muted);
+    }
+
+    .status.none {
+      background: rgba(255,125,125,0.10);
+      border-color: rgba(255,125,125,0.22);
+      color: var(--red);
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar, .rightbar {
+        display: none;
       }
     }
-    hist[page].push({role:'assistant',content:full});
-  }catch(e){streamTarget.textContent='Error: '+e.message;}
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-box">
+          <div class="brand-mark">A</div>
+          <div class="brand-text">Agents</div>
+        </div>
+        <span class="live-pill">Live</span>
+      </div>
 
-  btn.disabled=false;btn.textContent='Send';
-}
-function fuKey(e,page){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();followUp(page);}}
+      <div class="nav-title">Workspaces</div>
 
-// ---- CROSS-LINK ----
-function linkTo(page,note){
-  goPage(page,null);
-  const hints={p1:'p1-desc',p2:'p2-eq',p3:'p3-desc',p4:'p4-goal',p5:'p5-input',p6:'p6-config',p7:'p7-input'};
-  const ta=document.getElementById(hints[page]);
-  if(ta&&note){
-    ta.value=(ta.value?ta.value+'\n\n[From previous tool] ':'')+note;
-  }
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+      <div class="agent-card active">
+        <div class="agent-name">Sentinel AI</div>
+        <div class="agent-role">Threat detection + response</div>
+      </div>
 
-// ---- COPY ----
-function copyRes(id,btn){
-  const text=document.getElementById(id).textContent;
-  navigator.clipboard.writeText(text).then(()=>{
-    btn.textContent='Copied!';btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
-  });
-}
-</script>
+      <div class="agent-card">
+        <div class="agent-name">Atlas Analyst</div>
+        <div class="agent-role">Evidence gathering + review</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="agent-name">Core Runner</div>
+        <div class="agent-role">Automation + orchestration</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="agent-name">Verify Guard</div>
+        <div class="agent-role">Policy validation + checks</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="page-title">Cyber Command</div>
+        <div class="top-actions">
+          <button class="btn ghost">New Task</button>
+          <button class="btn primary">Launch Agent</button>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div class="hero-head">
+          <div class="hero-copy">
+            <h3>Your workspace belongs to you</h3>
+            <p>
+              This page runs in your browser/system, not on the app owner’s machine.
+              Your API keys, data, tools, and agent memory stay in your workspace and are not shared by default.
+            </p>
+          </div>
+          <div class="chip">User-owned session</div>
+        </div>
+
+        <div class="settings">
+          <div class="field">
+            <label>Provider</label>
+            <select>
+              <option>Groq</option>
+              <option>OpenAI</option>
+              <option>Anthropic</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>API Key</label>
+            <input type="password" placeholder="Paste your own key here" />
+          </div>
+
+          <div class="field">
+            <label>Model</label>
+            <select>
+              <option>llama-3.3-70b-versatile</option>
+              <option>gpt-4o-mini</option>
+              <option>claude-3-5-sonnet</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Environment</label>
+            <select>
+              <option>Current browser session</option>
+              <option>Browser-only storage</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="card">
+          <h4>Agents</h4>
+          <div class="metric">04 <small>online</small></div>
+          <div class="mini-list">
+            <div>Sentinel: monitoring</div>
+            <div>Atlas: active</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Memory</h4>
+          <div class="metric">12k <small>tokens</small></div>
+          <div class="mini-list">
+            <div>Short-term: enabled</div>
+            <div>Long-term: enabled</div>
+            <div>Private memory: yes</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Safety</h4>
+          <div class="metric">100% <small>isolated</small></div>
+          <div class="mini-list">
+            <div>Approval required: yes</div>
+            <div>Shared key: no</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="chatbox">
+        <div class="chat-head">
+          <div class="chat-title">Threat Console</div>
+          <div class="toolbar">
+            <button class="tiny-btn">Threat Scan</button>
+            <button class="tiny-btn">Run Review</button>
+          </div>
+        </div>
+
+        <div class="output">
+          <strong>Sentinel AI:</strong> Threat model scan complete. No shared app-owned environment detected.
+          The system remains scoped to your browser session, your selected providers, and your approved tools.
+          Safety posture remains isolated and user-owned.
+        </div>
+
+        <div class="composer">
+          <input type="text" placeholder="Query the security agent..." />
+          <button class="btn primary">Execute</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="rightbar">
+      <div class="panel">
+        <h4>Tool Access</h4>
+
+        <div class="tool-item">
+          <span class="tool-label">Threat Search</span>
+          <span class="status on">On</span>
+        </div>
+
+        <div class="tool-item">
+          <span class="tool-label">Browser</span>
+          <span class="status off">Off</span>
+        </div>
+
+        <div class="tool-item">
+          <span class="tool-label">Code Runner</span>
+          <span class="status on">On</span>
+        </div>
+
+        <div class="tool-item">
+          <span class="tool-label">File Access</span>
+          <span class="status on">Read</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>Safety Rules</h4>
+
+        <div class="tool-item">
+          <span class="tool-label">Approval gate</span>
+          <span class="status on">Yes</span>
+        </div>
+
+        <div class="tool-item">
+          <span class="tool-label">Private memory</span>
+          <span class="status on">Yes</span>
+        </div>
+
+        <div class="tool-item">
+          <span class="tool-label">Shared secret</span>
+          <span class="status off">No</span>
+        </div>
+
+        <div class="tool-item">
+          <span class="tool-label">App owner access</span>
+          <span class="status none">None</span>
+        </div>
+      </div>
+    </aside>
+  </div>
 </body>
 </html>
