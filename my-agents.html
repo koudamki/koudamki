@@ -1,523 +1,656 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Agents</title>
-  <style>
-    :root {
-      --bg: #0b1020;
-      --panel: #101a2d;
-      --panel-2: #121e33;
-      --panel-3: #0d172a;
-      --border: rgba(255,255,255,0.08);
-      --text: #edf3ff;
-      --muted: #9bb0d3;
-      --green: #5ee7a3;
-      --green-soft: rgba(94, 231, 163, 0.12);
-      --blue: #60a5fa;
-      --danger: #ff7b7b;
-      --shadow: rgba(0,0,0,0.25);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Agents</title>
+    <style>
+      :root {
+        --bg: #070d18;
+        --bg-2: #0d1729;
+        --panel: rgba(14, 25, 40, 0.9);
+        --panel-soft: rgba(18, 31, 49, 0.9);
+        --panel-strong: rgba(9, 17, 30, 0.98);
+        --line: rgba(153, 180, 255, 0.12);
+        --line-strong: rgba(124, 232, 198, 0.32);
+        --text: #eaf5ff;
+        --muted: #94a9c9;
+        --green: #7ef7bf;
+        --green-2: #52e0a5;
+        --blue: #69b7ff;
+        --cyan: #6ee7ff;
+        --purple: #8b8dff;
+        --red: #ff7d7d;
+        --yellow: #f7d77a;
+        --shadow: rgba(0, 0, 0, 0.35);
+      }
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-    }
+      * {
+        box-sizing: border-box;
+      }
 
-    .app {
-      display: grid;
-      grid-template-columns: 260px 1fr 300px;
-      min-height: 100vh;
-    }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background:
+          radial-gradient(circle at top left, rgba(110, 231, 255, 0.10), transparent 22%),
+          radial-gradient(circle at bottom right, rgba(126, 247, 191, 0.09), transparent 22%),
+          var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+      }
 
-    .sidebar {
-      background: var(--panel);
-      border-right: 1px solid var(--border);
-      padding: 18px 14px;
-    }
+      body {
+        min-height: 100vh;
+      }
 
-    .brand {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--green);
-    }
-
-    .brand span {
-      color: var(--muted);
-      font-weight: 400;
-    }
-
-    .nav-section {
-      margin-top: 24px;
-    }
-
-    .nav-title {
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .agent-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .agent-card {
-      background: #17253d;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 10px;
-      padding: 12px;
-      cursor: pointer;
-      transition: 0.18s ease;
-    }
-
-    .agent-card:hover {
-      border-color: rgba(96,165,250,0.35);
-    }
-
-    .agent-card.active {
-      border-color: var(--green);
-      box-shadow: 0 0 0 1px rgba(94,231,163,0.2);
-      background: rgba(94,231,163,0.04);
-    }
-
-    .agent-name {
-      font-weight: 700;
-      font-size: 15px;
-      margin-bottom: 4px;
-    }
-
-    .agent-role {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .main {
-      padding: 22px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .page-title {
-      font-size: 28px;
-      font-weight: 700;
-    }
-
-    .primary-btn {
-      border: none;
-      background: var(--green);
-      color: #07131d;
-      font-weight: 700;
-      border-radius: 9px;
-      padding: 10px 16px;
-      cursor: pointer;
-    }
-
-    .user-box {
-      background: rgba(94,231,163,0.08);
-      border: 1px solid rgba(94,231,163,0.32);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-
-    .user-box h3 {
-      margin: 0 0 8px;
-      font-size: 18px;
-    }
-
-    .user-box p {
-      margin: 0 0 12px;
-      color: #dbe8ff;
-      line-height: 1.5;
-    }
-
-    .provider-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(200px, 1fr));
-      gap: 14px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .field label {
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .field input, .field select {
-      width: 100%;
-      background: #0f1830;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .workspace-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .card {
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-    }
-
-    .card h4 {
-      margin: 0 0 12px;
-      font-size: 16px;
-    }
-
-    .mini-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      color: #dfeaff;
-      font-size: 14px;
-    }
-
-    .badge {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: rgba(94,231,163,0.12);
-      border: 1px solid rgba(94,231,163,0.25);
-      color: var(--green);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .chat-box {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-    }
-
-    .chat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 12px;
-    }
-
-    .chat-title {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .chat-controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .small-btn {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: #1c2a41;
-      color: var(--text);
-      border-radius: 8px;
-      padding: 8px 10px;
-      cursor: pointer;
-    }
-
-    .chat-output {
-      min-height: 150px;
-      background: #091524;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 10px;
-      padding: 14px;
-      color: #dfeaff;
-      line-height: 1.6;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .input-row input {
-      flex: 1;
-      background: #0d1629;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 12px 14px;
-      font-size: 14px;
-    }
-
-    .rightbar {
-      background: var(--panel-3);
-      border-left: 1px solid var(--border);
-      padding: 18px 14px;
-    }
-
-    .right-panel {
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 16px;
-    }
-
-    .right-panel h4 {
-      margin: 0 0 12px;
-      font-size: 16px;
-    }
-
-    .tool-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .tool-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 8px;
-      padding: 8px 10px;
-      color: #e3edff;
-      font-size: 14px;
-    }
-
-    .status {
-      border-radius: 999px;
-      font-size: 11px;
-      padding: 5px 8px;
-      font-weight: 700;
-      border: 1px solid transparent;
-    }
-
-    .enabled {
-      background: rgba(94,231,163,0.12);
-      color: var(--green);
-      border-color: rgba(94,231,163,0.25);
-    }
-
-    .disabled {
-      background: rgba(255,255,255,0.04);
-      color: var(--muted);
-      border-color: rgba(255,255,255,0.08);
-    }
-
-    .danger {
-      background: rgba(255,123,123,0.12);
-      color: var(--danger);
-      border-color: rgba(255,123,123,0.25);
-    }
-
-    @media (max-width: 1000px) {
       .app {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr) 300px;
+        min-height: 100vh;
       }
-      .sidebar,
+
+      .sidebar {
+        background: rgba(10, 18, 31, 0.76);
+        border-right: 1px solid var(--line);
+        padding: 18px 14px 10px;
+        backdrop-filter: blur(15px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 8px 14px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 18px;
+      }
+
+      .brand-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--green), var(--cyan));
+        color: #08131d;
+        font-weight: 800;
+      }
+
+      .brand-name {
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .nav-section {
+        margin-top: 18px;
+      }
+
+      .nav-title {
+        padding: 0 8px;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+
+      .agent-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .agent-card {
+        background: rgba(20, 30, 46, 0.95);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 12px 12px 10px;
+        cursor: pointer;
+        transition: 0.18s ease;
+        box-shadow: inset 0 1px rgba(255,255,255,0.04);
+      }
+
+      .agent-card:hover {
+        border-color: rgba(105, 183, 255, 0.38);
+        transform: translateY(-1px);
+      }
+
+      .agent-card.active {
+        background: linear-gradient(180deg, rgba(98, 237, 179, 0.09), rgba(19, 31, 44, 0.95));
+        border-color: rgba(126, 247, 191, 0.38);
+        box-shadow: 0 0 0 1px rgba(126,247,191,0.08), inset 0 1px rgba(255,255,255,0.04);
+      }
+
+      .agent-name {
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+
+      .agent-role {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .main {
+        padding: 22px 20px 20px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 4px 18px;
+      }
+
+      .page-title {
+        font-size: 29px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+
+      .topbar-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .ghost-btn, .primary-btn {
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: 0.16s ease;
+      }
+
+      .ghost-btn {
+        background: rgba(255,255,255,0.02);
+        color: var(--text);
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, var(--green), var(--green-2));
+        color: #08131c;
+        border: none;
+        box-shadow: 0 10px 25px rgba(82, 224, 165, 0.30);
+      }
+
+      .primary-btn:hover, .ghost-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .hero {
+        background: linear-gradient(180deg, rgba(15, 24, 38, 0.95), rgba(9, 17, 30, 0.9));
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 20px 20px 18px;
+        box-shadow: 0 18px 45px var(--shadow);
+      }
+
+      .hero-banner {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+
+      .hero-copy {
+        max-width: 720px;
+      }
+
+      .hero-copy h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .hero-copy p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .status-chip {
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 1px solid rgba(126,247,191,0.35);
+        background: rgba(126,247,191,0.08);
+        color: var(--green);
+      }
+
+      .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 14px;
+        margin-top: 12px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .field label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .field input, .field select {
+        width: 100%;
+        background: rgba(7, 16, 28, 0.8);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        color: var(--text);
+        padding: 11px 12px;
+        font-size: 14px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .card {
+        background: linear-gradient(180deg, rgba(21, 33, 52, 0.95), rgba(13, 21, 35, 0.9));
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 15px 38px rgba(0,0,0,0.2);
+      }
+
+      .card h4 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .metric {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+
+      .metric small {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        margin-left: 6px;
+      }
+
+      .mini-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        color: #dfeafc;
+        font-size: 14px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 10px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid rgba(126,247,191,0.25);
+        background: rgba(126,247,191,0.09);
+        color: var(--green);
+      }
+
+      .chat-box {
+        margin-top: 20px;
+        background: rgba(10, 18, 31, 0.9);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 16px 16px;
+      }
+
+      .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .chat-title {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .chat-controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .small-btn {
+        background: rgba(255,255,255,0.02);
+        color: var(--text);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+
+      .chat-output {
+        min-height: 170px;
+        background: rgba(7, 14, 24, 0.9);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 16px;
+        color: #dfeafc;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+
+      .chat-output .label {
+        color: var(--green);
+        font-weight: 700;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .input-row input {
+        flex: 1;
+        min-width: 0;
+        background: rgba(7, 16, 28, 0.8);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        color: var(--text);
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
       .rightbar {
-        display: none;
+        background: rgba(9, 17, 30, 0.8);
+        border-left: 1px solid var(--line);
+        padding: 18px 14px;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">KOUDAMKI <span>/ AGENTS</span></div>
 
-      <div class="nav-section">
-        <div class="nav-title">Agents</div>
-        <div class="agent-list">
-          <div class="agent-card active">
-            <div class="agent-name">Research Agent</div>
-            <div class="agent-role">Web + fact checking</div>
-          </div>
-          <div class="agent-card">
-            <div class="agent-name">Coding Agent</div>
-            <div class="agent-role">Code generation</div>
-          </div>
-          <div class="agent-card">
-            <div class="agent-name">Writer Agent</div>
-            <div class="agent-role">Draft + rewrite</div>
-          </div>
-          <div class="agent-card">
-            <div class="agent-name">Reviewer Agent</div>
-            <div class="agent-role">QA + validation</div>
-          </div>
-        </div>
-      </div>
-    </aside>
+      .right-panel {
+        background: rgba(17, 27, 42, 0.92);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px 14px 12px;
+        margin-bottom: 16px;
+      }
 
-    <main class="main">
-      <div class="topbar">
-        <div class="page-title">My Agents</div>
-        <button class="primary-btn">Create New Agent</button>
-      </div>
+      .right-panel h4 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
 
-      <div class="user-box">
-        <h3>This workspace is running in your browser/system, not on the app owner’s machine.</h3>
-        <p>Your API keys, data, tools, and agent memory belong to your personal workspace. The app does not own your environment.</p>
+      .tool-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
 
-        <div class="provider-grid">
-          <div class="field">
-            <label>AI Provider</label>
-            <select>
-              <option>Groq</option>
-              <option>OpenAI</option>
-              <option>Anthropic</option>
-            </select>
+      .tool-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px;
+        padding: 9px 10px;
+        color: #e1ecff;
+        font-size: 13px;
+      }
+
+      .status {
+        border-radius: 999px;
+        font-size: 10px;
+        padding: 5px 8px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .enabled {
+        background: rgba(126,247,191,0.1);
+        color: var(--green);
+        border: 1px solid rgba(126,247,191,0.25);
+      }
+
+      .disabled {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--muted);
+      }
+
+      .danger {
+        background: rgba(255,125,125,0.10);
+        color: var(--red);
+        border: 1px solid rgba(255,125,125,0.24);
+      }
+
+      @media (max-width: 1100px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar,
+        .rightbar {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="brand-mark">A</div>
+            <div class="brand-name">Agents</div>
           </div>
-
-          <div class="field">
-            <label>API Key</label>
-            <input type="password" placeholder="Paste your own key here" />
-          </div>
-
-          <div class="field">
-            <label>Model</label>
-            <select>
-              <option>llama-3.3-70b-versatile</option>
-              <option>gpt-4o-mini</option>
-              <option>claude-3-5-sonnet</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Session</label>
-            <select>
-              <option>Current browser session</option>
-              <option>Save in account</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="workspace-grid">
-        <div class="card">
-          <h4>Current Agent</h4>
-          <div class="mini-list">
-            <div><strong>Research Agent</strong></div>
-            <div>Role: Fact finding</div>
-            <div>Mode: Deep research</div>
-            <div>Memory: Project memory</div>
-          </div>
-          <span class="badge">Deep mode active</span>
+          <div class="status enabled" style="padding: 5px 8px;">Live</div>
         </div>
 
-        <div class="card">
-          <h4>Memory</h4>
-          <div class="mini-list">
-            <div>Short-term memory: enabled</div>
-            <div>Long-term memory: enabled</div>
-            <div>Private workspace: yes</div>
+        <div class="nav-section">
+          <div class="nav-title">Workspaces</div>
+          <div class="agent-list">
+            <div class="agent-card active">
+              <div class="agent-name">Research Agent</div>
+              <div class="agent-role">Fact finding + source review</div>
+            </div>
+            <div class="agent-card">
+              <div class="agent-name">Coding Agent</div>
+              <div class="agent-role">Code generation + debugging</div>
+            </div>
+            <div class="agent-card">
+              <div class="agent-name">Writer Agent</div>
+              <div class="agent-role">Draft + rewrite + strategy</div>
+            </div>
+            <div class="agent-card">
+              <div class="agent-name">Reviewer Agent</div>
+              <div class="agent-role">QA + validation + checks</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div class="page-title">My Agents</div>
+          <div class="topbar-actions">
+            <button class="ghost-btn">New Goal</button>
+            <button class="primary-btn">Create Agent</button>
           </div>
         </div>
 
-        <div class="card">
-          <h4>Tools</h4>
-          <div class="mini-list">
-            <div>Search: enabled</div>
-            <div>Browser: disabled</div>
-            <div>Code runner: enabled</div>
-            <div>Files: read-only</div>
+        <section class="hero">
+          <div class="hero-banner">
+            <div class="hero-copy">
+              <h3>Your workspace belongs to you</h3>
+              <p>
+                This page runs in your browser/system, not on the app owner’s machine. Your API keys,
+                data, tools, and agent memory stay in your workspace and are not shared by default.
+              </p>
+            </div>
+            <div class="status-chip">User-owned session</div>
           </div>
-        </div>
-      </div>
 
-      <div class="chat-box">
-        <div class="chat-header">
-          <div class="chat-title">Agent Chat</div>
-          <div class="chat-controls">
-            <button class="small-btn">Research mode</button>
-            <button class="small-btn">Call Agent</button>
+          <div class="settings-grid">
+            <div class="field">
+              <label>AI Provider</label>
+              <select>
+                <option>Groq</option>
+                <option>OpenAI</option>
+                <option>Anthropic</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>API Key</label>
+              <input type="password" placeholder="Paste your own key here" />
+            </div>
+
+            <div class="field">
+              <label>Model</label>
+              <select>
+                <option>llama-3.3-70b-versatile</option>
+                <option>gpt-4o-mini</option>
+                <option>claude-3-5-sonnet</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Session</label>
+              <select>
+                <option>Current browser session</option>
+                <option>Save in account</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-grid">
+          <div class="card">
+            <h4>Agents</h4>
+            <div class="metric">04 <small>online</small></div>
+            <div class="mini-list" style="margin-top: 12px;">
+              <div>Research: Deep mode</div>
+              <div>Coding: Active</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4>Memory</h4>
+            <div class="metric">12k <small>tokens</small></div>
+            <div class="mini-list" style="margin-top: 12px;">
+              <div>Short-term: enabled</div>
+              <div>Long-term: enabled</div>
+              <div>Private memory: yes</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4>Safety</h4>
+            <div class="metric">100% <small>isolated</small></div>
+            <div class="mini-list" style="margin-top: 12px;">
+              <div>Approval required: yes</div>
+              <div>Shared key: no</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="chat-box">
+          <div class="chat-header">
+            <div class="chat-title">Agent Chat</div>
+            <div class="chat-controls">
+              <button class="small-btn">Research mode</button>
+              <button class="small-btn">Call agent</button>
+            </div>
+          </div>
+
+          <div class="chat-output">
+<span class="label">Research Agent:</span> I’m focused on facts, evidence, and accurate summaries. I will use your selected provider and your browser session only.
+
+I am not using a shared app-owned environment. My work remains scoped to your workspace and your selected tools.
+          </div>
+
+          <div class="input-row">
+            <input type="text" placeholder="Ask the agent to do something..." />
+            <button class="primary-btn">Send</button>
+          </div>
+        </section>
+      </main>
+
+      <aside class="rightbar">
+        <div class="right-panel">
+          <h4>Tool Access</h4>
+          <div class="tool-list">
+            <div class="tool-item">
+              <span>Web Search</span>
+              <span class="status enabled">On</span>
+            </div>
+            <div class="tool-item">
+              <span>Browser</span>
+              <span class="status disabled">Off</span>
+            </div>
+            <div class="tool-item">
+              <span>Code Runner</span>
+              <span class="status enabled">On</span>
+            </div>
+            <div class="tool-item">
+              <span>File Access</span>
+              <span class="status enabled">Read</span>
+            </div>
           </div>
         </div>
 
-        <div class="chat-output">
-          Research Agent: I am focused on facts, evidence, and accurate summaries. I will use your browser session and the provider key you selected.
-        </div>
-
-        <div class="input-row">
-          <input type="text" placeholder="Ask the agent to do something..." />
-          <button class="primary-btn">Send</button>
-        </div>
-      </div>
-    </main>
-
-    <aside class="rightbar">
-      <div class="right-panel">
-        <h4>Tool Access</h4>
-        <div class="tool-list">
-          <div class="tool-item">
-            <span>Web Search</span>
-            <span class="status enabled">Enabled</span>
-          </div>
-          <div class="tool-item">
-            <span>Browser</span>
-            <span class="status disabled">Disabled</span>
-          </div>
-          <div class="tool-item">
-            <span>Code Runner</span>
-            <span class="status enabled">Enabled</span>
-          </div>
-          <div class="tool-item">
-            <span>File Access</span>
-            <span class="status enabled">Enabled</span>
+        <div class="right-panel">
+          <h4>Safety Rules</h4>
+          <div class="tool-list">
+            <div class="tool-item">
+              <span>Approval gate</span>
+              <span class="status enabled">Yes</span>
+            </div>
+            <div class="tool-item">
+              <span>Private memory</span>
+              <span class="status enabled">Yes</span>
+            </div>
+            <div class="tool-item">
+              <span>Shared secret</span>
+              <span class="status disabled">No</span>
+            </div>
+            <div class="tool-item">
+              <span>App owner access</span>
+              <span class="status danger">None</span>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="right-panel">
-        <h4>Safety</h4>
-        <div class="tool-list">
-          <div class="tool-item">
-            <span>Approval required</span>
-            <span class="status enabled">Yes</span>
-          </div>
-          <div class="tool-item">
-            <span>Private memory</span>
-            <span class="status enabled">Yes</span>
-          </div>
-          <div class="tool-item">
-            <span>Shared key</span>
-            <span class="status disabled">No</span>
-          </div>
-          <div class="tool-item">
-            <span>App owner access</span>
-            <span class="status danger">None</span>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </div>
-</body>
+      </aside>
+    </div>
+  </body>
 </html>
