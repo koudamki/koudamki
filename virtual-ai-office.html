@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AetherOps HQ — Virtual AI Office</title>
+  <style>
+    :root {
+      --bg: #050b14;
+      --bg-2: #0b1420;
+      --bg-3: #0e1827;
+      --panel: rgba(12, 22, 31, 0.92);
+      --panel-2: rgba(17, 29, 40, 0.92);
+      --panel-3: rgba(10, 19, 29, 0.96);
+      --line: rgba(164, 197, 255, 0.12);
+      --line-strong: rgba(126, 247, 191, 0.28);
+      --text: #edf7ff;
+      --muted: #9bb4d7;
+      --green: #7af8be;
+      --green-2: #4fe0a2;
+      --blue: #79c6ff;
+      --cyan: #7ee7ff;
+      --purple: #a7a7ff;
+      --orange: #ffc56e;
+      --red: #ff7d7d;
+      --shadow: rgba(0,0,0,0.42);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(126, 231, 255, 0.13), transparent 20%),
+        radial-gradient(circle at 80% 80%, rgba(122, 248, 190, 0.10), transparent 22%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .page {
+      width: min(1600px, calc(100vw - 32px));
+      margin: 18px auto;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      background: rgba(7, 14, 23, 0.7);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(8, 16, 26, 0.9);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: #061621;
+      font-weight: 900;
+      box-shadow: 0 0 24px rgba(122, 248, 190, 0.28);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(122, 248, 190, 0.3);
+      background: rgba(122, 248, 190, 0.08);
+      color: var(--green);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(122,248,190,0.9);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-btn, .primary-btn, .tiny-btn {
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+      color: var(--text);
+      padding: 9px 12px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .ghost-btn:hover, .tiny-btn:hover { transform: translateY(-1px); border-color: rgba(126,199,255,0.3); }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      border-color: rgba(122, 248, 190, 0.2);
+      color: #061621;
+      font-weight: 800;
+      box-shadow: 0 12px 24px rgba(82,224,165,0.25);
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 330px;
+      min-height: calc(100vh - 90px);
+    }
+
+    .sidebar,
+    .rightbar {
+      background: rgba(10, 19, 29, 0.86);
+      border-right: 1px solid var(--line);
+      padding: 16px 14px;
+    }
+
+    .rightbar {
+      border-right: none;
+      border-left: 1px solid var(--line);
+    }
+
+    .section-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin: 12px 10px 10px;
+      opacity: 0.95;
+    }
+
+    .role-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .role-card {
+      background: linear-gradient(180deg, rgba(18, 30, 42, 0.92), rgba(12, 21, 30, 0.98));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 12px 11px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--green), var(--cyan));
+      opacity: 0.8;
+    }
+
+    .role-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(126, 199, 255, 0.32);
+    }
+
+    .role-card.active {
+      background: linear-gradient(180deg, rgba(122, 248, 190, 0.07), rgba(15, 25, 34, 0.96));
+      border-color: rgba(122, 248, 190, 0.26);
+    }
+
+    .role-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .role-name {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-size: 14px;
+    }
+
+    .role-badge {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      border: 1px solid rgba(122,248,190,0.3);
+      background: rgba(122,248,190,0.08);
+      border-radius: 999px;
+      padding: 4px 7px;
+    }
+
+    .role-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .center {
+      padding: 18px 18px 20px;
+      background: rgba(9, 16, 25, 0.22);
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(9, 20, 30, 0.9), rgba(8, 17, 26, 0.96));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px 22px 18px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 30px 40px rgba(0,0,0,0.2);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(126,231,255,0.06), transparent);
+      animation: sweep 8s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes sweep {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(130%); }
+    }
+
+    .hero-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .hero-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      color: var(--green);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(32px, 4vw, 64px);
+      line-height: 0.96;
+      letter-spacing: -0.075em;
+      font-weight: 900;
+    }
+
+    .hero h1 .green {
+      color: var(--green);
+      display: block;
+    }
+
+    .hero-sub {
+      margin-top: 16px;
+      max-width: 740px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .kpis {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .kpi {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+    }
+
+    .kpi .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .kpi .value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+    }
+
+    .kpi .detail {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1.0fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(15, 24, 35, 0.96), rgba(9, 17, 27, 0.96));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.01);
+    }
+
+    .panel-title {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .panel-body {
+      padding: 14px 16px 16px;
+    }
+
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .mini-agent {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: #051621;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .mini-agent h4 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .mini-agent p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .mini-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .small-tag {
+      border-radius: 999px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9px;
+      padding: 4px 8px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid transparent;
+    }
+
+    .status-pill.online {
+      background: rgba(122, 248, 190, 0.08);
+      color: var(--green);
+      border-color: rgba(122,248,190,0.28);
+    }
+
+    .status-pill.busy {
+      background: rgba(255,197,110,0.08);
+      color: var(--orange);
+      border-color: rgba(255,197,110,0.3);
+    }
+
+    .status-pill.idle {
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 1;
+    }
+
+    .activity-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .activity {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .activity .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 14px rgba(122,248,190,0.8);
+      justify-self: center;
+    }
+
+    .activity .info {
+      min-width: 0;
+    }
+
+    .activity .title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .activity .sub {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .activity .time {
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .stacked-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .workflow-board {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .step-index {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: rgba(122,248,190,0.08);
+      border: 1px solid rgba(122,248,190,0.28);
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .step-main {
+      min-width: 0;
+    }
+
+    .step-main .title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .step-main .desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .step .tag {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 5px 7px;
+      white-space: nowrap;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .task .icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(122,248,190,0.08);
+      color: var(--green);
+      font-weight: 800;
+      font-size: 11px;
+    }
+
+    .task .name {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .task .meta {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .task .score {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--green);
+      border: 1px solid rgba(122,248,190,0.25);
+      background: rgba(122,248,190,0.08);
+      border-radius: 999px;
+      padding: 5px 8px;
+    }
+
+    .rightbar .panel + .panel {
+      margin-top: 16px;
+    }
+
+    .control-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .control-card .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .control-card h5 {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .meter {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .meter > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      border-radius: inherit;
+    }
+
+    .metrics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .metric-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .metric-line strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 8px 1fr;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .timeline-item .bullet {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-top: 6px;
+      box-shadow: 0 0 10px rgba(122,248,190,0.8);
+    }
+
+    .timeline-item .text {
+      line-height: 1.5;
+    }
+
+    .timeline-item .text strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .company-tabset {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .tiny-btn.active {
+      background: rgba(122,248,190,0.08);
+      border-color: rgba(122,248,190,0.28);
+      color: var(--green);
+    }
+
+    @media (max-width: 1200px) {
+      .content {
+        grid-template-columns: 240px 1fr 290px;
+      }
+      .kpis { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+      .sidebar, .rightbar { display: none; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .agent-grid { grid-template-columns: 1fr; }
+      .topbar { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <div class="brand-mark">A</div>
+        <div class="brand-name">AetherOps HQ</div>
+      </div>
+
+      <div class="top-actions">
+        <div class="pill">24/7 Autonomous Office</div>
+        <button class="ghost-btn">Run Briefing</button>
+        <button class="primary-btn">Launch Team</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <aside class="sidebar">
+        <div class="section-label">Leadership</div>
+        <div class="role-list">
+          <div class="role-card active">
+            <div class="role-top">
+              <div class="role-name">Chief AI Director</div>
+              <span class="role-badge">CEO</span>
+            </div>
+            <div class="role-meta">Strategic oversight, roadmap, model governance</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-top">
+              <div class="role-name">VP Strategy</div>
+              <span class="role-badge">Ops</span>
+            </div>
+            <div class="role-meta">Market synthesis, expansion, M&A posture</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-top">
+              <div class="role-name">Chief Product Architect</div>
+              <span class="role-badge">PM</span>
+            </div>
+            <div class="role-meta">Roadmap prioritization, customer outcomes</div>
+          </div>
+        </div>
+
+        <div class="section-label">Core Operators</div>
+        <div class="role-list">
+          <div class="role-card">
+            <div class="role-top">
+              <div class="role-name">Research Engine</div>
+              <span class="role-badge">AI</span>
+            </div>
+            <div class="role-meta">Market intelligence, new opportunities, insight loops</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-top">
+              <div class="role-name">Growth Systems</div>
+              <span class="role-badge">Rev</span>
+            </div>
+            <div class="role-meta">Acquisition funnels, conversion experiments</div>
+          </div>
+
+          <div class="role-card">
+            <div class="role-top">
+              <div class="role-name">Ops Intelligence</div>
+              <span class="role-badge">Ops</span>
+            </div>
+            <div class="role-meta">Process automation, service health, orchestration</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="center">
+        <section class="hero">
+          <div class="hero-head">
+            <div>
+              <div class="hero-tag">Autonomous enterprise intelligence</div>
+              <h1>Build the next <span class="green">AI-native company</span></h1>
+            </div>
+            <div class="pill">Global HQ online</div>
+          </div>
+
+          <div class="hero-sub">
+            A 24/7 virtual office with self-growing specialists, automated execution loops, and premium operating systems for product, growth, research, and legal operations.
+          </div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="label">Active agents</div>
+              <div class="value">30</div>
+              <div class="detail">Across research, product, ops, and finance</div>
+            </div>
+
+            <div class="kpi">
+              <div class="label">Real-time tasks</div>
+              <div class="value">1,248</div>
+              <div class="detail">Queued and in motion</div>
+            </div>
+
+            <div class="kpi">
+              <div class="label">Avg SLA</div>
+              <div class="value">99.96%</div>
+              <div class="detail">Across all critical workflows</div>
+            </div>
+
+            <div class="kpi">
+              <div class="label">Skill growth</div>
+              <div class="value">+42%</div>
+              <div class="detail">Autonomous learning loop this week</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Agency roster</div>
+              <div class="status-row">
+                <span class="status-pill online">Live</span>
+                <span class="status-pill busy">12 active</span>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="company-tabset">
+                <button class="tiny-btn active">All agents</button>
+                <button class="tiny-btn">Product</button>
+                <button class="tiny-btn">Research</button>
+                <button class="tiny-btn">Ops</button>
+              </div>
+
+              <div class="agent-grid">
+                <div class="mini-agent">
+                  <div class="avatar">CE</div>
+                  <div>
+                    <h4>Chief Executive</h4>
+                    <p>Vision, capital allocation, strategic signals</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">Board</span>
+                      <span class="small-tag">QBR</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mini-agent">
+                  <div class="avatar">AI</div>
+                  <div>
+                    <h4>AI Strategist</h4>
+                    <p>Capability roadmap, model selection, frontier tracking</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">Roadmap</span>
+                      <span class="small-tag">LLM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mini-agent">
+                  <div class="avatar">PX</div>
+                  <div>
+                    <h4>Product Lead</h4>
+                    <p>Customer demand, feature sequencing, GTM flows</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">UX</span>
+                      <span class="small-tag">PMF</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mini-agent">
+                  <div class="avatar">EX</div>
+                  <div>
+                    <h4>Research Analyst</h4>
+                    <p>Trend mapping, benchmark reviews, knowledge synthesis</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">Data</span>
+                      <span class="small-tag">Trend</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mini-agent">
+                  <div class="avatar">GR</div>
+                  <div>
+                    <h4>Growth Operator</h4>
+                    <p>Acquisition, conversion, lifecycle experiments</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">SEO</span>
+                      <span class="small-tag">CRM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mini-agent">
+                  <div class="avatar">HR</div>
+                  <div>
+                    <h4>Talent Intelligence</h4>
+                    <p>Hiring loops, role design, culture orchestration</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">Hiring</span>
+                      <span class="small-tag">Org</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mini-agent">
+                  <div class="avatar">IN</div>
+                  <div>
+                    <h4>Infra Architect</h4>
+                    <p>System design, autoscaling, security posture</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">Kubernetes</span>
+                      <span class="small-tag">Cloud</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mini-agent">
+                  <div class="avatar">LW</div>
+                  <div>
+                    <h4>Legal Review</h4>
+                    <p>Contract review, policy handling, data compliance</p>
+                    <div class="mini-tags">
+                      <span class="small-tag">IP</span>
+                      <span class="small-tag">Risk</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="stacked-panel">
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Live workflow</div>
+                <div class="status-pill online">Sync</div>
+              </div>
+              <div class="panel-body">
+                <div class="workflow-board">
+                  <div class="step">
+                    <div class="step-index">01</div>
+                    <div class="step-main">
+                      <div class="title">Signal ingestion</div>
+                      <div class="desc">Inbound demand signals, market shifts, customer feedback</div>
+                    </div>
+                    <span class="tag">Live</span>
+                  </div>
+
+                  <div class="step">
+                    <div class="step-index">02</div>
+                    <div class="step-main">
+                      <div class="title">Opportunity scoring</div>
+                      <div class="desc">AI ranks bets by likelihood, ROI, strategic fit</div>
+                    </div>
+                    <span class="tag">Queued</span>
+                  </div>
+
+                  <div class="step">
+                    <div class="step-index">03</div>
+                    <div class="step-main">
+                      <div class="title">Execution dispatch</div>
+                      <div class="desc">Product, marketing, billing, and infra agents participate</div>
+                    </div>
+                    <span class="tag">Auto</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Priority tasks</div>
+              </div>
+              <div class="panel-body">
+                <div class="task-list">
+                  <div class="task">
+                    <div class="icon">R</div>
+                    <div>
+                      <div class="name">Revenue expansion brief</div>
+                      <div class="meta">Growth Ops • 18 min ago</div>
+                    </div>
+                    <div class="score">94%</div>
+                  </div>
+
+                  <div class="task">
+                    <div class="icon">P</div>
+                    <div>
+                      <div class="name">Product telemetry review</div>
+                      <div class="meta">UX • 6 min ago</div>
+                    </div>
+                    <div class="score">88%</div>
+                  </div>
+
+                  <div class="task">
+                    <div class="icon">I</div>
+                    <div>
+                      <div class="name">Infra resilience check</div>
+                      <div class="meta">Platform • 2 min ago</div>
+                    </div>
+                    <div class="score">97%</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+
+      <aside class="rightbar">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Team pulse</div>
+          </div>
+          <div class="panel-body">
+            <div class="control-stack">
+              <div class="control-card">
+                <div class="top">
+                  <h5>Autonomy health</h5>
+                  <span class="status-pill online">Normal</span>
+                </div>
+                <div class="meter"><span style="width: 92%"></span></div>
+              </div>
+
+              <div class="control-card">
+                <div class="top">
+                  <h5>Product velocity</h5>
+                  <span class="status-pill busy">Fast</span>
+                </div>
+                <div class="meter"><span style="width: 86%"></span></div>
+              </div>
+
+              <div class="control-card">
+                <div class="top">
+                  <h5>Risk posture</h5>
+                  <span class="status-pill online">Low</span>
+                </div>
+                <div class="meter"><span style="width: 74%"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Operations model</div>
+          </div>
+          <div class="panel-body">
+            <div class="metrics-list">
+              <div class="metric-line"><span>AI office uptime</span><strong>99.97%</strong></div>
+              <div class="metric-line"><span>Decision latency</span><strong>2.4 min</strong></div>
+              <div class="metric-line"><span>Team throughput</span><strong>5.6x</strong></div>
+              <div class="metric-line"><span>Talent match rate</span><strong>92%</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Live events</div>
+          </div>
+          <div class="panel-body">
+            <div class="timeline">
+              <div class="timeline-item">
+                <span class="bullet"></span>
+                <div class="text"><strong>CEO Agent</strong> approved the next expansion board brief.</div>
+              </div>
+              <div class="timeline-item">
+                <span class="bullet"></span>
+                <div class="text"><strong>Growth Systems</strong> launched a new conversion experiment set.</div>
+              </div>
+              <div class="timeline-item">
+                <span class="bullet"></span>
+                <div class="text"><strong>Infra Architect</strong> detected a 1.3s latency anomaly and auto-remediated.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>
